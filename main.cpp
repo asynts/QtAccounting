@@ -1,6 +1,6 @@
 #include "MainWindow.hpp"
 #include "Types.hpp"
-#include "TransactionsView.hpp"
+#include "TransactionListWidget.hpp"
 #include "TransactionListModel.hpp"
 
 #include <QApplication>
@@ -9,9 +9,17 @@
 
 int main(int argc, char *argv[])
 {
-    Accounting::TransactionListModel model;
+    QApplication application(argc, argv);
 
-    model.append(Accounting::Transaction{
+    qRegisterMetaType<Accounting::Id>();
+    qRegisterMetaType<Accounting::Transaction>();
+
+    MainWindow main_window;
+
+    auto model = new Accounting::TransactionListModel;
+    model->setParent(&main_window);
+
+    model->append(Accounting::Transaction{
          .m_id = Accounting::Id::create_random(),
          .m_previous_version_id = std::nullopt,
          .m_timestamp = QDateTime::currentDateTime(),
@@ -21,17 +29,10 @@ int main(int argc, char *argv[])
          .m_amount = 42.00,
      });
 
-    QApplication application(argc, argv);
+    auto transaction_list_widget = new Accounting::TransactionListWidget{ *model };
+    transaction_list_widget->setParent(&main_window);
 
-    qRegisterMetaType<Accounting::Id>();
-    qRegisterMetaType<Accounting::Transaction>();
-
-    MainWindow main_window;
-
-    auto transactions_view = new TransactionsView{ model };
-    transactions_view->setParent(&main_window);
-
-    main_window.setCentralWidget(transactions_view);
+    main_window.setCentralWidget(transaction_list_widget);
     main_window.show();
 
     return application.exec();

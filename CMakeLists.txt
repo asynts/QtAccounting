@@ -18,7 +18,7 @@ set(PROJECT_SOURCES
         main.cpp
         MainWindow.hpp MainWindow.cpp
         Types.hpp
-        TransactionsView.hpp TransactionsView.cpp
+        TransactionListWidget.hpp
         TransactionListModel.hpp
 )
 
