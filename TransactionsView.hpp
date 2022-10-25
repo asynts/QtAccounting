@@ -2,12 +2,12 @@
 
 #include <QWidget>
 
-#include "Types.hpp"
+#include "TransactionListModel.hpp"
 
 class TransactionsView : public QWidget
 {
     Q_OBJECT
 
 public:
-    TransactionsView(QList<Accounting::Transaction> transactions, QWidget *parent = nullptr);
+    TransactionsView(Accounting::TransactionListModel &model, QWidget *parent = nullptr);
 };

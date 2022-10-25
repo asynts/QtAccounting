@@ -1,14 +1,14 @@
 #include <QVBoxLayout>
 #include <QLabel>
-#include <QVariant>
 
 #include "TransactionsView.hpp"
 
-TransactionsView::TransactionsView(QList<Accounting::Transaction> transactions, QWidget *parent)
+TransactionsView::TransactionsView(Accounting::TransactionListModel &model, QWidget *parent)
     : QWidget(parent)
 {
     auto layout = new QVBoxLayout();
 
+    /*
     for (auto& transaction : transactions) {
         // Convert
         QString label_value;
@@ -18,6 +18,7 @@ TransactionsView::TransactionsView(QList<Accounting::Transaction> transactions, 
         transaction_widget->setParent(this);
         layout->addWidget(transaction_widget);
     }
+    */
 
     this->setLayout(layout);
 }

@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
         MainWindow.hpp MainWindow.cpp
         Types.hpp
         TransactionsView.hpp TransactionsView.cpp
+        TransactionListModel.hpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
