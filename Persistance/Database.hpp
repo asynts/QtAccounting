@@ -57,6 +57,8 @@ namespace Accounting::Persistance
         QString m_value;
 
         static PersistantId create_random();
+
+        auto operator<=>(const PersistantId&) const = default;
     };
 
     inline PersistantId PersistantId::create_random() {
@@ -93,6 +95,8 @@ namespace Accounting::Persistance
     struct QualifiedId {
         PersistantId m_id;
         int m_version;
+
+        auto operator<=>(const QualifiedId&) const = default;
     };
 
     inline QDebug& operator<<(QDebug& debug, const QualifiedId& value) {
@@ -207,7 +211,10 @@ namespace Accounting::Persistance
         return in;
     }
 
-    struct Database {
+    class Database : public QObject {
+        Q_OBJECT
+
+    public:
         QMap<QualifiedId, Transaction> m_transactions;
         QMap<QualifiedId, Bill> m_bills;
 
@@ -218,6 +225,10 @@ namespace Accounting::Persistance
         QMap<PersistantId, QualifiedId> m_version_lookup;
 
         std::optional<PersistantId> m_pending_bill_id;
+
+    signals:
+        void billChanged(QualifiedId new_qualified_bill_id, const Bill& bill);
+        void transactionChanged(QualifiedId new_qualified_transaction_id, const Transaction& transaction);
     };
 
     inline QDebug& operator<<(QDebug& debug, const Database& value) {
@@ -261,6 +272,4 @@ namespace Accounting::Persistance
 }
 
 Q_DECLARE_METATYPE(Accounting::Persistance::PersistantId);
-Q_DECLARE_METATYPE(Accounting::Persistance::Transaction);
-Q_DECLARE_METATYPE(Accounting::Persistance::Bill);
-Q_DECLARE_METATYPE(Accounting::Persistance::Database);
+Q_DECLARE_METATYPE(Accounting::Persistance::QualifiedId);

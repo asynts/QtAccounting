@@ -19,8 +19,9 @@ set(PROJECT_SOURCES
         MainWindow.hpp MainWindow.cpp
         TransactionListWidget.hpp
         TransactionListModel.hpp
-        Persistance/Database.hpp
         Util.hpp
+        Persistance/Database.hpp
+        Models/BillModel.hpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
