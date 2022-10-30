@@ -228,7 +228,11 @@ namespace Accounting::Persistance
 
     signals:
         void billChanged(QualifiedId new_qualified_bill_id, const Bill& bill);
-        void transactionChanged(QualifiedId new_qualified_transaction_id, const Transaction& transaction);
+
+        void transactionChanged(
+                Persistance::QualifiedId qualified_bill_id,
+                Persistance::QualifiedId new_qualified_transaction_id,
+                const Persistance::Transaction& transaction);
     };
 
     inline QDebug& operator<<(QDebug& debug, const Database& value) {

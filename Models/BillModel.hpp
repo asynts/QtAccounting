@@ -156,8 +156,13 @@ namespace Accounting::Models
             endResetModel();
         }
 
-        void transactionChanged(Persistance::QualifiedId new_qualified_transaction_id, const Persistance::Transaction& transaction) {
+        void transactionChanged(Persistance::QualifiedId qualified_bill_id, Persistance::QualifiedId new_qualified_transaction_id, const Persistance::Transaction& transaction) {
             if (!m_bill.has_value()) {
+                return;
+            }
+
+            if (m_bill.value().m_persistant_id != qualified_bill_id.m_id) {
+                // This transaction does not belong to this bill.
                 return;
             }
 
@@ -170,6 +175,8 @@ namespace Accounting::Models
                 }
                 ++row;
             }
+
+            Q_UNREACHABLE();
         }
 
     private:
