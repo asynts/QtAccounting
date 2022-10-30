@@ -17,9 +17,10 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
         main.cpp
         MainWindow.hpp MainWindow.cpp
-        Types.hpp
         TransactionListWidget.hpp
         TransactionListModel.hpp
+        Persistance/Database.hpp
+        Util.hpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
