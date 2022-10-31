@@ -39,7 +39,7 @@ namespace Accounting::Persistance
         }
 
     public slots:
-        void update(Accounting::Persistance::TransactionData&& data)
+        void update(Accounting::Persistance::TransactionData data)
         {
             m_versions.append(std::move(data));
             emit onChanged();
@@ -83,7 +83,7 @@ namespace Accounting::Persistance
         QList<const TransactionObject*> transactions() const;
 
     public slots:
-        void update(Accounting::Persistance::BillData&& data)
+        void update(Accounting::Persistance::BillData data)
         {
             m_versions.append(std::move(data));
             emit onChanged();
@@ -105,6 +105,19 @@ namespace Accounting::Persistance
         Q_OBJECT
 
     public:
+        Database(QObject *parent = nullptr)
+            : QObject(parent)
+        {
+        }
+
+        TransactionObject& create_transaction(TransactionData&& data) {
+            auto transaction = new TransactionObject(*this, std::move(data), this);
+            m_transactions.insert(transaction->id(), transaction);
+            return *transaction;
+        }
+
+        // FIXME: create_bill
+
         QMap<QString, TransactionObject*> m_transactions;
         QMap<QString, BillObject*> m_bills;
     };

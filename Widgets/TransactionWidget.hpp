@@ -4,7 +4,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-#include "Persistance/Database_2.hpp"
+#include "Persistance/Database.hpp"
 
 namespace Accounting::Widgets
 {
@@ -16,22 +16,22 @@ namespace Accounting::Widgets
             : QWidget(parent)
             , m_transaction_object(transaction_object)
         {
-            connect(&transaction_object, &Persistance::TransactionObject::onChanged,
-                    this, &TransactionWidget::onTransactionObjectChanged);
-
             auto layout = new QVBoxLayout();
 
             m_label_widget = new QLabel("", this);;
             layout->addWidget(m_label_widget);
 
-            onTransactionObjectChanged();
+            update();
 
             setLayout(layout);
+
+            connect(&transaction_object, &Persistance::TransactionObject::onChanged,
+                    this, &TransactionWidget::update);
         }
 
     public slots:
-        void onTransactionObjectChanged() {
-            m_label_widget->setText(m_transaction_object.get().m_id.m_id.m_value);
+        void update() {
+            m_label_widget->setText(QString("%1 (%2)").arg(m_transaction_object.id(), QString::number(m_transaction_object.amount())));
         }
 
     private:

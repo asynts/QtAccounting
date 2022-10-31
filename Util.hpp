@@ -3,7 +3,6 @@
 #include <algorithm>
 
 #include <QString>
-#include <QDataStream>
 
 namespace Accounting
 {
