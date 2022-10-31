@@ -6,6 +6,7 @@
 #include <QPushButton>
 
 #include "Persistance/Database.hpp"
+#include "Widgets/EditTransactionDialog.hpp"
 
 namespace Accounting::Widgets
 {
@@ -30,16 +31,19 @@ namespace Accounting::Widgets
             m_edit_widget = new QPushButton("Edit", this);
             layout->addWidget(m_edit_widget);
 
-            update();
+            onUpdate();
 
             setLayout(layout);
 
             connect(&transaction_object, &Persistance::TransactionObject::onChanged,
-                    this, &TransactionWidget::update);
+                    this, &TransactionWidget::onUpdate);
+
+            connect(m_edit_widget, &QPushButton::clicked,
+                    this, &TransactionWidget::onEdit);
         }
 
-    public slots:
-        void update() {
+    private slots:
+        void onUpdate() {
             if (m_transaction_object.amount() < 0) {
                 m_expense_widget->setText("EXPENSE");
             } else {
@@ -53,12 +57,24 @@ namespace Accounting::Widgets
             m_category_widget->setText(m_transaction_object.category());
         }
 
+        void onEdit() {
+            if (m_edit_dialog == nullptr) {
+                m_edit_dialog = new EditTransactionDialog(m_transaction_object, this);
+            }
+
+            m_edit_dialog->show();
+            m_edit_dialog->raise();
+            m_edit_dialog->activateWindow();
+        }
+
     private:
         QLabel *m_expense_widget;
         QLabel *m_amount_widget;
         QLabel *m_category_widget;
         QLabel *m_id_widget;
         QPushButton *m_edit_widget;
+
+        EditTransactionDialog *m_edit_dialog = nullptr;
 
         Persistance::TransactionObject& m_transaction_object;
     };

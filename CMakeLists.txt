@@ -18,10 +18,14 @@ set(PROJECT_SOURCES
     Persistance/Database.hpp
     Widgets/BillWidget.hpp
     Widgets/TransactionWidget.hpp
+    Widgets/EditTransactionDialog.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp
 )
+
+qt_wrap_ui(PROJECT_SOURCES
+    Widgets/EditTransactionDialog.ui)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Accounting
