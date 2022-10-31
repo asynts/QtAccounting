@@ -3,6 +3,10 @@
 #include <QDialog>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QProperty>
+#include <QPushButton>
+
+#include <optional>
 
 #include "Persistance/Database.hpp"
 #include "ui_EditTransactionDialog.h"
@@ -26,9 +30,29 @@ namespace Accounting::Widgets
             m_date_widget = ui.m_date_DateEdit;
             m_amount_widget = ui.m_amount_LineEdit;
             m_type_widget = ui.m_type_ComboBox;
+            m_buttons_widget = ui.m_buttons_DialogButtonBox;
 
-            // FIXME: Setup bindings for interpreted values.
-            // FIXME: Disable 'ok' button if invalid (binding).
+            m_category_interpreted.setBinding([&]() -> std::optional<QString> {
+                // FIXME: We do not detect this change.
+                auto value = m_category_widget->text().trimmed();
+
+                if (value.size() >= 1) {
+                    return value;
+                } else {
+                    return std::nullopt;
+                }
+            });
+
+            // FIXME: Setup bindings for remaining values.
+
+            m_button_enabled.setBinding([&] {
+                return m_category_interpreted.value().has_value();
+            });
+
+            // FIXME: I think that I should use 'subscribe' instead, but that has an unpredictable return type.
+            m_button_enabled_notifier = m_button_enabled.addNotifier([&] {
+                m_buttons_widget->button(QDialogButtonBox::Ok)->setEnabled(m_button_enabled.value());
+            });
         }
 
     private slots:
@@ -43,5 +67,11 @@ namespace Accounting::Widgets
         QDateEdit *m_date_widget;
         QLineEdit *m_amount_widget;
         QComboBox *m_type_widget;
+        QDialogButtonBox *m_buttons_widget;
+
+        // FIXME: Do I need to call 'Q_PROPERTY' macro for private properties?
+        QProperty<std::optional<QString>> m_category_interpreted;
+        QProperty<bool> m_button_enabled;
+        QPropertyNotifier m_button_enabled_notifier;
     };
 }
