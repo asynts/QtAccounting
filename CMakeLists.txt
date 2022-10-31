@@ -21,7 +21,6 @@ set(PROJECT_SOURCES
         TransactionListModel.hpp
         Util.hpp
         Persistance/Database.hpp
-        Persistance/TransactionObject.hpp
         Models/BillModel.hpp
         Widgets/TransactionWidget.hpp
         Widgets/BillWidget.hpp

@@ -4,7 +4,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-#include "Persistance/TransactionObject.hpp"
+#include "Persistance/Database_2.hpp"
 
 namespace Accounting::Widgets
 {
