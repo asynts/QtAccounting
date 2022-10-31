@@ -2,7 +2,7 @@
 
 #include <QWidget>
 #include <QLabel>
-#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 #include "Persistance/Database.hpp"
 
@@ -16,7 +16,7 @@ namespace Accounting::Widgets
             : QWidget(parent)
             , m_transaction_object(transaction_object)
         {
-            auto layout = new QVBoxLayout();
+            auto layout = new QHBoxLayout();
 
             m_label_widget = new QLabel("", this);;
             layout->addWidget(m_label_widget);
@@ -31,7 +31,9 @@ namespace Accounting::Widgets
 
     public slots:
         void update() {
+            // FIXME: Somehow, this text is being truncated.
             m_label_widget->setText(QString("%1 (%2)").arg(m_transaction_object.id(), QString::number(m_transaction_object.amount())));
+            qDebug() << m_label_widget->text();
         }
 
     private:

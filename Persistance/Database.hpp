@@ -80,7 +80,7 @@ namespace Accounting::Persistance
             return m_versions.constLast().m_timestamp_created;
         }
 
-        QList<const TransactionObject*> transactions() const;
+        QList<TransactionObject*> transactions() const;
 
     public slots:
         void update(Accounting::Persistance::BillData data)
@@ -116,15 +116,19 @@ namespace Accounting::Persistance
             return *transaction;
         }
 
-        // FIXME: create_bill
+        BillObject& create_bill(BillData&& data) {
+            auto bill = new BillObject(*this, std::move(data), this);
+            m_bills.insert(bill->id(), bill);
+            return *bill;
+        }
 
         QMap<QString, TransactionObject*> m_transactions;
         QMap<QString, BillObject*> m_bills;
     };
 
-    inline QList<const TransactionObject*> BillObject::transactions() const {
+    inline QList<TransactionObject*> BillObject::transactions() const {
         // FIXME: This is essentially a join and could be done more efficiently.
-        QList<const TransactionObject*> transactions;
+        QList<TransactionObject*> transactions;
         for (auto& transaction_id : m_versions.constLast().m_transaction_ids) {
             transactions.append(m_database.m_transactions[transaction_id]);
         }

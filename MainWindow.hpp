@@ -4,7 +4,7 @@
 #include <QTimerEvent>
 
 #include "Persistance/Database.hpp"
-#include "Widgets/TransactionWidget.hpp"
+#include "Widgets/BillWidget.hpp"
 
 namespace Accounting
 {
@@ -19,13 +19,22 @@ namespace Accounting
             m_database = new Persistance::Database(this);
 
             auto& transaction_object = m_database->create_transaction(Persistance::TransactionData{
-                                                                   .m_id = "#1",
+                                                                   .m_id = "transaction#1",
                                                                    .m_timestamp_created = QDateTime::currentDateTimeUtc(),
                                                                    .m_amount = 42.00,
                                                                });
 
-            auto transaction_widget = new Widgets::TransactionWidget(transaction_object, this);
-            setCentralWidget(transaction_widget);
+            QList<QString> transaction_ids;
+            transaction_ids.append(transaction_object.id());
+
+            auto& bill_object = m_database->create_bill(Persistance::BillData{
+                                                            .m_id = "bill#1",
+                                                            .m_timestamp_created = QDateTime::currentDateTimeUtc(),
+                                                            .m_transaction_ids = transaction_ids,
+                                                        });
+
+            auto bill_widget = new Widgets::BillWidget(bill_object, this);
+            setCentralWidget(bill_widget);
 
             m_transaction_object = &transaction_object;
             startTimer(1000);
@@ -34,7 +43,7 @@ namespace Accounting
         void timerEvent(QTimerEvent *event)
         {
             m_transaction_object->update(Persistance::TransactionData{
-                                             .m_id = "#1",
+                                             .m_id = "transaction#1",
                                              .m_timestamp_created = QDateTime::currentDateTimeUtc(),
                                              .m_amount = 13.00,
                                          });

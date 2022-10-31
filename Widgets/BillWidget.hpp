@@ -4,7 +4,8 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-#include "Persistance/Database_2.hpp"
+#include "Persistance/Database.hpp"
+#include "Widgets/TransactionWidget.hpp"
 
 namespace Accounting::Widgets
 {
@@ -16,26 +17,32 @@ namespace Accounting::Widgets
             : QWidget(parent)
             , m_bill_object(bill_object)
         {
+            setLayout(new QVBoxLayout());
+
+            update();
+
             connect(&bill_object, &Persistance::BillObject::onChanged,
-                    this, &BillWidget::onBillObjectChanged);
-
-            auto layout = new QVBoxLayout();
-
-            m_label_widget = new QLabel("", this);;
-            layout->addWidget(m_label_widget);
-
-            onBillObjectChanged();
-
-            setLayout(layout);
+                    this, &BillWidget::update);
         }
 
     public slots:
-        void onBillObjectChanged() {
-            m_label_widget->setText(m_bill_object.get().m_id.m_id.m_value);
+        void update() {
+            // Delete old widgets.
+            for (auto *widget : m_widgets) {
+                layout()->removeWidget(widget);
+                delete widget;
+            }
+            m_widgets.clear();
+
+            // Create new widgets.
+            for (auto *transaction_object : m_bill_object.transactions()) {
+                auto widget = new TransactionWidget(*transaction_object, this);
+                m_widgets.append(widget);
+            }
         }
 
     private:
-        QLabel *m_label_widget;
+        QList<QWidget*> m_widgets;
 
         Persistance::BillObject& m_bill_object;
     };
