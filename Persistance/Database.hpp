@@ -12,6 +12,7 @@ namespace Accounting::Persistance
     struct TransactionData {
         QString m_id;
         QDateTime m_timestamp_created;
+        QDate m_date;
         qreal m_amount;
         QString m_category;
     };
@@ -29,6 +30,10 @@ namespace Accounting::Persistance
 
         QString id() const {
             return m_versions.constLast().m_id;
+        }
+
+        QDate date() const {
+            return m_versions.constLast().m_date;
         }
 
         QDateTime timestamp_created() const {

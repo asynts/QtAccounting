@@ -22,6 +22,7 @@ namespace Accounting
                                                .m_id = "transaction#1",
                                                .m_timestamp_created = QDateTime::currentDateTimeUtc(),
                                                .m_amount = 42.00,
+                                               .m_category = "category#1",
                                            });
 
             QList<QString> transaction_ids;
@@ -46,6 +47,7 @@ namespace Accounting
                                                .m_id = "transaction#2",
                                                .m_timestamp_created = QDateTime::currentDateTimeUtc(),
                                                .m_amount = -14.23,
+                                               .m_category = "category#1",
                                            });
 
             QList<QString> transaction_ids;

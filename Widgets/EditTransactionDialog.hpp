@@ -27,37 +27,75 @@ namespace Accounting::Widgets
             ui.setupUi(this);
 
             m_category_widget = ui.m_category_LineEdit;
+            m_category_widget->setText(transaction_object.category());
+
             m_date_widget = ui.m_date_DateEdit;
+            m_date_widget->setDate(transaction_object.date());
+
             m_amount_widget = ui.m_amount_LineEdit;
+            auto amount_validator = new QDoubleValidator(this);
+            amount_validator->setBottom(0.00);
+            m_amount_widget->setValidator(amount_validator);
+            m_amount_widget->setText(QString::number(std::abs(transaction_object.amount()), 'f', 2));
+
             m_type_widget = ui.m_type_ComboBox;
+            m_type_widget->addItem("Expense");
+            m_type_widget->addItem("Income");
+
+            if (transaction_object.amount() < 0) {
+                m_type_widget->setCurrentIndex(0);
+            } else {
+                m_type_widget->setCurrentIndex(1);
+            }
+
             m_buttons_widget = ui.m_buttons_DialogButtonBox;
 
-            m_category_interpreted.setBinding([&]() -> std::optional<QString> {
-                // FIXME: We do not detect this change.
-                auto value = m_category_widget->text().trimmed();
+            validate();
 
-                if (value.size() >= 1) {
-                    return value;
-                } else {
-                    return std::nullopt;
-                }
-            });
+            connect(m_category_widget, &QLineEdit::textChanged,
+                    this, &EditTransactionDialog::validate);
 
-            // FIXME: Setup bindings for remaining values.
+            connect(m_date_widget, &QDateEdit::dateChanged,
+                    this, &EditTransactionDialog::validate);
 
-            m_button_enabled.setBinding([&] {
-                return m_category_interpreted.value().has_value();
-            });
+            connect(m_amount_widget, &QLineEdit::textChanged,
+                    this, &EditTransactionDialog::validate);
 
-            // FIXME: I think that I should use 'subscribe' instead, but that has an unpredictable return type.
-            m_button_enabled_notifier = m_button_enabled.addNotifier([&] {
-                m_buttons_widget->button(QDialogButtonBox::Ok)->setEnabled(m_button_enabled.value());
-            });
+            connect(m_type_widget, &QComboBox::currentIndexChanged,
+                    this, &EditTransactionDialog::validate);
         }
 
     private slots:
+        void validate() {
+            bool is_valid = true;
+
+            auto category = m_category_widget->text().trimmed();
+            if (category.size() == 0) {
+                is_valid = false;
+            }
+
+            if (!m_amount_widget->hasAcceptableInput()) {
+                is_valid = false;
+            }
+
+            m_buttons_widget->button(QDialogButtonBox::Ok)->setEnabled(is_valid);
+        }
+
         virtual void accept() override {
-            // FIXME: This has already been validated, simply update the transaction object.
+            qreal amount = m_amount_widget->text().trimmed().toDouble();
+
+            if (m_type_widget->currentIndex() == 0) {
+                amount *= -1;
+            }
+
+            m_transaction_object.update(Persistance::TransactionData{
+                                            .m_id = m_transaction_object.id(),
+                                            .m_timestamp_created = QDateTime::currentDateTimeUtc(),
+                                            .m_amount = amount,
+                                            .m_category = m_category_widget->text().trimmed(),
+                                        });
+
+            done(QDialog::Accepted);
         }
 
     private:
@@ -68,10 +106,5 @@ namespace Accounting::Widgets
         QLineEdit *m_amount_widget;
         QComboBox *m_type_widget;
         QDialogButtonBox *m_buttons_widget;
-
-        // FIXME: Do I need to call 'Q_PROPERTY' macro for private properties?
-        QProperty<std::optional<QString>> m_category_interpreted;
-        QProperty<bool> m_button_enabled;
-        QPropertyNotifier m_button_enabled_notifier;
     };
 }
