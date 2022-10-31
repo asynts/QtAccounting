@@ -96,7 +96,7 @@ namespace Accounting::Models
         mutable std::optional<QList<TransactionItem>> m_cached_transaction_items;
     };
 
-    class BillModel : public QAbstractListModel {
+    class BillModel final : public QAbstractListModel {
         Q_OBJECT
 
     public:

@@ -211,7 +211,7 @@ namespace Accounting::Persistance
         return in;
     }
 
-    class Database : public QObject {
+    class Database final : public QObject {
         Q_OBJECT
 
     public:
