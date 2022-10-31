@@ -13,6 +13,7 @@ namespace Accounting::Persistance
         QString m_id;
         QDateTime m_timestamp_created;
         qreal m_amount;
+        QString m_category;
     };
 
     class TransactionObject final : public QObject {
@@ -36,6 +37,10 @@ namespace Accounting::Persistance
 
         qreal amount() const {
             return m_versions.constLast().m_amount;
+        }
+
+        QString category() const {
+            return m_versions.constLast().m_category;
         }
 
     public slots:

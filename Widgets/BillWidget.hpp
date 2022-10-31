@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QSplitter>
 
 #include "Persistance/Database.hpp"
 #include "Widgets/TransactionWidget.hpp"
@@ -37,8 +38,8 @@ namespace Accounting::Widgets
             // Create new widgets.
             for (auto *transaction_object : m_bill_object.transactions()) {
                 auto widget = new TransactionWidget(*transaction_object, this);
-
                 layout()->addWidget(widget);
+
                 m_widgets.append(widget);
             }
         }
