@@ -23,7 +23,7 @@ namespace Accounting::Widgets
             m_container_widget = generateContainerWidget();
             layout()->addWidget(m_container_widget);
 
-            connect(&m_database, &Persistance::Database::onBillAdded,
+            connect(&m_database, &Persistance::Database::signalBillAdded,
                     this, &BillListWidget::slotUpdate);
         }
 

@@ -41,24 +41,24 @@ namespace Accounting::Widgets
 
             m_buttons_widget = ui.m_buttons_DialogButtonBox;
 
-            setTransactionData(Persistance::TransactionData::new_default());
-            validate();
+            slotSetTransactionData(Persistance::TransactionData::new_default());
+            slotValidate();
 
             connect(m_category_widget, &QLineEdit::textChanged,
-                    this, &EditTransactionDialog::validate);
+                    this, &EditTransactionDialog::slotValidate);
 
             connect(m_date_widget, &QDateEdit::dateChanged,
-                    this, &EditTransactionDialog::validate);
+                    this, &EditTransactionDialog::slotValidate);
 
             connect(m_amount_widget, &QLineEdit::textChanged,
-                    this, &EditTransactionDialog::validate);
+                    this, &EditTransactionDialog::slotValidate);
 
             connect(m_type_widget, &QComboBox::currentIndexChanged,
-                    this, &EditTransactionDialog::validate);
+                    this, &EditTransactionDialog::slotValidate);
         }
 
     public slots:
-        void setTransactionData(Persistance::TransactionData transaction_data) {
+        void slotSetTransactionData(Persistance::TransactionData transaction_data) {
             m_old_transaction_data = transaction_data;
 
             m_category_widget->setText(transaction_data.m_category);
@@ -73,7 +73,7 @@ namespace Accounting::Widgets
         }
 
     private slots:
-        void validate() {
+        void slotValidate() {
             bool is_valid = true;
 
             auto category = m_category_widget->text().trimmed();
@@ -99,13 +99,13 @@ namespace Accounting::Widgets
             new_transaction_data.m_amount = amount;
             new_transaction_data.m_timestamp_created = QDateTime::currentDateTimeUtc();
             new_transaction_data.m_category = m_category_widget->text().trimmed();
-            emit onComplete(new_transaction_data);
+            emit signalComplete(new_transaction_data);
 
             done(QDialog::Accepted);
         }
 
     signals:
-        void onComplete(Persistance::TransactionData transaction_data);
+        void signalComplete(Persistance::TransactionData transaction_data);
 
     private:
         Persistance::TransactionData m_old_transaction_data;

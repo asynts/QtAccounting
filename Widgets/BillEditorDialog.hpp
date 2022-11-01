@@ -32,7 +32,7 @@ namespace Accounting::Widgets
             connect(new_button, &QPushButton::clicked,
                     this, &BillEditorDialog::slotNewTransaction);
 
-            connect(&bill_object, &Persistance::BillObject::onChanged,
+            connect(&bill_object, &Persistance::BillObject::signalChanged,
                     this, &BillEditorDialog::slotUpdate);
         }
 

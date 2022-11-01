@@ -65,14 +65,14 @@ namespace Accounting::Persistance
         }
 
     public slots:
-        void update(Accounting::Persistance::TransactionData data)
+        void slotUpdate(Accounting::Persistance::TransactionData data)
         {
             m_versions.append(std::move(data));
-            emit onChanged();
+            emit signalChanged();
         }
 
     signals:
-        void onChanged();
+        void signalChanged();
 
     private:
         Database& m_database;
@@ -113,16 +113,16 @@ namespace Accounting::Persistance
         }
 
     public slots:
-        void update(Accounting::Persistance::BillData data)
+        void slotUpdate(Accounting::Persistance::BillData data)
         {
             m_versions.append(std::move(data));
-            emit onChanged();
+            emit signalChanged();
         }
 
     signals:
         // This could be done way more efficiently if we communicate which entries have changed.
         // That seems to be what the whole model/view thing is about, but I can't get it to work properly.
-        void onChanged();
+        void signalChanged();
 
     private:
         Database& m_database;
@@ -157,7 +157,7 @@ namespace Accounting::Persistance
             auto bill = new BillObject(*this, std::move(data), this);
             m_bills.insert(bill->id(), bill);
 
-            emit onBillAdded();
+            emit signalBillAdded();
 
             return *bill;
         }
@@ -169,13 +169,13 @@ namespace Accounting::Persistance
             new_bill_data.m_timestamp_created = QDateTime::currentDateTimeUtc();
             new_bill_data.m_transaction_ids.append(transaction_object.id());
 
-            m_staged_bill->update(new_bill_data);
+            m_staged_bill->slotUpdate(new_bill_data);
 
             qDebug() << "after:" << m_staged_bill->data().m_transaction_ids;
         }
 
     signals:
-        void onBillAdded();
+        void signalBillAdded();
 
     public:
         QMap<QString, TransactionObject*> m_transactions;

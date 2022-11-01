@@ -31,19 +31,19 @@ namespace Accounting::Widgets
             m_edit_widget = new QPushButton("Edit", this);
             layout->addWidget(m_edit_widget);
 
-            onUpdate();
+            slotUpdate();
 
             setLayout(layout);
 
-            connect(&transaction_object, &Persistance::TransactionObject::onChanged,
-                    this, &TransactionWidget::onUpdate);
+            connect(&transaction_object, &Persistance::TransactionObject::signalChanged,
+                    this, &TransactionWidget::slotUpdate);
 
             connect(m_edit_widget, &QPushButton::clicked,
-                    this, &TransactionWidget::onEdit);
+                    this, &TransactionWidget::slotEdit);
         }
 
     private slots:
-        void onUpdate() {
+        void slotUpdate() {
             if (m_transaction_object.amount() < 0) {
                 m_expense_widget->setText("EXPENSE");
             } else {
@@ -57,13 +57,13 @@ namespace Accounting::Widgets
             m_category_widget->setText(m_transaction_object.category());
         }
 
-        void onEdit() {
+        void slotEdit() {
             if (m_edit_dialog == nullptr) {
                 m_edit_dialog = new EditTransactionDialog(this);
-                m_edit_dialog->setTransactionData(m_transaction_object.data());
+                m_edit_dialog->slotSetTransactionData(m_transaction_object.data());
 
-                connect(m_edit_dialog, &EditTransactionDialog::onComplete,
-                        this, &TransactionWidget::onEditComplete);
+                connect(m_edit_dialog, &EditTransactionDialog::signalComplete,
+                        this, &TransactionWidget::slotEditComplete);
             }
 
             m_edit_dialog->show();
@@ -71,8 +71,8 @@ namespace Accounting::Widgets
             m_edit_dialog->activateWindow();
         }
 
-        void onEditComplete(Persistance::TransactionData new_transaction_data) {
-            m_transaction_object.update(new_transaction_data);
+        void slotEditComplete(Persistance::TransactionData new_transaction_data) {
+            m_transaction_object.slotUpdate(new_transaction_data);
         }
 
     private:
