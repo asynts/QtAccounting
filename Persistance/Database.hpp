@@ -81,10 +81,31 @@ namespace Accounting::Persistance
         QList<TransactionData> m_versions;
     };
 
+    enum class BillStatus {
+        // I am working on this bill.
+        Staged,
+
+        // The bill has been send out.
+        PendingPayment,
+
+        // The bill has been paid.
+        ConfirmedPaid,
+    };
+
     struct BillData {
         QString m_id;
         QDateTime m_timestamp_created;
         QList<QString> m_transaction_ids;
+        BillStatus m_status;
+
+        static BillData new_default() {
+            return BillData{
+                .m_id = generate_id(),
+                .m_timestamp_created = QDateTime::currentDateTimeUtc(),
+                .m_transaction_ids = {},
+                .m_status = BillStatus::Staged,
+            };
+        }
     };
 
     class BillObject final : public QObject {
@@ -107,6 +128,23 @@ namespace Accounting::Persistance
         }
 
         QList<TransactionObject*> transactions() const;
+
+        BillStatus status() const {
+            return data().m_status;
+        }
+
+        QString status_string() const {
+            switch (status()) {
+            case BillStatus::Staged:
+                return "Staged";
+            case BillStatus::PendingPayment:
+                return "PendingPayment";
+            case BillStatus::ConfirmedPaid:
+                return "ConfirmedPaid";
+            default:
+                Q_UNREACHABLE();
+            }
+        }
 
         BillData data() const {
             return m_versions.constLast();
@@ -140,11 +178,7 @@ namespace Accounting::Persistance
         Database(QObject *parent = nullptr)
             : QObject(parent)
         {
-            m_staged_bill = &internal_create_bill(BillData{
-                                             .m_id = generate_id(),
-                                             .m_timestamp_created = QDateTime::currentDateTimeUtc(),
-                                             .m_transaction_ids = {},
-                                         });
+            create_staged_bill();
         }
 
         // Should not be used directly.
@@ -155,11 +189,8 @@ namespace Accounting::Persistance
             return *transaction;
         }
 
-        // Should not be used directly.
-        BillObject& internal_create_bill(BillData&& data) {
-            // FIXME: This should only be possible by replacing the staged bill.
-
-            auto bill = new BillObject(*this, std::move(data), this);
+        BillObject& create_staged_bill() {
+            auto bill = new BillObject(*this, BillData::new_default(), this);
             m_bills.insert(bill->id(), bill);
 
             emit signalBillAdded();
@@ -173,9 +204,6 @@ namespace Accounting::Persistance
     public:
         QMap<QString, TransactionObject*> m_transactions;
         QMap<QString, BillObject*> m_bills;
-
-        // Not null.
-        BillObject *m_staged_bill = nullptr;
     };
 
     inline QList<TransactionObject*> BillObject::transactions() const {

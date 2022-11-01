@@ -51,11 +51,7 @@ namespace Accounting::Widgets
                 auto *bill_layout = new QHBoxLayout;
                 bill_widget->setLayout(bill_layout);
 
-                if (bill_object == m_database.m_staged_bill) {
-                    bill_layout->addWidget(new QLabel(QString("%1 (staged)").arg(bill_object->id()), container_widget));
-                } else {
-                    bill_layout->addWidget(new QLabel(bill_object->id(), container_widget));
-                }
+                bill_layout->addWidget(new QLabel(QString("%1 (%2)").arg(bill_object->id(), bill_object->status_string()), container_widget));
 
                 auto *edit_button = new QPushButton("Edit", container_widget);
                 bill_layout->addWidget(edit_button);
