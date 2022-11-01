@@ -25,7 +25,8 @@ set(PROJECT_SOURCES
 )
 
 qt_wrap_ui(PROJECT_SOURCES
-    Widgets/TransactionEditorDialog.ui)
+    Widgets/TransactionEditorDialog.ui
+    Widgets/BillEditorDialog.ui)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Accounting

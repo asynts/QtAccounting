@@ -8,6 +8,7 @@
 
 #include "Persistance/Database.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
+#include "ui_BillEditorDialog.h"
 
 namespace Accounting::Widgets
 {
@@ -19,33 +20,14 @@ namespace Accounting::Widgets
             : QDialog(parent)
             , m_bill_object(bill_object)
         {
-            setModal(false);
+            m_ui.setupUi(this);
+
             setWindowTitle(QString("Edit Bill '%1'").arg(bill_object.id()));
 
-            setLayout(new QVBoxLayout);
+            connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
+                    this, &BillEditorDialog::slotNewTransaction);
 
-            // FIXME: Use '.ui' file.
-
-            {
-                m_container_widget = generateContainerWidget();
-                layout()->addWidget(m_container_widget);
-            }
-
-            {
-                auto *new_button = new QPushButton("New Transaction", this);
-                layout()->addWidget(new_button);
-
-                connect(new_button, &QPushButton::clicked,
-                        this, &BillEditorDialog::slotNewTransaction);
-            }
-
-            {
-                auto *dialog_buttons = new QDialogButtonBox(QDialogButtonBox::Ok, this);
-                layout()->addWidget(dialog_buttons);
-
-                connect(dialog_buttons, &QDialogButtonBox::accepted,
-                        this, &BillEditorDialog::accept);
-            }
+            slotUpdate();
 
             connect(&bill_object, &Persistance::BillObject::signalChanged,
                     this, &BillEditorDialog::slotUpdate);
@@ -54,10 +36,10 @@ namespace Accounting::Widgets
     private slots:
         void slotUpdate() {
             auto *container_widget = generateContainerWidget();
-            layout()->replaceWidget(m_container_widget, container_widget);
+            layout()->replaceWidget(m_ui.m_container_QWidget, container_widget);
 
-            delete m_container_widget;
-            m_container_widget = container_widget;
+            delete m_ui.m_container_QWidget;
+            m_ui.m_container_QWidget = container_widget;
         }
 
         void slotNewTransaction() {
@@ -80,6 +62,7 @@ namespace Accounting::Widgets
             auto container_widget = new QWidget(this);
 
             auto container_layout = new QVBoxLayout;
+            container_layout->setAlignment(Qt::AlignTop);
             container_widget->setLayout(container_layout);
 
             for (auto *transaction_object : m_bill_object.transactions()) {
@@ -115,8 +98,9 @@ namespace Accounting::Widgets
             return container_widget;
         }
 
+        Ui::BillEditorDialog m_ui;
+
         TransactionEditorDialog *m_new_transaction_dialog = nullptr;
-        QWidget *m_container_widget = nullptr;
 
         Persistance::BillObject& m_bill_object;
     };

@@ -41,6 +41,7 @@ namespace Accounting::Widgets
             auto container_widget = new QWidget(this);
 
             auto container_layout = new QVBoxLayout;
+            container_layout->setAlignment(Qt::AlignTop);
             container_widget->setLayout(container_layout);
 
             for (auto *bill_object : std::as_const(m_database.m_bills)) {
