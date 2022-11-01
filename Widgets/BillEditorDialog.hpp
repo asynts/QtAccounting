@@ -24,6 +24,13 @@ namespace Accounting::Widgets
 
             setWindowTitle(QString("Edit Bill '%1'").arg(bill_object.id()));
 
+            m_ui.m_status_QComboBox->addItem("Staged");
+            m_ui.m_status_QComboBox->addItem("PendingPayment");
+            m_ui.m_status_QComboBox->addItem("ConfirmedPaid");
+
+            connect(m_ui.m_status_QComboBox, &QComboBox::currentIndexChanged,
+                    this, &BillEditorDialog::slotStatusChanged);
+
             connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
                     this, &BillEditorDialog::slotNewTransaction);
 
@@ -40,6 +47,13 @@ namespace Accounting::Widgets
 
             delete m_ui.m_container_QWidget;
             m_ui.m_container_QWidget = container_widget;
+        }
+
+        void slotStatusChanged() {
+            auto data = m_bill_object.data();
+            data.m_status = Persistance::bill_status_from_string(m_ui.m_status_QComboBox->currentText());
+
+            m_bill_object.slotUpdate(data);
         }
 
         void slotNewTransaction() {

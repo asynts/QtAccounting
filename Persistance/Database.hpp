@@ -92,6 +92,18 @@ namespace Accounting::Persistance
         ConfirmedPaid,
     };
 
+    inline BillStatus bill_status_from_string(QString string) {
+        if (string == "Staged") {
+            return BillStatus::Staged;
+        } else if (string == "PendingPayment") {
+            return BillStatus::PendingPayment;
+        } else if (string == "ConfirmedPaid") {
+            return BillStatus::ConfirmedPaid;
+        } else {
+            Q_UNREACHABLE();
+        }
+    }
+
     struct BillData {
         QString m_id;
         QDateTime m_timestamp_created;
@@ -153,11 +165,7 @@ namespace Accounting::Persistance
         void create_transaction(TransactionData&& data);
 
     public slots:
-        void slotUpdate(Accounting::Persistance::BillData data)
-        {
-            m_versions.append(std::move(data));
-            emit signalChanged();
-        }
+        void slotUpdate(Accounting::Persistance::BillData data);
 
     signals:
         // This could be done way more efficiently if we communicate which entries have changed.
@@ -193,13 +201,13 @@ namespace Accounting::Persistance
             auto bill = new BillObject(*this, BillData::new_default(), this);
             m_bills.insert(bill->id(), bill);
 
-            emit signalBillAdded();
+            emit signalBillChanged(*bill);
 
             return *bill;
         }
 
     signals:
-        void signalBillAdded();
+        void signalBillChanged(Accounting::Persistance::BillObject& bill_object);
 
     public:
         QMap<QString, TransactionObject*> m_transactions;
@@ -223,6 +231,15 @@ namespace Accounting::Persistance
         bill_data.m_transaction_ids.append(transaction_object.id());
 
         slotUpdate(bill_data);
+    }
+
+    inline void BillObject::slotUpdate(Accounting::Persistance::BillData data)
+    {
+        m_versions.append(std::move(data));
+        emit signalChanged();
+
+        // FIXME: This causes a SIGSEGV:
+        // emit m_database.signalBillChanged(*this);
     }
 }
 
