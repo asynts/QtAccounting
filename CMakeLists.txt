@@ -19,13 +19,15 @@ set(PROJECT_SOURCES
     Widgets/BillWidget.hpp
     Widgets/TransactionWidget.hpp
     Widgets/EditTransactionDialog.hpp
+    Widgets/StagedBillWidget.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp
 )
 
 qt_wrap_ui(PROJECT_SOURCES
-    Widgets/EditTransactionDialog.ui)
+    Widgets/EditTransactionDialog.ui
+    Widgets/StagedBillWidget.ui)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Accounting

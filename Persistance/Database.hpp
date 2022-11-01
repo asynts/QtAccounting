@@ -5,6 +5,8 @@
 #include <QDateTime>
 #include <QMap>
 
+#include "Util.hpp"
+
 namespace Accounting::Persistance
 {
     class Database;
@@ -29,23 +31,27 @@ namespace Accounting::Persistance
         }
 
         QString id() const {
-            return m_versions.constLast().m_id;
+            return data().m_id;
         }
 
         QDate date() const {
-            return m_versions.constLast().m_date;
+            return data().m_date;
         }
 
         QDateTime timestamp_created() const {
-            return m_versions.constLast().m_timestamp_created;
+            return data().m_timestamp_created;
         }
 
         qreal amount() const {
-            return m_versions.constLast().m_amount;
+            return data().m_amount;
         }
 
         QString category() const {
-            return m_versions.constLast().m_category;
+            return data().m_category;
+        }
+
+        TransactionData data() const {
+            return m_versions.constLast();
         }
 
     public slots:
@@ -83,14 +89,18 @@ namespace Accounting::Persistance
         }
 
         QString id() const {
-            return m_versions.constLast().m_id;
+            return data().m_id;
         }
 
         QDateTime timestamp_created() const {
-            return m_versions.constLast().m_timestamp_created;
+            return data().m_timestamp_created;
         }
 
         QList<TransactionObject*> transactions() const;
+
+        BillData data() const {
+            return m_versions.constLast();
+        }
 
     public slots:
         void update(Accounting::Persistance::BillData data)
@@ -111,13 +121,18 @@ namespace Accounting::Persistance
         QList<BillData> m_versions;
     };
 
-    class Database final : public QObject{
+    class Database final : public QObject {
         Q_OBJECT
 
     public:
         Database(QObject *parent = nullptr)
             : QObject(parent)
         {
+            m_staged_bill = &create_bill(BillData{
+                                             .m_id = generate_id(),
+                                             .m_timestamp_created = QDateTime::currentDateTimeUtc(),
+                                             .m_transaction_ids = {},
+                                         });
         }
 
         TransactionObject& create_transaction(TransactionData&& data) {
@@ -132,14 +147,25 @@ namespace Accounting::Persistance
             return *bill;
         }
 
+        void stage_transaction(TransactionObject& transaction_object) {
+            auto new_bill_data = m_staged_bill->data();
+            new_bill_data.m_timestamp_created = QDateTime::currentDateTimeUtc();
+            new_bill_data.m_transaction_ids.append(transaction_object.id());
+
+            m_staged_bill->update(new_bill_data);
+        }
+
         QMap<QString, TransactionObject*> m_transactions;
         QMap<QString, BillObject*> m_bills;
+
+        // Not null.
+        BillObject *m_staged_bill = nullptr;
     };
 
     inline QList<TransactionObject*> BillObject::transactions() const {
         // FIXME: This is essentially a join and could be done more efficiently.
         QList<TransactionObject*> transactions;
-        for (auto& transaction_id : m_versions.constLast().m_transaction_ids) {
+        for (auto& transaction_id : data().m_transaction_ids) {
             transactions.append(m_database.m_transactions[transaction_id]);
         }
 

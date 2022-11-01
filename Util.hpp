@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <QString>
+#include <QRandomGenerator64>
 
 namespace Accounting
 {
@@ -21,5 +22,12 @@ namespace Accounting
         std::reverse(result.begin(), result.end());
 
         return result;
+    }
+
+    inline QString generate_id() {
+        // Generate 48 bit value.
+        auto value = QRandomGenerator64::global()->bounded(Q_INT64_C(1) << 48);
+
+        return to_base_58(value);
     }
 }

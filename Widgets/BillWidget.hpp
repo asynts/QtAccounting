@@ -14,20 +14,31 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        BillWidget(Persistance::BillObject& bill_object, QWidget *parent = nullptr)
+        BillWidget(QWidget *parent = nullptr)
             : QWidget(parent)
-            , m_bill_object(bill_object)
         {
             setLayout(new QVBoxLayout());
 
             update();
+        }
 
-            connect(&bill_object, &Persistance::BillObject::onChanged,
+        void setBillWidget(Persistance::BillObject& new_bill_object) {
+            if (m_bill_object != nullptr) {
+                disconnect(m_bill_object, &Persistance::BillObject::onChanged,
+                           this, &BillWidget::update);
+            }
+            m_bill_object = &new_bill_object;
+
+            connect(m_bill_object, &Persistance::BillObject::onChanged,
                     this, &BillWidget::update);
         }
 
     public slots:
         void update() {
+            if (m_bill_object == nullptr) {
+                return;
+            }
+
             // Delete old widgets.
             for (auto *widget : m_widgets) {
                 layout()->removeWidget(widget);
@@ -36,7 +47,7 @@ namespace Accounting::Widgets
             m_widgets.clear();
 
             // Create new widgets.
-            for (auto *transaction_object : m_bill_object.transactions()) {
+            for (auto *transaction_object : m_bill_object->transactions()) {
                 auto widget = new TransactionWidget(*transaction_object, this);
                 layout()->addWidget(widget);
 
@@ -47,6 +58,6 @@ namespace Accounting::Widgets
     private:
         QList<QWidget*> m_widgets;
 
-        Persistance::BillObject& m_bill_object;
+        Persistance::BillObject *m_bill_object = nullptr;
     };
 }
