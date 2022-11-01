@@ -5,6 +5,7 @@
 
 #include "Persistance/Database.hpp"
 #include "Widgets/StagedBillWidget.hpp"
+#include "Widgets/BillListWidget.hpp"
 
 namespace Accounting
 {
@@ -16,13 +17,10 @@ namespace Accounting
         MainWindow(QWidget *parent = nullptr)
             : QMainWindow(parent)
         {
-            m_database = new Persistance::Database(this);
+            auto *database = new Persistance::Database(this);
 
-            auto staged_bill_widget = new Widgets::StagedBillWidget(*m_database, this);
-            setCentralWidget(staged_bill_widget);
+            auto bill_list_widget = new Widgets::BillListWidget(*database, this);
+            setCentralWidget(bill_list_widget);
         }
-
-    private:
-        Persistance::Database *m_database;
     };
 }

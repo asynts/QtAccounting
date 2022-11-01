@@ -20,6 +20,7 @@ set(PROJECT_SOURCES
     Widgets/TransactionWidget.hpp
     Widgets/EditTransactionDialog.hpp
     Widgets/StagedBillWidget.hpp
+    Widgets/BillListWidget.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp

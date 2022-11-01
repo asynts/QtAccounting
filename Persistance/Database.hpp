@@ -152,8 +152,13 @@ namespace Accounting::Persistance
         }
 
         BillObject& create_bill(BillData&& data) {
+            // FIXME: This should only be possible by replacing the staged bill.
+
             auto bill = new BillObject(*this, std::move(data), this);
             m_bills.insert(bill->id(), bill);
+
+            emit onBillAdded();
+
             return *bill;
         }
 
@@ -169,6 +174,10 @@ namespace Accounting::Persistance
             qDebug() << "after:" << m_staged_bill->data().m_transaction_ids;
         }
 
+    signals:
+        void onBillAdded();
+
+    public:
         QMap<QString, TransactionObject*> m_transactions;
         QMap<QString, BillObject*> m_bills;
 
