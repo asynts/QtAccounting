@@ -5,6 +5,7 @@
 
 #include "Persistance/Database.hpp"
 #include "Widgets/BillListWidget.hpp"
+#include "ui_MainWindow.h"
 
 namespace Accounting
 {
@@ -16,12 +17,15 @@ namespace Accounting
         MainWindow(QWidget *parent = nullptr)
             : QMainWindow(parent)
         {
-            setWindowTitle("Accouting");
+            m_ui.setupUi(this);
 
             auto *database = new Persistance::Database(this);
 
             auto bill_list_widget = new Widgets::BillListWidget(*database, this);
             setCentralWidget(bill_list_widget);
         }
+
+    private:
+        Ui::MainWindow m_ui;
     };
 }
