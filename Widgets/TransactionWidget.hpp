@@ -59,12 +59,19 @@ namespace Accounting::Widgets
 
         void onEdit() {
             if (m_edit_dialog == nullptr) {
-                m_edit_dialog = new EditTransactionDialog(m_transaction_object, this);
+                m_edit_dialog = new EditTransactionDialog(m_transaction_object.data(), this);
+
+                connect(m_edit_dialog, &EditTransactionDialog::onComplete,
+                        this, &TransactionWidget::onEditComplete);
             }
 
             m_edit_dialog->show();
             m_edit_dialog->raise();
             m_edit_dialog->activateWindow();
+        }
+
+        void onEditComplete(Persistance::TransactionData new_transaction_data) {
+            m_transaction_object.update(new_transaction_data);
         }
 
     private:

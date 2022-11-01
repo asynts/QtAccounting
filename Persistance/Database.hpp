@@ -17,6 +17,16 @@ namespace Accounting::Persistance
         QDate m_date;
         qreal m_amount;
         QString m_category;
+
+        static TransactionData new_default() {
+            return TransactionData{
+                .m_id = generate_id(),
+                .m_timestamp_created = QDateTime::currentDateTimeUtc(),
+                .m_date = QDate::currentDate(),
+                .m_amount = 0.00,
+                .m_category = "",
+            };
+        }
     };
 
     class TransactionObject final : public QObject {

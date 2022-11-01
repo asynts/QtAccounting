@@ -4,6 +4,7 @@
 
 #include <QString>
 #include <QRandomGenerator64>
+#include <QWidget>
 
 namespace Accounting
 {
@@ -29,5 +30,13 @@ namespace Accounting
         auto value = QRandomGenerator64::global()->bounded(Q_INT64_C(1) << 48);
 
         return to_base_58(value);
+    }
+
+    // This is useful for background.
+    inline void debug_set_widget_background_red(QWidget *widget) {
+        QPalette palette;
+        palette.setColor(QPalette::Window, Qt::red);
+        widget->setAutoFillBackground(true);
+        widget->setPalette(palette);
     }
 }

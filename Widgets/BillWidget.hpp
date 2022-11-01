@@ -18,26 +18,24 @@ namespace Accounting::Widgets
             : QWidget(parent)
         {
             setLayout(new QVBoxLayout());
-
-            update();
         }
 
-        void setBillWidget(Persistance::BillObject& new_bill_object) {
+        void setBillObject(Persistance::BillObject& new_bill_object) {
             if (m_bill_object != nullptr) {
                 disconnect(m_bill_object, &Persistance::BillObject::onChanged,
-                           this, &BillWidget::update);
+                           this, &BillWidget::onUpdate);
             }
             m_bill_object = &new_bill_object;
 
             connect(m_bill_object, &Persistance::BillObject::onChanged,
-                    this, &BillWidget::update);
+                    this, &BillWidget::onUpdate);
+
+            onUpdate();
         }
 
     public slots:
-        void update() {
-            if (m_bill_object == nullptr) {
-                return;
-            }
+        void onUpdate() {
+            Q_ASSERT(m_bill_object != nullptr);
 
             // Delete old widgets.
             for (auto *widget : m_widgets) {
