@@ -61,9 +61,9 @@ namespace Accounting::Widgets
 
                 BillEditorDialog *dialog = nullptr;
                 connect(edit_button, &QPushButton::clicked,
-                        this, [=, this]() mutable {
+                        this, [=]() mutable {
                             if (dialog == nullptr) {
-                                dialog = new BillEditorDialog(*bill_object, this);
+                                dialog = new BillEditorDialog(*bill_object, container_widget);
 
                                 // FIXME: Connect 'signalComplete'.
                             }

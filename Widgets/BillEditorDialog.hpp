@@ -7,6 +7,7 @@
 #include <QDialog>
 
 #include "Persistance/Database.hpp"
+#include "Widgets/TransactionEditorDialog.hpp"
 
 namespace Accounting::Widgets
 {
@@ -19,7 +20,7 @@ namespace Accounting::Widgets
             , m_bill_object(bill_object)
         {
             setModal(false);
-            setWindowTitle(QString("Editing Bill '%1'").arg(bill_object.id()));
+            setWindowTitle(QString("Edit Bill '%1'").arg(bill_object.id()));
 
             setLayout(new QVBoxLayout);
 
@@ -46,7 +47,18 @@ namespace Accounting::Widgets
         }
 
         void slotNewTransaction() {
-            // FIXME: TransactionEditorDialog.
+            if (m_new_transaction_dialog == nullptr) {
+                m_new_transaction_dialog = new TransactionEditorDialog(nullptr, this);
+
+                connect(m_new_transaction_dialog, &TransactionEditorDialog::signalComplete,
+                        this, [](Persistance::TransactionData) {
+                            // FIXME: Create new transaction in this bill.
+                        });
+            }
+
+            m_new_transaction_dialog->show();
+            m_new_transaction_dialog->raise();
+            m_new_transaction_dialog->activateWindow();
         }
 
     private:
@@ -68,15 +80,28 @@ namespace Accounting::Widgets
                 auto *edit_button = new QPushButton("Edit", container_widget);
                 transaction_layout->addWidget(edit_button);
 
+                TransactionEditorDialog *dialog = nullptr;
                 connect(edit_button, &QPushButton::clicked,
-                        this, [=] {
-                            // FIXME: Open dialog to edit this transaction.
+                        this, [=]() mutable {
+                            if (dialog == nullptr) {
+                                dialog = new TransactionEditorDialog(transaction_object, container_widget);
+
+                                connect(dialog, &TransactionEditorDialog::signalComplete,
+                                        container_widget, [=](Persistance::TransactionData transaction_data) {
+                                            transaction_object->slotUpdate(transaction_data);
+                                        });
+                            }
+
+                            dialog->show();
+                            dialog->raise();
+                            dialog->activateWindow();
                         });
             }
 
             return container_widget;
         }
 
+        TransactionEditorDialog *m_new_transaction_dialog = nullptr;
         QWidget *m_container_widget = nullptr;
 
         Persistance::BillObject& m_bill_object;

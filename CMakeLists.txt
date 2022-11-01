@@ -18,6 +18,7 @@ set(PROJECT_SOURCES
     Persistance/Database.hpp
     Widgets/BillListWidget.hpp
     Widgets/BillEditorDialog.hpp
+    Widgets/TransactionEditorDialog.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp
