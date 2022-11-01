@@ -140,20 +140,23 @@ namespace Accounting::Persistance
         Database(QObject *parent = nullptr)
             : QObject(parent)
         {
-            m_staged_bill = &create_bill(BillData{
+            m_staged_bill = &internal_create_bill(BillData{
                                              .m_id = generate_id(),
                                              .m_timestamp_created = QDateTime::currentDateTimeUtc(),
                                              .m_transaction_ids = {},
                                          });
         }
 
-        TransactionObject& create_transaction(TransactionData&& data) {
+        // Should not be used directly.
+        // Instead use 'BillObject::create_transaction'.
+        TransactionObject& internal_create_transaction(TransactionData&& data) {
             auto transaction = new TransactionObject(*this, std::move(data), this);
             m_transactions.insert(transaction->id(), transaction);
             return *transaction;
         }
 
-        BillObject& create_bill(BillData&& data) {
+        // Should not be used directly.
+        BillObject& internal_create_bill(BillData&& data) {
             // FIXME: This should only be possible by replacing the staged bill.
 
             auto bill = new BillObject(*this, std::move(data), this);
@@ -186,7 +189,7 @@ namespace Accounting::Persistance
     }
 
     inline void BillObject::create_transaction(TransactionData&& transaction_data) {
-        auto& transaction_object = m_database.create_transaction(std::move(transaction_data));
+        auto& transaction_object = m_database.internal_create_transaction(std::move(transaction_data));
 
         auto bill_data = data();
         bill_data.m_transaction_ids.append(transaction_object.id());
