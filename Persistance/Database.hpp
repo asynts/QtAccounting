@@ -112,6 +112,8 @@ namespace Accounting::Persistance
             return m_versions.constLast();
         }
 
+        void create_transaction(TransactionData&& data);
+
     public slots:
         void slotUpdate(Accounting::Persistance::BillData data)
         {
@@ -162,18 +164,6 @@ namespace Accounting::Persistance
             return *bill;
         }
 
-        void stage_transaction(TransactionObject& transaction_object) {
-            qDebug() << "before:" << m_staged_bill->data().m_transaction_ids;
-
-            auto new_bill_data = m_staged_bill->data();
-            new_bill_data.m_timestamp_created = QDateTime::currentDateTimeUtc();
-            new_bill_data.m_transaction_ids.append(transaction_object.id());
-
-            m_staged_bill->slotUpdate(new_bill_data);
-
-            qDebug() << "after:" << m_staged_bill->data().m_transaction_ids;
-        }
-
     signals:
         void signalBillAdded();
 
@@ -193,6 +183,15 @@ namespace Accounting::Persistance
         }
 
         return transactions;
+    }
+
+    inline void BillObject::create_transaction(TransactionData&& transaction_data) {
+        auto& transaction_object = m_database.create_transaction(std::move(transaction_data));
+
+        auto bill_data = data();
+        bill_data.m_transaction_ids.append(transaction_object.id());
+
+        slotUpdate(bill_data);
     }
 }
 

@@ -51,8 +51,8 @@ namespace Accounting::Widgets
                 m_new_transaction_dialog = new TransactionEditorDialog(nullptr, this);
 
                 connect(m_new_transaction_dialog, &TransactionEditorDialog::signalComplete,
-                        this, [](Persistance::TransactionData) {
-                            // FIXME: Create new transaction in this bill.
+                        this, [=, this](Persistance::TransactionData transaction_data) {
+                            m_bill_object.create_transaction(std::move(transaction_data));
                         });
             }
 
