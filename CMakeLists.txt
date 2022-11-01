@@ -22,14 +22,10 @@ set(PROJECT_SOURCES
     MainWindow.hpp
     Util.hpp
     main.cpp
-
-    # FIXME: Rework.
-    Widgets/TransactionWidget.hpp
-    Widgets/EditTransactionDialog.hpp
 )
 
 qt_wrap_ui(PROJECT_SOURCES
-    Widgets/EditTransactionDialog.ui)
+    Widgets/TransactionEditorDialog.ui)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Accounting
