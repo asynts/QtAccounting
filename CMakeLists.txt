@@ -16,14 +16,15 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
     Persistance/Database.hpp
-    Widgets/BillWidget.hpp
-    Widgets/TransactionWidget.hpp
-    Widgets/EditTransactionDialog.hpp
-    Widgets/StagedBillWidget.hpp
     Widgets/BillListWidget.hpp
+    Widgets/BillEditorDialog.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp
+
+    # FIXME: Rework.
+    Widgets/TransactionWidget.hpp
+    Widgets/EditTransactionDialog.hpp
 )
 
 qt_wrap_ui(PROJECT_SOURCES

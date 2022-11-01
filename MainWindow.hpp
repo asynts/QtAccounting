@@ -4,7 +4,6 @@
 #include <QTimerEvent>
 
 #include "Persistance/Database.hpp"
-#include "Widgets/StagedBillWidget.hpp"
 #include "Widgets/BillListWidget.hpp"
 
 namespace Accounting
@@ -17,6 +16,8 @@ namespace Accounting
         MainWindow(QWidget *parent = nullptr)
             : QMainWindow(parent)
         {
+            setWindowTitle("Accouting");
+
             auto *database = new Persistance::Database(this);
 
             auto bill_list_widget = new Widgets::BillListWidget(*database, this);

@@ -6,6 +6,7 @@
 #include <QPushButton>
 
 #include "Persistance/Database.hpp"
+#include "Widgets/BillEditorDialog.hpp"
 
 namespace Accounting::Widgets
 {
@@ -19,58 +20,64 @@ namespace Accounting::Widgets
         {
             setLayout(new QVBoxLayout);
 
-            onUpdate();
+            m_container_widget = generateContainerWidget();
+            layout()->addWidget(m_container_widget);
 
             connect(&m_database, &Persistance::Database::onBillAdded,
-                    this, &BillListWidget::onUpdate);
+                    this, &BillListWidget::slotUpdate);
         }
 
     private slots:
-        void onUpdate() {
-            auto *parent_widget = generate_parent_widget();
+        void slotUpdate() {
+            auto *container_widget = generateContainerWidget();
+            layout()->replaceWidget(m_container_widget, container_widget);
 
-            if (m_parent_widget != nullptr) {
-                layout()->removeWidget(m_parent_widget);
-                delete m_parent_widget;
-            }
-
-            layout()->addWidget(parent_widget);
-            m_parent_widget = parent_widget;
+            delete m_container_widget;
+            m_container_widget = container_widget;
         }
 
     private:
-        QWidget* generate_parent_widget() {
-            auto parent_widget = new QWidget(this);
+        QWidget* generateContainerWidget() {
+            auto container_widget = new QWidget(this);
 
-            auto parent_layout = new QVBoxLayout;
-            parent_widget->setLayout(parent_layout);
+            auto container_layout = new QVBoxLayout;
+            container_widget->setLayout(container_layout);
 
             for (auto *bill_object : std::as_const(m_database.m_bills)) {
-                auto *bill_widget = new QWidget(parent_widget);
-                parent_layout->addWidget(bill_widget);
+                auto *bill_widget = new QWidget(container_widget);
+                container_layout->addWidget(bill_widget);
 
                 auto *bill_layout = new QHBoxLayout;
                 bill_widget->setLayout(bill_layout);
 
                 if (bill_object == m_database.m_staged_bill) {
-                    bill_layout->addWidget(new QLabel(QString("%1 (staged)").arg(bill_object->id()), parent_widget));
+                    bill_layout->addWidget(new QLabel(QString("%1 (staged)").arg(bill_object->id()), container_widget));
                 } else {
-                    bill_layout->addWidget(new QLabel(bill_object->id(), parent_widget));
+                    bill_layout->addWidget(new QLabel(bill_object->id(), container_widget));
                 }
 
-                auto *edit_button = new QPushButton("Edit", parent_widget);
+                auto *edit_button = new QPushButton("Edit", container_widget);
                 bill_layout->addWidget(edit_button);
 
+                BillEditorDialog *dialog = nullptr;
                 connect(edit_button, &QPushButton::clicked,
-                        this, [=] {
-                            // FIXME: Open dialog to edit this bill.
+                        this, [=, this]() mutable {
+                            if (dialog == nullptr) {
+                                dialog = new BillEditorDialog(*bill_object, this);
+
+                                // FIXME: Connect 'signalComplete'.
+                            }
+
+                            dialog->show();
+                            dialog->raise();
+                            dialog->activateWindow();
                         });
             }
 
-            return parent_widget;
+            return container_widget;
         }
 
-        QWidget *m_parent_widget = nullptr;
+        QWidget *m_container_widget = nullptr;
 
         Persistance::Database& m_database;
     };
