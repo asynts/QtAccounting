@@ -24,14 +24,28 @@ namespace Accounting::Widgets
 
             setLayout(new QVBoxLayout);
 
-            m_container_widget = generateContainerWidget();
-            layout()->addWidget(m_container_widget);
+            // FIXME: Use '.ui' file.
 
-            auto *new_button = new QPushButton("New Transaction", this);
-            layout()->addWidget(new_button);
+            {
+                m_container_widget = generateContainerWidget();
+                layout()->addWidget(m_container_widget);
+            }
 
-            connect(new_button, &QPushButton::clicked,
-                    this, &BillEditorDialog::slotNewTransaction);
+            {
+                auto *new_button = new QPushButton("New Transaction", this);
+                layout()->addWidget(new_button);
+
+                connect(new_button, &QPushButton::clicked,
+                        this, &BillEditorDialog::slotNewTransaction);
+            }
+
+            {
+                auto *dialog_buttons = new QDialogButtonBox(QDialogButtonBox::Ok, this);
+                layout()->addWidget(dialog_buttons);
+
+                connect(dialog_buttons, &QDialogButtonBox::accepted,
+                        this, &BillEditorDialog::accept);
+            }
 
             connect(&bill_object, &Persistance::BillObject::signalChanged,
                     this, &BillEditorDialog::slotUpdate);

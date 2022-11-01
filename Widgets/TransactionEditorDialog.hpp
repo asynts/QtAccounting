@@ -52,6 +52,7 @@ namespace Accounting::Widgets
                 auto *validator = new QDoubleValidator(this);
                 validator->setBottom(0.00);
                 m_amount_QLineEdit->setValidator(validator);
+                m_amount_QLineEdit->setText("0.00");
 
                 connect(m_amount_QLineEdit, &QLineEdit::textChanged,
                         this, &TransactionEditorDialog::slotValidate);
