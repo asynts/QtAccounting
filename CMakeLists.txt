@@ -27,6 +27,7 @@ set(PROJECT_SOURCES
 qt_wrap_ui(PROJECT_SOURCES
     Widgets/TransactionEditorDialog.ui
     Widgets/BillEditorDialog.ui
+    Widgets/BillListWidget.ui
     MainWindow.ui)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

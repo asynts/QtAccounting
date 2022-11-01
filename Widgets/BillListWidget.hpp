@@ -7,6 +7,7 @@
 
 #include "Persistance/Database.hpp"
 #include "Widgets/BillEditorDialog.hpp"
+#include "ui_BillListWidget.h"
 
 namespace Accounting::Widgets
 {
@@ -18,22 +19,28 @@ namespace Accounting::Widgets
             : QWidget(parent)
             , m_database(database)
         {
-            setLayout(new QVBoxLayout);
-
-            m_container_widget = generateContainerWidget();
-            layout()->addWidget(m_container_widget);
+            m_ui.setupUi(this);
 
             connect(&m_database, &Persistance::Database::signalBillAdded,
                     this, &BillListWidget::slotUpdate);
+
+            connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
+                    this, &BillListWidget::slotNewBill);
+
+            slotUpdate();
         }
 
     private slots:
         void slotUpdate() {
             auto *container_widget = generateContainerWidget();
-            layout()->replaceWidget(m_container_widget, container_widget);
+            layout()->replaceWidget(m_ui.m_container_QWidget, container_widget);
 
-            delete m_container_widget;
-            m_container_widget = container_widget;
+            delete m_ui.m_container_QWidget;
+            m_ui.m_container_QWidget = container_widget;
+        }
+
+        void slotNewBill() {
+            m_database.create_staged_bill();
         }
 
     private:
@@ -61,8 +68,6 @@ namespace Accounting::Widgets
                         this, [=]() mutable {
                             if (dialog == nullptr) {
                                 dialog = new BillEditorDialog(*bill_object, container_widget);
-
-                                // FIXME: Connect 'signalComplete'.
                             }
 
                             dialog->show();
@@ -74,7 +79,7 @@ namespace Accounting::Widgets
             return container_widget;
         }
 
-        QWidget *m_container_widget = nullptr;
+        Ui::BillListWidget m_ui;
 
         Persistance::Database& m_database;
     };
