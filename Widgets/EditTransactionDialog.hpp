@@ -17,9 +17,8 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        EditTransactionDialog(Persistance::TransactionData transaction_data, QWidget *parent = nullptr)
+        EditTransactionDialog(QWidget *parent = nullptr)
             : QDialog(parent)
-            , m_old_transaction_data(transaction_data)
         {
             setModal(false);
 
@@ -27,28 +26,22 @@ namespace Accounting::Widgets
             ui.setupUi(this);
 
             m_category_widget = ui.m_category_LineEdit;
-            m_category_widget->setText(transaction_data.m_category);
 
             m_date_widget = ui.m_date_DateEdit;
-            m_date_widget->setDate(transaction_data.m_date);
 
             m_amount_widget = ui.m_amount_LineEdit;
             auto amount_validator = new QDoubleValidator(this);
             amount_validator->setBottom(0.00);
             m_amount_widget->setValidator(amount_validator);
-            m_amount_widget->setText(QString::number(std::abs(transaction_data.m_amount), 'f', 2));
 
             m_type_widget = ui.m_type_ComboBox;
             m_type_widget->addItem("Expense");
             m_type_widget->addItem("Income");
-            if (transaction_data.m_amount < 0) {
-                m_type_widget->setCurrentIndex(0);
-            } else {
-                m_type_widget->setCurrentIndex(1);
-            }
+
 
             m_buttons_widget = ui.m_buttons_DialogButtonBox;
 
+            setTransactionData(Persistance::TransactionData::new_default());
             validate();
 
             connect(m_category_widget, &QLineEdit::textChanged,
@@ -62,6 +55,21 @@ namespace Accounting::Widgets
 
             connect(m_type_widget, &QComboBox::currentIndexChanged,
                     this, &EditTransactionDialog::validate);
+        }
+
+    public slots:
+        void setTransactionData(Persistance::TransactionData transaction_data) {
+            m_old_transaction_data = transaction_data;
+
+            m_category_widget->setText(transaction_data.m_category);
+            m_date_widget->setDate(transaction_data.m_date);
+            m_amount_widget->setText(QString::number(std::abs(transaction_data.m_amount), 'f', 2));
+
+            if (transaction_data.m_amount < 0) {
+                m_type_widget->setCurrentIndex(0);
+            } else {
+                m_type_widget->setCurrentIndex(1);
+            }
         }
 
     private slots:

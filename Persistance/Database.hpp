@@ -158,11 +158,15 @@ namespace Accounting::Persistance
         }
 
         void stage_transaction(TransactionObject& transaction_object) {
+            qDebug() << "before:" << m_staged_bill->data().m_transaction_ids;
+
             auto new_bill_data = m_staged_bill->data();
             new_bill_data.m_timestamp_created = QDateTime::currentDateTimeUtc();
             new_bill_data.m_transaction_ids.append(transaction_object.id());
 
             m_staged_bill->update(new_bill_data);
+
+            qDebug() << "after:" << m_staged_bill->data().m_transaction_ids;
         }
 
         QMap<QString, TransactionObject*> m_transactions;

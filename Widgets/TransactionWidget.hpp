@@ -59,7 +59,8 @@ namespace Accounting::Widgets
 
         void onEdit() {
             if (m_edit_dialog == nullptr) {
-                m_edit_dialog = new EditTransactionDialog(m_transaction_object.data(), this);
+                m_edit_dialog = new EditTransactionDialog(this);
+                m_edit_dialog->setTransactionData(m_transaction_object.data());
 
                 connect(m_edit_dialog, &EditTransactionDialog::onComplete,
                         this, &TransactionWidget::onEditComplete);

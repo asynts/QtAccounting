@@ -32,10 +32,12 @@ namespace Accounting::Widgets
     public slots:
         void onNew() {
             if (m_edit_dialog == nullptr) {
-                m_edit_dialog = new EditTransactionDialog(Persistance::TransactionData::new_default(), this);
+                m_edit_dialog = new EditTransactionDialog(this);
 
                 connect(m_edit_dialog, &EditTransactionDialog::onComplete,
                         this, &StagedBillWidget::onEditComplete);
+            } else {
+                m_edit_dialog->setTransactionData(Persistance::TransactionData::new_default());
             }
 
             m_edit_dialog->show();
