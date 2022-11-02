@@ -45,7 +45,7 @@ namespace Accounting::Widgets
             auto *container_widget = generateContainerWidget();
             layout()->replaceWidget(m_ui.m_container_QWidget, container_widget);
 
-            delete m_ui.m_container_QWidget;
+            m_ui.m_container_QWidget->deleteLater();
             m_ui.m_container_QWidget = container_widget;
         }
 

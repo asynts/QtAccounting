@@ -201,13 +201,15 @@ namespace Accounting::Persistance
             auto bill = new BillObject(*this, BillData::new_default(), this);
             m_bills.insert(bill->id(), bill);
 
-            emit signalBillChanged(*bill);
+            emit signalBillChanged(bill);
 
             return *bill;
         }
 
     signals:
-        void signalBillChanged(Accounting::Persistance::BillObject& bill_object);
+        // FIXME: That should not be necessary.
+        //        Instead I should add 'TransactionWidget' and 'BillWidget' back in.
+        void signalBillChanged(Accounting::Persistance::BillObject *bill_object);
 
     public:
         QMap<QString, TransactionObject*> m_transactions;
@@ -230,7 +232,7 @@ namespace Accounting::Persistance
         auto bill_data = data();
         bill_data.m_transaction_ids.append(transaction_object.id());
 
-        slotUpdate(bill_data);
+        slotUpdate(std::move(bill_data));
     }
 
     inline void BillObject::slotUpdate(Accounting::Persistance::BillData data)
@@ -238,8 +240,7 @@ namespace Accounting::Persistance
         m_versions.append(std::move(data));
         emit signalChanged();
 
-        // FIXME: This causes a SIGSEGV:
-        // emit m_database.signalBillChanged(*this);
+        emit m_database.signalBillChanged(this);
     }
 }
 
