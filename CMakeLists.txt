@@ -16,6 +16,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
     Persistance/Database.hpp
+    Persistance/NewDatabase.hpp
     Widgets/BillListWidget.hpp
     Widgets/BillEditorDialog.hpp
     Widgets/TransactionEditorDialog.hpp
