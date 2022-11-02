@@ -24,6 +24,7 @@ namespace Accounting::Persistance
         Q_PROPERTY(QString id READ id BINDABLE bindableId);
         Q_PROPERTY(QDate date READ date WRITE setDate BINDABLE bindableDate);
         Q_PROPERTY(qreal amount READ amount WRITE setAmount BINDABLE bindableAmount);
+        Q_PROPERTY(QString category READ category WRITE setCategory BINDABLE bindableCategory);
 
     public:
         // The parent 'BillObject' will maintain a list of transactions.
@@ -40,6 +41,10 @@ namespace Accounting::Persistance
         void setAmount(qreal value) { m_amount = value; }
         QBindable<qreal> bindableAmount() { return QBindable<qreal>(&m_amount); }
 
+        QString category() const { return m_category; }
+        void setCategory(QString value) { m_category = value; }
+        QBindable<QString> bindableCategory() { return QBindable<QString>(&m_category); }
+
     signals:
         void signalChanged(Accounting::Persistance::TransactionObject *transaction_object);
 
@@ -47,6 +52,7 @@ namespace Accounting::Persistance
         Q_OBJECT_BINDABLE_PROPERTY(TransactionObject, QString, m_id, &TransactionObject::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionObject, QDate, m_date, &TransactionObject::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionObject, qreal, m_amount, &TransactionObject::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionObject, QString, m_category, &TransactionObject::signalChanged);
     };
 
     class BillObject final : public QObject {
@@ -88,10 +94,11 @@ namespace Accounting::Persistance
         QList<TransactionObject*> transactions() const { return m_transactions; }
         QBindable<QList<TransactionObject*>> bindableTransactions() { return QBindable<QList<TransactionObject*>>(&m_transactions); }
 
-        TransactionObject* createTransaction(QDate date, qreal amount) {
+        TransactionObject* createTransaction(QDate date, qreal amount, QString category) {
             auto *transaction_object = new TransactionObject(InternalMarker{}, this);
             transaction_object->setDate(date);
             transaction_object->setAmount(amount);
+            transaction_object->setCategory(category);
 
             QList<TransactionObject*> new_transactions = m_transactions;
             new_transactions.append(transaction_object);

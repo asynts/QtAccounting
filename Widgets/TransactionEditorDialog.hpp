@@ -3,7 +3,7 @@
 #include <QDialog>
 #include <QPushButton>
 
-#include "Persistance/Database.hpp"
+#include "Persistance/NewDatabase.hpp"
 
 #include "ui_TransactionEditorDialog.h"
 
@@ -13,8 +13,10 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        TransactionEditorDialog(Persistance::TransactionObject *transaction_object, QWidget *parent = nullptr)
+        TransactionEditorDialog(Persistance::BillObject *parent_bill_object, Persistance::TransactionObject *transaction_object, QWidget *parent = nullptr)
             : QDialog(parent)
+            , m_old_transaction_object(transaction_object)
+            , m_parent_bill_object(parent_bill_object)
         {
             m_ui.setupUi(this);
 
@@ -26,7 +28,12 @@ namespace Accounting::Widgets
 
             {
                 m_ui.m_category_QComboBox->addItem("Groceries");
-                m_ui.m_category_QComboBox->setCurrentIndex(0);
+
+                if (transaction_object == nullptr) {
+                    m_ui.m_category_QComboBox->setCurrentIndex(0);
+                } else {
+                    m_ui.m_category_QComboBox->setCurrentText(transaction_object->category());
+                }
 
                 connect(m_ui.m_category_QComboBox, &QComboBox::currentTextChanged,
                         this, &TransactionEditorDialog::slotValidate);
@@ -35,7 +42,14 @@ namespace Accounting::Widgets
             {
                 m_ui.m_type_QComboBox->addItem("Expense");
                 m_ui.m_type_QComboBox->addItem("Income");
-                m_ui.m_type_QComboBox->setCurrentIndex(0);
+
+                if (transaction_object == nullptr) {
+                    m_ui.m_type_QComboBox->setCurrentIndex(0); // Expense
+                } else if (transaction_object->amount() <= 0.00){
+                    m_ui.m_type_QComboBox->setCurrentIndex(0); // Expense
+                } else {
+                    m_ui.m_type_QComboBox->setCurrentIndex(1); // Income
+                }
 
                 connect(m_ui.m_type_QComboBox, &QComboBox::currentIndexChanged,
                         this, &TransactionEditorDialog::slotValidate);
@@ -45,49 +59,34 @@ namespace Accounting::Widgets
                 auto *validator = new QDoubleValidator(this);
                 validator->setBottom(0.00);
                 m_ui.m_amount_QLineEdit->setValidator(validator);
-                m_ui.m_amount_QLineEdit->setText("0.00");
+
+                if (transaction_object == nullptr) {
+                    m_ui.m_amount_QLineEdit->setText("0.00");
+                } else {
+                    m_ui.m_amount_QLineEdit->setText(QString::number(std::abs(transaction_object->amount()), 'f', 2));
+                }
 
                 connect(m_ui.m_amount_QLineEdit, &QLineEdit::textChanged,
                         this, &TransactionEditorDialog::slotValidate);
             }
 
             {
-                m_ui.m_date_QDateEdit->setDate(QDate::currentDate());
+                if (transaction_object == nullptr) {
+                    m_ui.m_date_QDateEdit->setDate(QDate::currentDate());
+                } else {
+                    m_ui.m_date_QDateEdit->setDate(transaction_object->date());
+                }
 
                 connect(m_ui.m_date_QDateEdit, &QDateEdit::dateChanged,
                         this, &TransactionEditorDialog::slotValidate);
             }
 
-            if (transaction_object != nullptr) {
-                slotLoad(transaction_object->data());
-            } else {
-                slotValidate();
-            }
-        }
-
-    signals:
-        void signalComplete(Persistance::TransactionData);
-
-    private slots:
-        void slotLoad(Persistance::TransactionData transaction_data) {
-            m_old_transaction_data = transaction_data;
-
-            m_ui.m_category_QComboBox->setCurrentText(transaction_data.m_category);
-
-            if (transaction_data.m_amount <= 0.00) {
-                m_ui.m_type_QComboBox->setCurrentIndex(0); // Expense
-            } else {
-                m_ui.m_type_QComboBox->setCurrentIndex(1); // Income
-            }
-
-            m_ui.m_amount_QLineEdit->setText(QString::number(std::abs(transaction_data.m_amount), 'f', 2));
-
-            m_ui.m_date_QDateEdit->setDate(transaction_data.m_date);
-
             slotValidate();
         }
 
-        std::optional<Persistance::TransactionData> slotValidate() {
+    private slots:
+
+        bool slotValidate() {
             bool is_valid = true;
 
             if (m_ui.m_category_QComboBox->currentText().trimmed().isEmpty()) {
@@ -104,35 +103,29 @@ namespace Accounting::Widgets
 
             m_ui.m_buttons_QDialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(is_valid);
 
-            if (is_valid) {
-                QString id;
-                if (m_old_transaction_data.has_value()) {
-                    id = m_old_transaction_data.value().m_id;
-                } else {
-                    id = generate_id();
-                }
-
-                return Persistance::TransactionData{
-                    .m_id = id,
-                    .m_timestamp_created = QDateTime::currentDateTimeUtc(),
-                    .m_date = m_ui.m_date_QDateEdit->date(),
-                    .m_amount = m_ui.m_amount_QLineEdit->text().toDouble(),
-                    .m_category = m_ui.m_category_QComboBox->currentText().trimmed(),
-                };
-            } else {
-                return std::nullopt;
-            }
+            return is_valid;
         }
 
         virtual void accept() override {
-            // The "Accept" button will be disabled util the validation is successful.
-            emit signalComplete(slotValidate().value());
+            auto amount = std::abs(m_ui.m_amount_QLineEdit->text().toDouble());
+            auto date = m_ui.m_date_QDateEdit->date();
+            auto category = m_ui.m_category_QComboBox->currentText().trimmed();
+
+            if (m_old_transaction_object == nullptr) {
+                m_parent_bill_object->createTransaction(date, amount, category);
+            } else {
+                m_old_transaction_object->setAmount(amount);
+                m_old_transaction_object->setDate(date);
+                m_old_transaction_object->setCategory(category);
+            }
 
             done(QDialog::Accepted);
         }
 
     private:
         Ui::TransactionEditorDialog m_ui;
-        std::optional<Persistance::TransactionData> m_old_transaction_data;
+
+        Persistance::BillObject *m_parent_bill_object;
+        Persistance::TransactionObject *m_old_transaction_object;
     };
 }
