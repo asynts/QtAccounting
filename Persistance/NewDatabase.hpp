@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QObject>
 #include <QObjectBindableProperty>
+#include <QMetaEnum>
 
 #include "Util.hpp"
 
@@ -52,6 +53,7 @@ namespace Accounting::Persistance
         Q_OBJECT
 
         Q_PROPERTY(QString id READ id BINDABLE bindableId);
+        Q_PROPERTY(QString id READ id WRITE setId BINDABLE bindableId);
         Q_PROPERTY(QString transactions READ transactions BINDABLE bindableTransactions);
 
     public:
@@ -62,11 +64,26 @@ namespace Accounting::Persistance
         };
         Q_ENUM(Status);
 
+        static Status status_from_string(QString key) {
+            bool ok;
+            auto value = QMetaEnum::fromType<Status>().keyToValue(key.toUtf8(), &ok);
+            Q_ASSERT(ok);
+
+            return static_cast<Status>(value);
+        }
+        static QString status_to_string(Status value) {
+            return QMetaEnum::fromType<Status>().valueToKey(static_cast<int>(value));
+        }
+
         // The parent 'DatabaseObject' will maintain a list of bills.
         BillObject(InternalMarker, DatabaseObject *parent);
 
         QString id() const { return m_id; }
         QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
+
+        Status status() const { return m_status; }
+        void setStatus(Status value) { m_status = value; }
+        QBindable<Status> bindableStatus() { return QBindable<Status>(&m_status); }
 
         QList<TransactionObject*> transactions() const { return m_transactions; }
         QBindable<QList<TransactionObject*>> bindableTransactions() { return QBindable<QList<TransactionObject*>>(&m_transactions); }
@@ -88,9 +105,11 @@ namespace Accounting::Persistance
 
     private:
         Q_OBJECT_BINDABLE_PROPERTY(BillObject, QString, m_id, &BillObject::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(BillObject, Status, m_status, &BillObject::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(BillObject, QList<TransactionObject*>, m_transactions, &BillObject::signalChanged);
     };
 
+    // FIXME: The database should maintain a log of what changed.
     class DatabaseObject final : public QObject {
         Q_OBJECT
 

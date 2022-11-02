@@ -6,8 +6,10 @@
 #include <QPushButton>
 #include <QDialog>
 
-#include "Persistance/Database.hpp"
+#include "Persistance/NewDatabase.hpp"
+/*
 #include "Widgets/TransactionEditorDialog.hpp"
+*/
 #include "ui_BillEditorDialog.h"
 
 namespace Accounting::Widgets
@@ -24,11 +26,9 @@ namespace Accounting::Widgets
 
             setWindowTitle(QString("Edit Bill '%1'").arg(bill_object.id()));
 
-            m_ui.m_status_QComboBox->addItem("Staged");
-            m_ui.m_status_QComboBox->addItem("PendingPayment");
-            m_ui.m_status_QComboBox->addItem("ConfirmedPaid");
+            fill_QComboBox_with_enum<Persistance::BillObject::Status>(m_ui.m_status_QComboBox);
 
-            connect(m_ui.m_status_QComboBox, &QComboBox::currentTextChanged,
+            connect(m_ui.m_status_QComboBox, &QComboBox::currentIndexChanged,
                     this, &BillEditorDialog::slotStatusChanged);
 
             connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
@@ -42,8 +42,8 @@ namespace Accounting::Widgets
 
     private slots:
         void slotUpdate() {
-            // This is not an infinite loop, since we only emit 'signalStatusChanged' if the text changes.
-            m_ui.m_status_QComboBox->setCurrentText(m_bill_object.status_string());
+            // This is not an infinite loop, since we only emit 'signalStatusChanged' if the index changes.
+            m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(m_bill_object.status()));
 
             auto *container_widget = generateContainerWidget();
             layout()->replaceWidget(m_ui.m_container_QWidget, container_widget);
@@ -53,13 +53,11 @@ namespace Accounting::Widgets
         }
 
         void slotStatusChanged() {
-            auto data = m_bill_object.data();
-            data.m_status = Persistance::bill_status_from_string(m_ui.m_status_QComboBox->currentText());
-
-            m_bill_object.slotUpdate(data);
+            m_bill_object.setStatus(static_cast<Persistance::BillObject::Status>(m_ui.m_status_QComboBox->currentIndex()));
         }
 
         void slotNewTransaction() {
+            /*
             if (m_new_transaction_dialog == nullptr) {
                 m_new_transaction_dialog = new TransactionEditorDialog(nullptr, this);
 
@@ -72,6 +70,7 @@ namespace Accounting::Widgets
             m_new_transaction_dialog->show();
             m_new_transaction_dialog->raise();
             m_new_transaction_dialog->activateWindow();
+            */
         }
 
     private:
@@ -94,6 +93,7 @@ namespace Accounting::Widgets
                 auto *edit_button = new QPushButton("Edit", container_widget);
                 transaction_layout->addWidget(edit_button);
 
+                /*
                 TransactionEditorDialog *dialog = nullptr;
                 connect(edit_button, &QPushButton::clicked,
                         this, [=]() mutable {
@@ -110,6 +110,7 @@ namespace Accounting::Widgets
                             dialog->raise();
                             dialog->activateWindow();
                         });
+                */
             }
 
             return container_widget;
@@ -117,7 +118,9 @@ namespace Accounting::Widgets
 
         Ui::BillEditorDialog m_ui;
 
+        /*
         TransactionEditorDialog *m_new_transaction_dialog = nullptr;
+        */
 
         Persistance::BillObject& m_bill_object;
     };

@@ -5,6 +5,8 @@
 #include <QString>
 #include <QRandomGenerator64>
 #include <QWidget>
+#include <QComboBox>
+#include <QMetaEnum>
 
 namespace Accounting
 {
@@ -38,5 +40,16 @@ namespace Accounting
         palette.setColor(QPalette::Window, Qt::red);
         widget->setAutoFillBackground(true);
         widget->setPalette(palette);
+    }
+
+    // This assumes that the enum is 0-indexed.
+    template<typename EnumType>
+    inline void fill_QComboBox_with_enum(QComboBox *combo_box) {
+        combo_box->clear();
+
+        auto meta_enum = QMetaEnum::fromType<EnumType>();
+        for (int key = 0; key < meta_enum.keyCount(); ++key) {
+            combo_box->addItem(meta_enum.value(key));
+        }
     }
 }
