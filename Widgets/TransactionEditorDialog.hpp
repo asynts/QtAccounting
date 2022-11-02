@@ -13,7 +13,7 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        TransactionEditorDialog(Persistance::BillObject *parent_bill_object, Persistance::TransactionObject *transaction_object, QWidget *parent = nullptr)
+        explicit TransactionEditorDialog(Persistance::BillObject *parent_bill_object, Persistance::TransactionObject *transaction_object, QWidget *parent = nullptr)
             : QDialog(parent)
             , m_old_transaction_object(transaction_object)
             , m_parent_bill_object(parent_bill_object)

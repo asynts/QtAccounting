@@ -14,7 +14,7 @@ namespace Accounting
         Q_OBJECT
 
     public:
-        MainWindow(QWidget *parent = nullptr)
+        explicit MainWindow(QWidget *parent = nullptr)
             : QMainWindow(parent)
         {
             m_ui.setupUi(this);

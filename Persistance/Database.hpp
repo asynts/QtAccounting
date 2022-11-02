@@ -28,7 +28,7 @@ namespace Accounting::Persistance
 
     public:
         // The parent 'BillObject' will maintain a list of transactions.
-        TransactionObject(InternalMarker, BillObject *parent);
+        explicit TransactionObject(InternalMarker, BillObject *parent);
 
         QString id() const { return m_id.value(); }
         QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
@@ -82,7 +82,7 @@ namespace Accounting::Persistance
         }
 
         // The parent 'DatabaseObject' will maintain a list of bills.
-        BillObject(InternalMarker, DatabaseObject *parent);
+        explicit BillObject(InternalMarker, DatabaseObject *parent);
 
         QString id() const { return m_id.value(); }
         QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
@@ -123,7 +123,7 @@ namespace Accounting::Persistance
         Q_PROPERTY(QList<BillObject*> bills READ bills BINDABLE bindableBills NOTIFY signalChanged);
 
     public:
-        DatabaseObject(QObject *parent = nullptr)
+        explicit DatabaseObject(QObject *parent = nullptr)
             : QObject(parent) { }
 
         QList<BillObject*> bills() const { return m_bills; }

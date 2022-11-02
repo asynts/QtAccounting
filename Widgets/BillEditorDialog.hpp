@@ -16,7 +16,7 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        BillEditorDialog(Persistance::BillObject *bill_object, QWidget *parent = nullptr)
+        explicit BillEditorDialog(Persistance::BillObject *bill_object, QWidget *parent = nullptr)
             : QDialog(parent)
             , m_bill_object(bill_object)
         {

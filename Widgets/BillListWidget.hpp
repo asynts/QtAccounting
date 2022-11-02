@@ -15,7 +15,7 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        BillListWidget(Persistance::DatabaseObject *database_object, QWidget *parent = nullptr)
+        explicit BillListWidget(Persistance::DatabaseObject *database_object, QWidget *parent = nullptr)
             : QWidget(parent)
             , m_database_object(database_object)
         {
