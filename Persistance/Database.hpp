@@ -21,10 +21,10 @@ namespace Accounting::Persistance
     class TransactionObject final : public QObject {
         Q_OBJECT
 
-        Q_PROPERTY(QString id READ id BINDABLE bindableId);
-        Q_PROPERTY(QDate date READ date WRITE setDate BINDABLE bindableDate);
-        Q_PROPERTY(qreal amount READ amount WRITE setAmount BINDABLE bindableAmount);
-        Q_PROPERTY(QString category READ category WRITE setCategory BINDABLE bindableCategory);
+        Q_PROPERTY(QString id READ id BINDABLE bindableId NOTIFY signalChanged);
+        Q_PROPERTY(QDate date READ date WRITE setDate BINDABLE bindableDate NOTIFY signalChanged);
+        Q_PROPERTY(qreal amount READ amount WRITE setAmount BINDABLE bindableAmount NOTIFY signalChanged);
+        Q_PROPERTY(QString category READ category WRITE setCategory BINDABLE bindableCategory NOTIFY signalChanged);
 
     public:
         // The parent 'BillObject' will maintain a list of transactions.
@@ -46,7 +46,7 @@ namespace Accounting::Persistance
         QBindable<QString> bindableCategory() { return QBindable<QString>(&m_category); }
 
     signals:
-        void signalChanged(Accounting::Persistance::TransactionObject *transaction_object);
+        void signalChanged();
 
     private:
         Q_OBJECT_BINDABLE_PROPERTY(TransactionObject, QString, m_id, &TransactionObject::signalChanged);
@@ -58,9 +58,9 @@ namespace Accounting::Persistance
     class BillObject final : public QObject {
         Q_OBJECT
 
-        Q_PROPERTY(QString id READ id BINDABLE bindableId);
-        Q_PROPERTY(Status status READ status WRITE setStatus BINDABLE bindableStatus);
-        Q_PROPERTY(QList<TransactionObject*> transactions READ transactions BINDABLE bindableTransactions);
+        Q_PROPERTY(QString id READ id BINDABLE bindableId NOTIFY signalChanged);
+        Q_PROPERTY(Status status READ status WRITE setStatus BINDABLE bindableStatus NOTIFY signalChanged);
+        Q_PROPERTY(QList<TransactionObject*> transactions READ transactions BINDABLE bindableTransactions NOTIFY signalChanged);
 
     public:
         enum class Status {
@@ -108,7 +108,7 @@ namespace Accounting::Persistance
         }
 
     signals:
-        void signalChanged(Accounting::Persistance::BillObject *bill_object);
+        void signalChanged();
 
     private:
         Q_OBJECT_BINDABLE_PROPERTY(BillObject, QString, m_id, &BillObject::signalChanged);
@@ -120,7 +120,7 @@ namespace Accounting::Persistance
     class DatabaseObject final : public QObject {
         Q_OBJECT
 
-        Q_PROPERTY(QList<BillObject*> bills READ bills BINDABLE bindableBills);
+        Q_PROPERTY(QList<BillObject*> bills READ bills BINDABLE bindableBills NOTIFY signalChanged);
 
     public:
         DatabaseObject(QObject *parent = nullptr)
@@ -140,7 +140,7 @@ namespace Accounting::Persistance
         }
 
     signals:
-        void signalChanged(Accounting::Persistance::DatabaseObject *database_object);
+        void signalChanged();
 
     private:
         Q_OBJECT_BINDABLE_PROPERTY(DatabaseObject, QList<BillObject*>, m_bills, &DatabaseObject::signalChanged);
