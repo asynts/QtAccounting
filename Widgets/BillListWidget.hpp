@@ -64,17 +64,11 @@ namespace Accounting::Widgets
                 auto *edit_button = new QPushButton("Edit", container_widget);
                 bill_layout->addWidget(edit_button);
 
-                BillEditorDialog *dialog = nullptr;
                 connect(edit_button, &QPushButton::clicked,
-                        this, [=]() mutable {
-                            if (dialog == nullptr) {
-                                dialog = new BillEditorDialog(bill_object, container_widget);
-                            }
-
-                            dialog->show();
-                            dialog->raise();
-                            dialog->activateWindow();
-                        });
+                    this, [=]() {
+                        BillEditorDialog dialog{bill_object, container_widget};
+                        dialog.exec();
+                    });
             }
 
             return container_widget;

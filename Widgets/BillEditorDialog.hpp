@@ -54,14 +54,10 @@ namespace Accounting::Widgets
             m_bill_object->setStatus(static_cast<Persistance::BillObject::Status>(m_ui.m_status_QComboBox->currentIndex()));
         }
 
-        void slotNewTransaction() {
-            if (m_new_transaction_dialog == nullptr) {
-                m_new_transaction_dialog = new TransactionEditorDialog(m_bill_object, nullptr, this);
-            }
-
-            m_new_transaction_dialog->show();
-            m_new_transaction_dialog->raise();
-            m_new_transaction_dialog->activateWindow();
+        void slotNewTransaction()
+        {
+            TransactionEditorDialog dialog(m_bill_object, nullptr, this);
+            dialog.exec();
         }
 
     private:
@@ -87,16 +83,10 @@ namespace Accounting::Widgets
                 auto *edit_button = new QPushButton("Edit", container_widget);
                 transaction_layout->addWidget(edit_button);
 
-                TransactionEditorDialog *dialog = nullptr;
                 connect(edit_button, &QPushButton::clicked,
                         this, [=, bill_object = m_bill_object]() mutable {
-                            if (dialog == nullptr) {
-                                dialog = new TransactionEditorDialog(bill_object, transaction_object, container_widget);
-                            }
-
-                            dialog->show();
-                            dialog->raise();
-                            dialog->activateWindow();
+                            TransactionEditorDialog dialog(bill_object, transaction_object, container_widget);
+                            dialog.exec();
                         });
             }
 
@@ -104,8 +94,6 @@ namespace Accounting::Widgets
         }
 
         Ui::BillEditorDialog m_ui;
-
-        TransactionEditorDialog *m_new_transaction_dialog = nullptr;
 
         Persistance::BillObject *const m_bill_object;
     };
