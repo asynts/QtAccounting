@@ -59,14 +59,14 @@ namespace Accounting::Widgets
                 bill_widget->setLayout(bill_layout);
 
                 auto label_text = QString("%1 (%2)").arg(bill_object->id(), Persistance::BillObject::status_to_string(bill_object->status()));
-                bill_layout->addWidget(new QLabel(label_text, container_widget));
+                bill_layout->addWidget(new QLabel(label_text, bill_widget));
 
-                auto *edit_button = new QPushButton("Edit", container_widget);
+                auto *edit_button = new QPushButton("Edit", bill_widget);
                 bill_layout->addWidget(edit_button);
 
                 connect(edit_button, &QPushButton::clicked,
                     this, [=]() {
-                        BillEditorDialog dialog{bill_object, container_widget};
+                        BillEditorDialog dialog{ bill_object };
                         dialog.exec();
                     });
             }

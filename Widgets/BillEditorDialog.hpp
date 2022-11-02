@@ -48,6 +48,8 @@ namespace Accounting::Widgets
 
             m_ui.m_container_QWidget->deleteLater();
             m_ui.m_container_QWidget = container_widget;
+
+            dumpObjectTree();
         }
 
         void slotStatusChanged() {
@@ -56,7 +58,7 @@ namespace Accounting::Widgets
 
         void slotNewTransaction()
         {
-            TransactionEditorDialog dialog(m_bill_object, nullptr, this);
+            TransactionEditorDialog dialog{ m_bill_object, nullptr };
             dialog.exec();
         }
 
@@ -78,14 +80,14 @@ namespace Accounting::Widgets
                 auto *transaction_layout = new QHBoxLayout;
                 transaction_widget->setLayout(transaction_layout);
 
-                transaction_layout->addWidget(new QLabel(QString("transaction: %1").arg(transaction_object->id()), container_widget));
+                transaction_layout->addWidget(new QLabel(QString("transaction: %1").arg(transaction_object->id()), transaction_widget));
 
-                auto *edit_button = new QPushButton("Edit", container_widget);
+                auto *edit_button = new QPushButton("Edit", transaction_widget);
                 transaction_layout->addWidget(edit_button);
 
                 connect(edit_button, &QPushButton::clicked,
                         this, [=, bill_object = m_bill_object]() mutable {
-                            TransactionEditorDialog dialog(bill_object, transaction_object, container_widget);
+                            TransactionEditorDialog dialog{ bill_object, transaction_object };
                             dialog.exec();
                         });
             }
