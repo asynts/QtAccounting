@@ -22,6 +22,8 @@ set(PROJECT_SOURCES
     MainWindow.hpp
     Util.hpp
     main.cpp
+
+    Notes/0001_form-layout-expands.md
 )
 
 qt_wrap_ui(PROJECT_SOURCES
