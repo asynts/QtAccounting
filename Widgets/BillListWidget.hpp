@@ -21,7 +21,7 @@ namespace Accounting::Widgets
         {
             m_ui.setupUi(this);
 
-            connect(&m_database, &Persistance::Database::signalBillChanged,
+            connect(&m_database, &Persistance::Database::signalBillCreated,
                     this, &BillListWidget::slotUpdate);
 
             connect(m_ui.m_new_QPushButton, &QPushButton::clicked,

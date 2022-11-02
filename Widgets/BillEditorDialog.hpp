@@ -28,20 +28,23 @@ namespace Accounting::Widgets
             m_ui.m_status_QComboBox->addItem("PendingPayment");
             m_ui.m_status_QComboBox->addItem("ConfirmedPaid");
 
-            connect(m_ui.m_status_QComboBox, &QComboBox::currentIndexChanged,
+            connect(m_ui.m_status_QComboBox, &QComboBox::currentTextChanged,
                     this, &BillEditorDialog::slotStatusChanged);
 
             connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
                     this, &BillEditorDialog::slotNewTransaction);
 
-            slotUpdate();
-
             connect(&bill_object, &Persistance::BillObject::signalChanged,
                     this, &BillEditorDialog::slotUpdate);
+
+            slotUpdate();
         }
 
     private slots:
         void slotUpdate() {
+            // This is not an infinite loop, since we only emit 'signalStatusChanged' if the text changes.
+            m_ui.m_status_QComboBox->setCurrentText(m_bill_object.status_string());
+
             auto *container_widget = generateContainerWidget();
             layout()->replaceWidget(m_ui.m_container_QWidget, container_widget);
 
