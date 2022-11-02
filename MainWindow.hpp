@@ -19,9 +19,9 @@ namespace Accounting
         {
             m_ui.setupUi(this);
 
-            auto *database = new Persistance::Database(this);
+            auto *database_object = new Persistance::DatabaseObject(this);
 
-            auto bill_list_widget = new Widgets::BillListWidget(*database, this);
+            auto bill_list_widget = new Widgets::BillListWidget(database_object, this);
             setCentralWidget(bill_list_widget);
         }
 

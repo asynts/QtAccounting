@@ -49,7 +49,7 @@ namespace Accounting
 
         auto meta_enum = QMetaEnum::fromType<EnumType>();
         for (int key = 0; key < meta_enum.keyCount(); ++key) {
-            combo_box->addItem(meta_enum.value(key));
+            combo_box->addItem(meta_enum.key(key));
         }
     }
 }

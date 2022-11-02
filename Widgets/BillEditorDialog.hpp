@@ -6,7 +6,7 @@
 #include <QPushButton>
 #include <QDialog>
 
-#include "Persistance/NewDatabase.hpp"
+#include "Persistance/Database.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
 #include "ui_BillEditorDialog.h"
 
@@ -89,9 +89,9 @@ namespace Accounting::Widgets
 
                 TransactionEditorDialog *dialog = nullptr;
                 connect(edit_button, &QPushButton::clicked,
-                        this, [=]() mutable {
+                        this, [=, bill_object = m_bill_object]() mutable {
                             if (dialog == nullptr) {
-                                dialog = new TransactionEditorDialog(m_bill_object, transaction_object, container_widget);
+                                dialog = new TransactionEditorDialog(bill_object, transaction_object, container_widget);
                             }
 
                             dialog->show();
@@ -107,6 +107,6 @@ namespace Accounting::Widgets
 
         TransactionEditorDialog *m_new_transaction_dialog = nullptr;
 
-        Persistance::BillObject *m_bill_object;
+        Persistance::BillObject *const m_bill_object;
     };
 }

@@ -3,7 +3,7 @@
 #include <QDialog>
 #include <QPushButton>
 
-#include "Persistance/NewDatabase.hpp"
+#include "Persistance/Database.hpp"
 
 #include "ui_TransactionEditorDialog.h"
 
@@ -85,7 +85,6 @@ namespace Accounting::Widgets
         }
 
     private slots:
-
         bool slotValidate() {
             bool is_valid = true;
 

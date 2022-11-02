@@ -1,245 +1,160 @@
 #pragma once
 
-#include <QObject>
 #include <QString>
 #include <QDateTime>
-#include <QMap>
+#include <QObject>
+#include <QObjectBindableProperty>
+#include <QMetaEnum>
 
 #include "Util.hpp"
 
 namespace Accounting::Persistance
 {
-    class Database;
+    // Used to indicate that this function should be used with care.
+    // There are non-obvious constraints that need to be fulfilled.
+    struct InternalMarker { };
 
-    struct TransactionData {
-        QString m_id;
-        QDateTime m_timestamp_created;
-        QDate m_date;
-        qreal m_amount;
-        QString m_category;
-
-        static TransactionData new_default() {
-            return TransactionData{
-                .m_id = generate_id(),
-                .m_timestamp_created = QDateTime::currentDateTimeUtc(),
-                .m_date = QDate::currentDate(),
-                .m_amount = 0.00,
-                .m_category = "",
-            };
-        }
-    };
+    class DatabaseObject;
+    class BillObject;
+    class TransactionObject;
 
     class TransactionObject final : public QObject {
         Q_OBJECT
 
+        Q_PROPERTY(QString id READ id BINDABLE bindableId);
+        Q_PROPERTY(QDate date READ date WRITE setDate BINDABLE bindableDate);
+        Q_PROPERTY(qreal amount READ amount WRITE setAmount BINDABLE bindableAmount);
+        Q_PROPERTY(QString category READ category WRITE setCategory BINDABLE bindableCategory);
+
     public:
-        TransactionObject(Database& database, TransactionData&& data, QObject *parent = nullptr)
-            : QObject(parent)
-            , m_database(database)
-        {
-            m_versions.append(std::move(data));
-        }
+        // The parent 'BillObject' will maintain a list of transactions.
+        TransactionObject(InternalMarker, BillObject *parent);
 
-        QString id() const {
-            return data().m_id;
-        }
+        QString id() const { return m_id.value(); }
+        QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
 
-        QDate date() const {
-            return data().m_date;
-        }
+        QDate date() const { return m_date.value(); }
+        void setDate(QDate value) { m_date = value; }
+        QBindable<QDate> bindableDate() { return QBindable<QDate>(&m_date); }
 
-        QDateTime timestamp_created() const {
-            return data().m_timestamp_created;
-        }
+        qreal amount() const { return m_amount.value(); }
+        void setAmount(qreal value) { m_amount = value; }
+        QBindable<qreal> bindableAmount() { return QBindable<qreal>(&m_amount); }
 
-        qreal amount() const {
-            return data().m_amount;
-        }
-
-        QString category() const {
-            return data().m_category;
-        }
-
-        TransactionData data() const {
-            return m_versions.constLast();
-        }
-
-    public slots:
-        void slotUpdate(Accounting::Persistance::TransactionData data)
-        {
-            m_versions.append(std::move(data));
-            emit signalChanged();
-        }
+        QString category() const { return m_category.value(); }
+        void setCategory(QString value) { m_category = value; }
+        QBindable<QString> bindableCategory() { return QBindable<QString>(&m_category); }
 
     signals:
-        void signalChanged();
+        void signalChanged(Accounting::Persistance::TransactionObject *transaction_object);
 
     private:
-        Database& m_database;
-
-        // The last entry is the most recent one.
-        QList<TransactionData> m_versions;
-    };
-
-    enum class BillStatus {
-        // I am working on this bill.
-        Staged,
-
-        // The bill has been send out.
-        PendingPayment,
-
-        // The bill has been paid.
-        ConfirmedPaid,
-    };
-
-    inline BillStatus bill_status_from_string(QString string) {
-        if (string == "Staged") {
-            return BillStatus::Staged;
-        } else if (string == "PendingPayment") {
-            return BillStatus::PendingPayment;
-        } else if (string == "ConfirmedPaid") {
-            return BillStatus::ConfirmedPaid;
-        } else {
-            Q_UNREACHABLE();
-        }
-    }
-
-    struct BillData {
-        QString m_id;
-        QDateTime m_timestamp_created;
-        QList<QString> m_transaction_ids;
-        BillStatus m_status;
-
-        static BillData new_default() {
-            return BillData{
-                .m_id = generate_id(),
-                .m_timestamp_created = QDateTime::currentDateTimeUtc(),
-                .m_transaction_ids = {},
-                .m_status = BillStatus::Staged,
-            };
-        }
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionObject, QString, m_id, &TransactionObject::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionObject, QDate, m_date, &TransactionObject::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionObject, qreal, m_amount, &TransactionObject::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionObject, QString, m_category, &TransactionObject::signalChanged);
     };
 
     class BillObject final : public QObject {
         Q_OBJECT
 
+        Q_PROPERTY(QString id READ id BINDABLE bindableId);
+        Q_PROPERTY(Status status READ status WRITE setStatus BINDABLE bindableStatus);
+        Q_PROPERTY(QList<TransactionObject*> transactions READ transactions BINDABLE bindableTransactions);
+
     public:
-        BillObject(Database& database, BillData&& bill_data, QObject *parent = nullptr)
-            : QObject(parent)
-            , m_database(database)
-        {
-            m_versions.append(std::move(bill_data));
+        enum class Status {
+            Staged,
+            PendingPayment,
+            ConfirmedPaid,
+        };
+        Q_ENUM(Status);
+
+        static Status status_from_string(QString key) {
+            bool ok;
+            auto value = QMetaEnum::fromType<Status>().keyToValue(key.toUtf8(), &ok);
+            Q_ASSERT(ok);
+
+            return static_cast<Status>(value);
+        }
+        static QString status_to_string(Status value) {
+            return QMetaEnum::fromType<Status>().valueToKey(static_cast<int>(value));
         }
 
-        QString id() const {
-            return data().m_id;
+        // The parent 'DatabaseObject' will maintain a list of bills.
+        BillObject(InternalMarker, DatabaseObject *parent);
+
+        QString id() const { return m_id.value(); }
+        QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
+
+        Status status() const { return m_status.value(); }
+        void setStatus(Status value) { m_status = value; }
+        QBindable<Status> bindableStatus() { return QBindable<Status>(&m_status); }
+
+        QList<TransactionObject*> transactions() const { return m_transactions; }
+        QBindable<QList<TransactionObject*>> bindableTransactions() { return QBindable<QList<TransactionObject*>>(&m_transactions); }
+
+        TransactionObject* createTransaction(QDate date, qreal amount, QString category) {
+            auto *transaction_object = new TransactionObject(InternalMarker{}, this);
+            transaction_object->setDate(date);
+            transaction_object->setAmount(amount);
+            transaction_object->setCategory(category);
+
+            QList<TransactionObject*> new_transactions = m_transactions;
+            new_transactions.append(transaction_object);
+            m_transactions = new_transactions;
+
+            return transaction_object;
         }
-
-        QDateTime timestamp_created() const {
-            return data().m_timestamp_created;
-        }
-
-        QList<TransactionObject*> transactions() const;
-
-        BillStatus status() const {
-            return data().m_status;
-        }
-
-        QString status_string() const {
-            switch (status()) {
-            case BillStatus::Staged:
-                return "Staged";
-            case BillStatus::PendingPayment:
-                return "PendingPayment";
-            case BillStatus::ConfirmedPaid:
-                return "ConfirmedPaid";
-            default:
-                Q_UNREACHABLE();
-            }
-        }
-
-        BillData data() const {
-            return m_versions.constLast();
-        }
-
-        void create_transaction(TransactionData&& data);
-
-    public slots:
-        void slotUpdate(Accounting::Persistance::BillData data);
 
     signals:
-        // This could be done way more efficiently if we communicate which entries have changed.
-        // That seems to be what the whole model/view thing is about, but I can't get it to work properly.
-        void signalChanged();
+        void signalChanged(Accounting::Persistance::BillObject *bill_object);
 
     private:
-        Database& m_database;
-
-        // The last element is the most recent version.
-        QList<BillData> m_versions;
+        Q_OBJECT_BINDABLE_PROPERTY(BillObject, QString, m_id, &BillObject::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(BillObject, Status, m_status, &BillObject::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(BillObject, QList<TransactionObject*>, m_transactions, &BillObject::signalChanged);
     };
 
-    class Database final : public QObject {
+    // FIXME: The database should maintain a log of what changed.
+    class DatabaseObject final : public QObject {
         Q_OBJECT
 
+        Q_PROPERTY(QList<BillObject*> bills READ bills BINDABLE bindableBills);
+
     public:
-        Database(QObject *parent = nullptr)
-            : QObject(parent)
-        {
-            create_staged_bill();
-        }
+        DatabaseObject(QObject *parent = nullptr)
+            : QObject(parent) { }
 
-        // Should not be used directly.
-        // Instead use 'BillObject::create_transaction'.
-        TransactionObject& internal_create_transaction(TransactionData&& data) {
-            auto transaction = new TransactionObject(*this, std::move(data), this);
-            m_transactions.insert(transaction->id(), transaction);
-            return *transaction;
-        }
+        QList<BillObject*> bills() const { return m_bills; }
+        QBindable<QList<BillObject*>> bindableBills() { return QBindable<QList<BillObject*>>(&m_bills); }
 
-        BillObject& create_staged_bill() {
-            auto bill = new BillObject(*this, BillData::new_default(), this);
-            m_bills.insert(bill->id(), bill);
+        BillObject* createBill() {
+            auto *bill_object = new BillObject(InternalMarker{}, this);
 
-            emit signalBillCreated(bill);
+            QList<BillObject*> bills = m_bills;
+            bills.append(bill_object);
+            m_bills = bills;
 
-            return *bill;
+            return bill_object;
         }
 
     signals:
-        void signalBillCreated(Accounting::Persistance::BillObject *bill_object);
+        void signalChanged(Accounting::Persistance::DatabaseObject *database_object);
 
-    public:
-        QMap<QString, TransactionObject*> m_transactions;
-        QMap<QString, BillObject*> m_bills;
+    private:
+        Q_OBJECT_BINDABLE_PROPERTY(DatabaseObject, QList<BillObject*>, m_bills, &DatabaseObject::signalChanged);
     };
 
-    inline QList<TransactionObject*> BillObject::transactions() const {
-        // FIXME: This is essentially a join and could be done more efficiently.
-        QList<TransactionObject*> transactions;
-        for (auto& transaction_id : data().m_transaction_ids) {
-            transactions.append(m_database.m_transactions[transaction_id]);
-        }
-
-        return transactions;
-    }
-
-    inline void BillObject::create_transaction(TransactionData&& transaction_data) {
-        auto& transaction_object = m_database.internal_create_transaction(std::move(transaction_data));
-
-        auto bill_data = data();
-        bill_data.m_transaction_ids.append(transaction_object.id());
-
-        slotUpdate(std::move(bill_data));
-    }
-
-    inline void BillObject::slotUpdate(Accounting::Persistance::BillData data)
+    inline TransactionObject::TransactionObject(InternalMarker, BillObject *parent)
+        : QObject(parent)
     {
-        m_versions.append(std::move(data));
+        m_id = generate_id();
+    }
 
-        emit signalChanged();
+    inline BillObject::BillObject(InternalMarker, DatabaseObject *parent)
+        : QObject(parent)
+    {
+        m_id = generate_id();
     }
 }
-
-Q_DECLARE_METATYPE(Accounting::Persistance::TransactionData);
-Q_DECLARE_METATYPE(Accounting::Persistance::BillData);
