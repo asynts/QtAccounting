@@ -11,6 +11,51 @@
 
 namespace Accounting::Widgets
 {
+    class BillItemWidget final : public QWidget {
+        Q_OBJECT
+
+    public:
+        explicit BillItemWidget(Persistance::BillObject *bill_object, QWidget *parent)
+            : QWidget(parent)
+            , m_bill_object(bill_object)
+        {
+            auto *layout = new QHBoxLayout();
+            setLayout(layout);
+
+            m_label_widget = new QLabel(this);
+            layout->addWidget(m_label_widget);
+
+            auto *edit_button = new QPushButton("Edit", this);
+            layout->addWidget(edit_button);
+
+            connect(edit_button, &QPushButton::clicked,
+                this, [=]() {
+                    BillEditorDialog dialog{ bill_object };
+                    dialog.exec();
+                });
+
+            connect(m_bill_object, &Persistance::BillObject::signalChanged,
+                    this, &BillItemWidget::slotUpdate);
+
+            slotUpdate();
+        }
+
+    private slots:
+        void slotUpdate() {
+            auto label_text = QString("%1 (%2)").arg(
+                m_bill_object->id(),
+                Persistance::BillObject::status_to_string(m_bill_object->status())
+            );
+
+            m_label_widget->setText(label_text);
+        }
+
+    private:
+        QLabel *m_label_widget;
+
+        Persistance::BillObject *m_bill_object;
+    };
+
     class BillListWidget final : public QWidget {
         Q_OBJECT
 
@@ -53,23 +98,8 @@ namespace Accounting::Widgets
             container_widget->setLayout(container_layout);
 
             for (auto *bill_object : m_database_object->bills()) {
-                auto *bill_widget = new QWidget(container_widget);
+                auto *bill_widget = new BillItemWidget(bill_object, container_widget);
                 container_layout->addWidget(bill_widget);
-
-                auto *bill_layout = new QHBoxLayout;
-                bill_widget->setLayout(bill_layout);
-
-                auto label_text = QString("%1 (%2)").arg(bill_object->id(), Persistance::BillObject::status_to_string(bill_object->status()));
-                bill_layout->addWidget(new QLabel(label_text, bill_widget));
-
-                auto *edit_button = new QPushButton("Edit", bill_widget);
-                bill_layout->addWidget(edit_button);
-
-                connect(edit_button, &QPushButton::clicked,
-                    this, [=]() {
-                        BillEditorDialog dialog{ bill_object };
-                        dialog.exec();
-                    });
             }
 
             return container_widget;
