@@ -22,11 +22,6 @@ namespace Accounting::Widgets
         {
             m_ui.setupUi(this);
 
-            QPalette palette;
-            palette.setColor(QPalette::Window, Qt::red);
-            m_ui.formWidget->setAutoFillBackground(true);
-            m_ui.formWidget->setPalette(palette);
-
             setWindowTitle(QString("Edit Bill '%1'").arg(bill_object->id()));
 
             fill_QComboBox_with_enum<Persistance::BillObject::Status>(m_ui.m_status_QComboBox);
@@ -70,6 +65,7 @@ namespace Accounting::Widgets
     private:
         QWidget* generateContainerWidget() {
             auto container_widget = new QWidget(this);
+            container_widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
             auto container_layout = new QVBoxLayout;
             container_layout->setAlignment(Qt::AlignTop);

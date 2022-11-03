@@ -14,3 +14,7 @@ In the `BillEditorDialog`, the `QFormLayout` takes up much more space than it sh
 ### Theories
 
 -   I suspect, that something is missing a layout.
+
+### Result
+
+-   The problem was that I wasn't setting the size policy when I was re-generating the widget.

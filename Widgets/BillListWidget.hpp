@@ -46,6 +46,7 @@ namespace Accounting::Widgets
     private:
         QWidget* generateContainerWidget() {
             auto container_widget = new QWidget(this);
+            container_widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
             auto container_layout = new QVBoxLayout;
             container_layout->setAlignment(Qt::AlignTop);
