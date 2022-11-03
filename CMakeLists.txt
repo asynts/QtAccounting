@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
     Widgets/BillListWidget.hpp
     Widgets/BillEditorDialog.hpp
     Widgets/TransactionEditorDialog.hpp
+    Models/BillModel.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp
