@@ -110,6 +110,11 @@ namespace Accounting::Widgets
             auto date = m_ui.m_date_QDateEdit->date();
             auto category = m_ui.m_category_QComboBox->currentText().trimmed();
 
+            // Is this an expense?
+            if (m_ui.m_type_QComboBox->currentIndex() == 0) {
+                amount *= -1;
+            }
+
             if (m_old_transaction_object == nullptr) {
                 m_parent_bill_object->createTransaction(date, amount, category);
             } else {

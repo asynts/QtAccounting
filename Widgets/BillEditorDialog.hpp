@@ -12,6 +12,75 @@
 
 namespace Accounting::Widgets
 {
+    class TransactionItemWidget final : public QWidget {
+        Q_OBJECT
+
+    public:
+        explicit TransactionItemWidget(Persistance::BillObject *bill_object, Persistance::TransactionObject *transaction_object, QWidget *parent = nullptr)
+            : QWidget(parent)
+            , m_bill_object(bill_object)
+            , m_transaction_object(transaction_object)
+        {
+            auto *layout = new QHBoxLayout();
+            setLayout(layout);
+
+            layout->addWidget(new QLabel(transaction_object->id(), this));
+
+            m_date_label = new QLabel(this);
+            layout->addWidget(m_date_label);
+
+            m_expense_label = new QLabel(this);
+            layout->addWidget(m_expense_label);
+
+            m_amount_label = new QLabel(this);
+            layout->addWidget(m_amount_label);
+
+            m_category_label = new QLabel(this);
+            layout->addWidget(m_category_label);
+
+            auto *edit_button = new QPushButton("Edit", this);
+            layout->addWidget(edit_button);
+
+            connect(edit_button, &QPushButton::clicked,
+                    this, [=]() mutable {
+                        TransactionEditorDialog dialog{ bill_object, transaction_object };
+                        dialog.exec();
+                    });
+
+            connect(transaction_object, &Persistance::TransactionObject::signalChanged,
+                    this, &TransactionItemWidget::slotUpdate);
+
+            slotUpdate();
+        }
+
+    private slots:
+        void slotUpdate() {
+            m_date_label->setText(m_transaction_object->date().toString("yyyy-MM-dd"));
+
+            QString expense;
+            if (m_transaction_object->amount() <= 0.00) {
+                expense = "EXPENSE";
+            } else {
+                expense = "INCOME";
+            }
+            m_expense_label->setText(expense);
+
+            auto amount = std::abs(m_transaction_object->amount());
+            m_amount_label->setText(QString::number(amount, 'f', 2));
+
+            m_category_label->setText(m_transaction_object->category());
+        }
+
+    private:
+        QLabel *m_date_label;
+        QLabel *m_amount_label;
+        QLabel *m_category_label;
+        QLabel *m_expense_label;
+
+        Persistance::BillObject *m_bill_object;
+        Persistance::TransactionObject *m_transaction_object;
+    };
+
     class BillEditorDialog final : public QDialog {
         Q_OBJECT
 
@@ -72,25 +141,8 @@ namespace Accounting::Widgets
             container_widget->setLayout(container_layout);
 
             for (auto *transaction_object : m_bill_object->transactions()) {
-                // FIXME: Move this into 'TransactionWidget'
-                //        That is necessary because otherwise the values won't be updated.
-
-                auto *transaction_widget = new QWidget(container_widget);
+                auto *transaction_widget = new TransactionItemWidget(m_bill_object, transaction_object, container_widget);
                 container_layout->addWidget(transaction_widget);
-
-                auto *transaction_layout = new QHBoxLayout;
-                transaction_widget->setLayout(transaction_layout);
-
-                transaction_layout->addWidget(new QLabel(QString("transaction: %1").arg(transaction_object->id()), transaction_widget));
-
-                auto *edit_button = new QPushButton("Edit", transaction_widget);
-                transaction_layout->addWidget(edit_button);
-
-                connect(edit_button, &QPushButton::clicked,
-                        this, [=, bill_object = m_bill_object]() mutable {
-                            TransactionEditorDialog dialog{ bill_object, transaction_object };
-                            dialog.exec();
-                        });
             }
 
             return container_widget;
