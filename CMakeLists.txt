@@ -26,6 +26,7 @@ set(PROJECT_SOURCES
     main.cpp
 
     Notes/0001_form-layout-expands.md
+    Notes/0002_understanding-model-view.md
 )
 
 qt_wrap_ui(PROJECT_SOURCES
