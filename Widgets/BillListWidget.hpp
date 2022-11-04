@@ -22,21 +22,10 @@ namespace Accounting::Widgets
             : QStyledItemDelegate(parent) { }
 
         virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
-            // FIXME: Obtain 'BillModel' from 'DatabaseModel'
-            //        Maybe I can use another 'role' for that?
-            Models::BillModel *bill_model = nullptr;
+            qDebug() << "createEditor";
 
+            auto *bill_model = reinterpret_cast<Models::BillModel*>(index.internalPointer());
             return new BillEditorDialog(bill_model, parent);
-        }
-
-        // FIXME: What is this even supposed to do?
-        virtual void setEditorData(QWidget *editor, const QModelIndex &index) const override {
-            QStyledItemDelegate::setEditorData(editor, index);
-        }
-
-        // FIXME: What is this even supposed to do?
-        virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
-            QStyledItemDelegate::setModelData(editor, model, index);
         }
     };
 

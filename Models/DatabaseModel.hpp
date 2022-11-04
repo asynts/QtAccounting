@@ -39,6 +39,16 @@ namespace Accounting::Models
             return createIndex(row, column, reinterpret_cast<void*>(m_bills[row]));
         }
 
+        virtual Qt::ItemFlags flags(const QModelIndex& index) const override {
+            if (!checkIndex(index)) {
+                return Qt::ItemFlag::NoItemFlags;
+            }
+
+            return Qt::ItemFlag::ItemIsSelectable
+                 | Qt::ItemFlag::ItemIsEditable
+                 | Qt::ItemFlag::ItemIsEnabled;
+        }
+
         virtual QModelIndex parent(const QModelIndex& index) const override {
             return QModelIndex();
         }
@@ -55,7 +65,7 @@ namespace Accounting::Models
         }
 
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
-            if (index.row() < 0 || index.row() > rowCount()) {
+            if (!checkIndex(index)) {
                 return QVariant();
             }
 

@@ -24,13 +24,9 @@ namespace Accounting::Widgets
         {
             m_ui.setupUi(this);
 
-            /*
             setWindowTitle(QString("Edit Bill '%1'").arg(bill_model->id()));
-            */
 
-            /*
-            fill_QComboBox_with_enum<Persistance::BillObject::Status>(m_ui.m_status_QComboBox);
-            */
+            fill_QComboBox_with_enum<Models::BillModel::Status>(m_ui.m_status_QComboBox);
 
             m_ui.m_transactions_QTableView->setModel(bill_model);
 
@@ -43,9 +39,7 @@ namespace Accounting::Widgets
 
     private slots:
         void slotStatusChanged() {
-            /*
-            m_bill_model->setStatus(static_cast<Persistance::BillObject::Status>(m_ui.m_status_QComboBox->currentIndex()));
-            */
+            m_bill_model->setStatus(static_cast<Models::BillModel::Status>(m_ui.m_status_QComboBox->currentIndex()));
         }
 
         void slotNewTransaction()
