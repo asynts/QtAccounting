@@ -3,15 +3,33 @@
 #include <QAbstractItemModel>
 
 #include "Models/TransactionModel.hpp"
+#include "Util.hpp"
 
 namespace Accounting::Models
 {
+    // FIXME: Rename to 'TransactionListModel'.
     class BillModel final : public QAbstractItemModel {
         Q_OBJECT
 
     public:
-        explicit BillModel(QObject *parent = nullptr)
-            : QAbstractItemModel(parent) { }
+        enum class Status {
+            Staged,
+            PendingPayment,
+            ConfirmedPaid,
+        };
+        Q_ENUM(Status);
+
+        explicit BillModel(QString id, Status status, QObject *parent = nullptr)
+            : QAbstractItemModel(parent)
+            , m_id(id)
+            , m_status(status) { }
+
+        QString id() const { return m_id.value(); }
+        QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
+
+        Status status() const { return m_status.value(); }
+        void setStatus(Status value) { m_status = value; }
+        QBindable<Status> bindableDate() { return QBindable<Status>(&m_status); }
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
@@ -34,7 +52,8 @@ namespace Accounting::Models
             // Expense
             // Amount
             // Category
-            return 4;
+            // Id
+            return 5;
         }
 
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
@@ -68,15 +87,25 @@ namespace Accounting::Models
                 return transaction->category();
             }
 
+            if (index.column() == 4) {
+                return transaction->id();
+            }
+
             return QVariant();
         }
 
+    signals:
+        void signalChanged();
+
     public slots:
         void createTransaction(QDate date, qreal amount, QString category) {
-            auto *transaction_object = new TransactionModel(date, amount, category, this);
+            auto *transaction_object = new TransactionModel(generate_id(), date, amount, category, this);
 
             int row = m_transactions.size();
+
+            beginInsertRows(QModelIndex(), row, row);
             m_transactions.append(transaction_object);
+            endInsertRows();
 
             connect(transaction_object, &TransactionModel::signalChanged,
                     this, [=, this]() {
@@ -86,5 +115,10 @@ namespace Accounting::Models
 
     private:
         QList<TransactionModel*> m_transactions;
+
+        Q_OBJECT_BINDABLE_PROPERTY(BillModel, QString, m_id, &BillModel::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(BillModel, Status, m_status, &BillModel::signalChanged);
     };
 }
+
+Q_DECLARE_METATYPE(Accounting::Models::BillModel::Status);

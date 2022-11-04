@@ -21,6 +21,7 @@ set(PROJECT_SOURCES
     Widgets/TransactionEditorDialog.hpp
     Models/BillModel.hpp
     Models/TransactionModel.hpp
+    Models/DatabaseModel.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp

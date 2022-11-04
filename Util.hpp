@@ -27,6 +27,7 @@ namespace Accounting
         return result;
     }
 
+    // FIXME: Rename to 'generate_random_id'.
     inline QString generate_id() {
         // Generate 48 bit value.
         auto value = QRandomGenerator64::global()->bounded(Q_INT64_C(1) << 48);

@@ -3,7 +3,7 @@
 #include <QMainWindow>
 #include <QTimerEvent>
 
-#include "Persistance/Database.hpp"
+#include "Models/DatabaseModel.hpp"
 #include "Widgets/BillListWidget.hpp"
 #include "ui_MainWindow.h"
 
@@ -19,9 +19,9 @@ namespace Accounting
         {
             m_ui.setupUi(this);
 
-            auto *database_object = new Persistance::DatabaseObject(this);
+            auto *database_model = new Models::DatabaseModel(this);
 
-            auto bill_list_widget = new Widgets::BillListWidget(database_object, this);
+            auto bill_list_widget = new Widgets::BillListWidget(database_model, this);
             setCentralWidget(bill_list_widget);
         }
 
