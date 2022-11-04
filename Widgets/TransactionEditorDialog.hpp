@@ -3,12 +3,13 @@
 #include <QDialog>
 #include <QPushButton>
 
-#include "Persistance/Database.hpp"
-
 #include "ui_TransactionEditorDialog.h"
 
 namespace Accounting::Widgets
 {
+    // FIXME: Update this file to use the new models.
+
+    /*
     class TransactionEditorDialog final : public QDialog {
         Q_OBJECT
 
@@ -132,4 +133,5 @@ namespace Accounting::Widgets
         Persistance::BillObject *m_parent_bill_object;
         Persistance::TransactionObject *m_old_transaction_object;
     };
+    */
 }

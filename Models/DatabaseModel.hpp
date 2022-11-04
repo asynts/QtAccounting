@@ -50,7 +50,8 @@ namespace Accounting::Models
         virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
             // Id
             // Status
-            return 2;
+            // Edit
+            return 3;
         }
 
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
