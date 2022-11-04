@@ -8,9 +8,7 @@
 #include <QPainter>
 
 #include "Models/DatabaseModel.hpp"
-/*
 #include "Widgets/BillEditorDialog.hpp"
-*/
 
 #include "ui_BillListWidget.h"
 
@@ -23,27 +21,22 @@ namespace Accounting::Widgets
         explicit BillItemDelegate(QObject *parent = nullptr)
             : QStyledItemDelegate(parent) { }
 
-        // FIXME: How can I associate the button with the 'QModelIndex'?
-        //        Can I attach data to the 'QModelIndex' directly?
+        virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+            // FIXME: Obtain 'BillModel' from 'DatabaseModel'
+            //        Maybe I can use another 'role' for that?
+            Models::BillModel *bill_model = nullptr;
 
-        virtual void paint(QPainter *painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
-            // Not 'Edit' column.
-            if (index.column() != 2) {
-                return QStyledItemDelegate::paint(painter, option, index);
-            }
-
-            // FIXME
-            painter->fillRect(option.rect, Qt::red);
+            return new BillEditorDialog(bill_model, parent);
         }
 
-        virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override {
-            // Not 'Edit' column.
-            if (index.column() != 2) {
-                return QStyledItemDelegate::sizeHint(option, index);
-            }
+        // FIXME: What is this even supposed to do?
+        virtual void setEditorData(QWidget *editor, const QModelIndex &index) const override {
+            QStyledItemDelegate::setEditorData(editor, index);
+        }
 
-            // FIXME
-            return QSize(0, 0);
+        // FIXME: What is this even supposed to do?
+        virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
+            QStyledItemDelegate::setModelData(editor, model, index);
         }
     };
 
