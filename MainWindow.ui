@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Accounting</string>
+   <string>Bills</string>
   </property>
   <widget class="QWidget" name="m_central_QWidget"/>
  </widget>

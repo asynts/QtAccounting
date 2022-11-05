@@ -6,6 +6,9 @@
 #include <QPushButton>
 #include <QDialog>
 #include <QStyledItemDelegate>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QTextDocumentWriter>
 
 #include "Models/BillModel.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
@@ -79,6 +82,11 @@ namespace Accounting::Widgets
                 connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
                         this, &BillEditorDialog::slotNewTransaction);
             }
+
+            {
+                connect(m_ui.m_export_QPushButton, &QPushButton::clicked,
+                        this, &BillEditorDialog::slotExport);
+            }
         }
 
     private slots:
@@ -94,6 +102,22 @@ namespace Accounting::Widgets
         {
             TransactionEditorDialog dialog{ m_bill_model, nullptr };
             dialog.exec();
+        }
+
+        void slotExport()
+        {
+            auto filepath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+            filepath.append("Asynts");
+            filepath.append(QDir::separator());
+            filepath.append("Accounting");
+            filepath.append(QDir::separator());
+            filepath.append(QString::number(QDateTime::currentMSecsSinceEpoch()).rightJustified(16, '0'));
+            filepath.append("_");
+            filepath.append(m_bill_model->id());
+
+            qDebug() << "Exporting to" << filepath;
+
+            // FIXME: Use 'QTextDocumentWriter' to create file.
         }
 
     private:
