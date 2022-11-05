@@ -30,6 +30,8 @@ namespace Accounting::Widgets
 
             m_ui.m_transactions_QTableView->setModel(bill_model);
 
+            m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(bill_model->status()));
+
             connect(m_ui.m_status_QComboBox, &QComboBox::currentIndexChanged,
                     this, &BillEditorDialog::slotStatusChanged);
 

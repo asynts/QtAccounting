@@ -21,11 +21,21 @@ namespace Accounting::Widgets
         explicit BillItemDelegate(QObject *parent = nullptr)
             : QStyledItemDelegate(parent) { }
 
-        virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
-            qDebug() << "createEditor";
+        virtual bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem& option, const QModelIndex& index) override {
+            if (!model->checkIndex(index)) {
+                return false;
+            }
 
             auto *bill_model = reinterpret_cast<Models::BillModel*>(index.internalPointer());
-            return new BillEditorDialog(bill_model, parent);
+
+            qDebug() << "editorEvent before";
+
+            BillEditorDialog dialog(bill_model);
+            dialog.exec();
+
+            qDebug() << "editorEvent after";
+
+            return true;
         }
     };
 
