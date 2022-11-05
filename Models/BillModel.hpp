@@ -63,9 +63,11 @@ namespace Accounting::Models
             boldFont.setBold(true);
             boldCharFormat.setFont(boldFont);
 
-            {
-                //
-            }
+            QTextFrameFormat noBorderFrameFormat;
+            noBorderFrameFormat.setBorderStyle(QTextFrameFormat::BorderStyle_None);
+
+            QTextFrameFormat borderFrameFormat;
+            noBorderFrameFormat.setBorder(2.0);
 
             // FIXME: Move this into a function.
             {
@@ -147,6 +149,21 @@ namespace Accounting::Models
                     });
                 }
 
+                // IBAN
+                const int iban_row = data_displayText.size();
+                data_displayText.append({
+                    "IBAN",
+                    "GB 33BU KB20 2015 5555 5555", // This is an example: https://www.iban.com/testibans
+                    "",
+                    ""
+                });
+                data_charFormat.append({
+                    boldCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                });
+
                 // Empty row.
                 data_displayText.append({
                     "",
@@ -161,23 +178,12 @@ namespace Accounting::Models
                     normalCharFormat,
                 });
 
-                // IBAN
-                data_displayText.append({
-                    "IBAN",
-                    "GB 33BU KB20 2015 5555 5555", // This is an example: https://www.iban.com/testibans
-                    "",
-                    ""
-                });
-                data_charFormat.append({
-                    boldCharFormat,
-                    normalCharFormat,
-                    normalCharFormat,
-                    normalCharFormat,
-                });
+                // FIXME: Split this into a function and generate two tables with different borders.
 
                 // Write to output file.
                 Q_ASSERT(data_displayText.size() == data_charFormat.size());
                 QTextTable *table = cursor.insertTable(data_displayText.size(), column_count);
+                table->setFrameFormat(noBorderFrameFormat);
                 for (int row_index = 0; row_index < data_displayText.size(); ++row_index) {
                     for (int column_index = 0; column_index < column_count; ++column_index) {
                         auto cell = table->cellAt(row_index, column_index);
@@ -188,6 +194,9 @@ namespace Accounting::Models
                         cell.firstCursorPosition().insertText(displayText, charFormat);
                     }
                 }
+
+                // The IBAN won't fit otherwise.
+                table->mergeCells(iban_row, 1, 1, 3);
             }
 
             {

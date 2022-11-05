@@ -112,7 +112,7 @@ namespace Accounting::Widgets
             filepath.append(QString::number(QDateTime::currentMSecsSinceEpoch()).rightJustified(16, '0'));
             filepath.append("_");
             filepath.append(m_bill_model->id());
-            filepath.append(".ods");
+            filepath.append(".odt");
 
             m_bill_model->exportTo(filepath);
         }
