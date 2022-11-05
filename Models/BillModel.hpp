@@ -48,47 +48,145 @@ namespace Accounting::Models
         void setDate(QDate value) { m_date = value; }
         QBindable<QDate> bindableDate() { return QBindable<QDate>(&m_date); }
 
+        // FIXME: Implement this in '.cpp' file.
+        // FIXME: Maybe even create a helper class for this?
         void exportTo(QString filepath) {
             qDebug() << "Exporting to" << filepath;
 
             QTextDocument document;
             QTextCursor cursor(&document);
 
-            enum ColumnEnum {
-                MinColumn = 0,
+            QTextCharFormat normalCharFormat;
 
-                ColumnId = 0,
-                ColumnDate,
-                ColumnCategory,
-                ColumnAmount,
+            QTextCharFormat boldCharFormat;
+            QFont boldFont = boldCharFormat.font();
+            boldFont.setBold(true);
+            boldCharFormat.setFont(boldFont);
 
-                MaxColumn,
-            };
-
-            QList<std::array<QString, MaxColumn>> data;
-
-            data.append({
-                "id",
-                "date",
-                "category",
-                "amount",
-            });
-
-            for (TransactionModel *transaction_model : m_transactions) {
-                data.append({
-                    transaction_model->id(),
-                    transaction_model->date().toString("yyyy-MM-dd"),
-                    transaction_model->category(),
-                    QString::number(transaction_model->amount(), 'f', 2),
-                });
+            {
+                //
             }
 
-            QTextTable *table = cursor.insertTable(data.size(), MaxColumn);
+            // FIXME: Move this into a function.
+            {
+                constexpr int column_count = 4;
 
-            for (int row_index = 0; row_index < data.size(); ++row_index) {
-                for (int column_index = MinColumn; column_index < MaxColumn; ++column_index) {
-                    auto cell = table->cellAt(row_index, column_index);
-                    cell.firstCursorPosition().insertText(data[row_index][column_index]);
+                // Prepare data to be written into table.
+                QList<std::array<QString, column_count>> data_displayText;
+                QList<std::array<QTextCharFormat, column_count>> data_charFormat;
+
+                // Date.
+                data_displayText.append({
+                    "date",
+                    date().toString("yyyy-MM-dd"),
+                    "",
+                    ""
+                });
+                data_charFormat.append({
+                    boldCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                });
+
+                // Bill ID.
+                data_displayText.append({
+                    "bill_id",
+                    id(),
+                    "",
+                    ""
+                });
+                data_charFormat.append({
+                    boldCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                });
+
+                // Empty row.
+                data_displayText.append({
+                    "",
+                    "",
+                    "",
+                    ""
+                });
+                data_charFormat.append({
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                });
+
+                // Table headers.
+                data_displayText.append({
+                    "id",
+                    "date",
+                    "category",
+                    "amount",
+                });
+                data_charFormat.append({
+                    boldCharFormat,
+                    boldCharFormat,
+                    boldCharFormat,
+                    boldCharFormat,
+                });
+
+                // Table.
+                for (TransactionModel *transaction_model : m_transactions) {
+                    data_displayText.append({
+                        transaction_model->id(),
+                        transaction_model->date().toString("yyyy-MM-dd"),
+                        transaction_model->category(),
+                        QString::number(transaction_model->amount(), 'f', 2),
+                    });
+                    data_charFormat.append({
+                        normalCharFormat,
+                        normalCharFormat,
+                        normalCharFormat,
+                        normalCharFormat,
+                    });
+                }
+
+                // Empty row.
+                data_displayText.append({
+                    "",
+                    "",
+                    "",
+                    ""
+                });
+                data_charFormat.append({
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                });
+
+                // IBAN
+                data_displayText.append({
+                    "IBAN",
+                    "GB 33BU KB20 2015 5555 5555", // This is an example: https://www.iban.com/testibans
+                    "",
+                    ""
+                });
+                data_charFormat.append({
+                    boldCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                });
+
+                // Write to output file.
+                Q_ASSERT(data_displayText.size() == data_charFormat.size());
+                QTextTable *table = cursor.insertTable(data_displayText.size(), column_count);
+                for (int row_index = 0; row_index < data_displayText.size(); ++row_index) {
+                    for (int column_index = 0; column_index < column_count; ++column_index) {
+                        auto cell = table->cellAt(row_index, column_index);
+
+                        auto displayText = data_displayText[row_index][column_index];
+                        auto charFormat = data_charFormat[row_index][column_index];
+
+                        cell.firstCursorPosition().insertText(displayText, charFormat);
+                    }
                 }
             }
 
