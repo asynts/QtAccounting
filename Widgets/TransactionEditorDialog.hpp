@@ -3,37 +3,37 @@
 #include <QDialog>
 #include <QPushButton>
 
+#include "Models/BillModel.hpp"
+#include "Models/TransactionModel.hpp"
+
 #include "ui_TransactionEditorDialog.h"
 
 namespace Accounting::Widgets
 {
-    // FIXME: Update this file to use the new models.
-
-    /*
     class TransactionEditorDialog final : public QDialog {
         Q_OBJECT
 
     public:
-        explicit TransactionEditorDialog(Persistance::BillObject *parent_bill_object, Persistance::TransactionObject *transaction_object, QWidget *parent = nullptr)
+        explicit TransactionEditorDialog(Models::BillModel *parent_bill_model, Models::TransactionModel *transaction_model, QWidget *parent = nullptr)
             : QDialog(parent)
-            , m_old_transaction_object(transaction_object)
-            , m_parent_bill_object(parent_bill_object)
+            , m_old_transaction_model(transaction_model)
+            , m_parent_bill_model(parent_bill_model)
         {
             m_ui.setupUi(this);
 
-            if (transaction_object == nullptr) {
+            if (transaction_model== nullptr) {
                 setWindowTitle("New Transaction");
             } else {
-                setWindowTitle(QString("Edit Transaction '%1'").arg(transaction_object->id()));
+                setWindowTitle(QString("Edit Transaction '%1'").arg(transaction_model->id()));
             }
 
             {
                 m_ui.m_category_QComboBox->addItem("Groceries");
 
-                if (transaction_object == nullptr) {
+                if (transaction_model == nullptr) {
                     m_ui.m_category_QComboBox->setCurrentIndex(0);
                 } else {
-                    m_ui.m_category_QComboBox->setCurrentText(transaction_object->category());
+                    m_ui.m_category_QComboBox->setCurrentText(transaction_model->category());
                 }
 
                 connect(m_ui.m_category_QComboBox, &QComboBox::currentTextChanged,
@@ -44,9 +44,9 @@ namespace Accounting::Widgets
                 m_ui.m_type_QComboBox->addItem("Expense");
                 m_ui.m_type_QComboBox->addItem("Income");
 
-                if (transaction_object == nullptr) {
+                if (transaction_model == nullptr) {
                     m_ui.m_type_QComboBox->setCurrentIndex(0); // Expense
-                } else if (transaction_object->amount() <= 0.00){
+                } else if (transaction_model->amount() <= 0.00){
                     m_ui.m_type_QComboBox->setCurrentIndex(0); // Expense
                 } else {
                     m_ui.m_type_QComboBox->setCurrentIndex(1); // Income
@@ -61,10 +61,10 @@ namespace Accounting::Widgets
                 validator->setBottom(0.00);
                 m_ui.m_amount_QLineEdit->setValidator(validator);
 
-                if (transaction_object == nullptr) {
+                if (transaction_model == nullptr) {
                     m_ui.m_amount_QLineEdit->setText("0.00");
                 } else {
-                    m_ui.m_amount_QLineEdit->setText(QString::number(std::abs(transaction_object->amount()), 'f', 2));
+                    m_ui.m_amount_QLineEdit->setText(QString::number(std::abs(transaction_model->amount()), 'f', 2));
                 }
 
                 connect(m_ui.m_amount_QLineEdit, &QLineEdit::textChanged,
@@ -72,10 +72,10 @@ namespace Accounting::Widgets
             }
 
             {
-                if (transaction_object == nullptr) {
+                if (transaction_model == nullptr) {
                     m_ui.m_date_QDateEdit->setDate(QDate::currentDate());
                 } else {
-                    m_ui.m_date_QDateEdit->setDate(transaction_object->date());
+                    m_ui.m_date_QDateEdit->setDate(transaction_model->date());
                 }
 
                 connect(m_ui.m_date_QDateEdit, &QDateEdit::dateChanged,
@@ -116,12 +116,12 @@ namespace Accounting::Widgets
                 amount *= -1;
             }
 
-            if (m_old_transaction_object == nullptr) {
-                m_parent_bill_object->createTransaction(date, amount, category);
+            if (m_old_transaction_model == nullptr) {
+                m_parent_bill_model->createTransaction(date, amount, category);
             } else {
-                m_old_transaction_object->setAmount(amount);
-                m_old_transaction_object->setDate(date);
-                m_old_transaction_object->setCategory(category);
+                m_old_transaction_model->setAmount(amount);
+                m_old_transaction_model->setDate(date);
+                m_old_transaction_model->setCategory(category);
             }
 
             done(QDialog::Accepted);
@@ -130,8 +130,7 @@ namespace Accounting::Widgets
     private:
         Ui::TransactionEditorDialog m_ui;
 
-        Persistance::BillObject *m_parent_bill_object;
-        Persistance::TransactionObject *m_old_transaction_object;
+        Models::BillModel *m_parent_bill_model;
+        Models::TransactionModel *m_old_transaction_model;
     };
-    */
 }

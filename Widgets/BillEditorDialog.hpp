@@ -5,15 +5,37 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QDialog>
+#include <QStyledItemDelegate>
 
 #include "Models/BillModel.hpp"
-/*
 #include "Widgets/TransactionEditorDialog.hpp"
-*/
+
 #include "ui_BillEditorDialog.h"
 
 namespace Accounting::Widgets
 {
+    class TransactionItemDelegate final : public QStyledItemDelegate {
+        Q_OBJECT
+
+    public:
+        explicit TransactionItemDelegate(QObject *parent = nullptr)
+            : QStyledItemDelegate(parent) { }
+
+        virtual bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem& option, const QModelIndex& index) override {
+            if (!model->checkIndex(index)) {
+                return false;
+            }
+
+            auto *bill_model = qobject_cast<Models::BillModel*>(model);
+            auto *transaction_model = reinterpret_cast<Models::TransactionModel*>(index.internalPointer());
+
+            TransactionEditorDialog dialog(bill_model, transaction_model);
+            dialog.exec();
+
+            return true;
+        }
+    };
+
     class BillEditorDialog final : public QDialog {
         Q_OBJECT
 
@@ -29,6 +51,7 @@ namespace Accounting::Widgets
             fill_QComboBox_with_enum<Models::BillModel::Status>(m_ui.m_status_QComboBox);
 
             m_ui.m_transactions_QTableView->setModel(bill_model);
+            m_ui.m_transactions_QTableView->setItemDelegate(new TransactionItemDelegate(this));
 
             m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(bill_model->status()));
 
@@ -46,10 +69,8 @@ namespace Accounting::Widgets
 
         void slotNewTransaction()
         {
-            /*
-            TransactionEditorDialog dialog{ m_bill_object, nullptr };
+            TransactionEditorDialog dialog{ m_bill_model, nullptr };
             dialog.exec();
-            */
         }
 
     private:

@@ -5,6 +5,7 @@
 
 #include "Models/DatabaseModel.hpp"
 #include "Widgets/BillListWidget.hpp"
+
 #include "ui_MainWindow.h"
 
 namespace Accounting

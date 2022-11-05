@@ -28,12 +28,8 @@ namespace Accounting::Widgets
 
             auto *bill_model = reinterpret_cast<Models::BillModel*>(index.internalPointer());
 
-            qDebug() << "editorEvent before";
-
             BillEditorDialog dialog(bill_model);
             dialog.exec();
-
-            qDebug() << "editorEvent after";
 
             return true;
         }
