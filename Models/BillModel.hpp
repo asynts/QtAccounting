@@ -68,7 +68,7 @@ namespace Accounting::Models
             auto *transaction = m_transactions[index.row()];
 
             if (index.column() == 0) {
-                return transaction->date();
+                return transaction->date().toString("yyyy-MM-dd");
             }
 
             if (index.column() == 1) {
@@ -80,7 +80,7 @@ namespace Accounting::Models
             }
 
             if (index.column() == 2) {
-                return std::abs(transaction->amount());
+                return QString::number(std::abs(transaction->amount()), 'f', 2);
             }
 
             if (index.column() == 3) {
