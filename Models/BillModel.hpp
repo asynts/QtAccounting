@@ -83,16 +83,14 @@ namespace Accounting::Models
                 });
             }
 
-            QTextTable *table = cursor.insertTable(m_transactions.size(), MaxColumn);
+            QTextTable *table = cursor.insertTable(data.size(), MaxColumn);
 
-            for (int row_index = 0; row_index < m_transactions.size(); ++row_index) {
+            for (int row_index = 0; row_index < data.size(); ++row_index) {
                 for (int column_index = MinColumn; column_index < MaxColumn; ++column_index) {
                     auto cell = table->cellAt(row_index, column_index);
                     cell.firstCursorPosition().insertText(data[row_index][column_index]);
                 }
             }
-
-            qDebug() << QFileInfo(filepath).dir();
 
             {
                 bool ok = QFileInfo(filepath).dir().mkpath(".");
