@@ -1,6 +1,12 @@
 #pragma once
 
 #include <QAbstractItemModel>
+#include <QTextTableFormat>
+#include <QTextDocument>
+#include <QTextCursor>
+#include <QTextTable>
+#include <QTextDocumentWriter>
+#include <QDir>
 
 #include "Models/TransactionModel.hpp"
 #include "Util.hpp"
@@ -41,6 +47,61 @@ namespace Accounting::Models
         QDate date() const { return m_date.value(); }
         void setDate(QDate value) { m_date = value; }
         QBindable<QDate> bindableDate() { return QBindable<QDate>(&m_date); }
+
+        void exportTo(QString filepath) {
+            qDebug() << "Exporting to" << filepath;
+
+            QTextDocument document;
+            QTextCursor cursor(&document);
+
+            enum ColumnEnum {
+                MinColumn = 0,
+
+                ColumnId = 0,
+                ColumnDate,
+                ColumnCategory,
+                ColumnAmount,
+
+                MaxColumn,
+            };
+
+            QList<std::array<QString, MaxColumn>> data;
+
+            data.append({
+                "id",
+                "date",
+                "category",
+                "amount",
+            });
+
+            for (TransactionModel *transaction_model : m_transactions) {
+                data.append({
+                    transaction_model->id(),
+                    transaction_model->date().toString("yyyy-MM-dd"),
+                    transaction_model->category(),
+                    QString::number(transaction_model->amount(), 'f', 2),
+                });
+            }
+
+            QTextTable *table = cursor.insertTable(m_transactions.size(), MaxColumn);
+
+            for (int row_index = 0; row_index < m_transactions.size(); ++row_index) {
+                for (int column_index = MinColumn; column_index < MaxColumn; ++column_index) {
+                    auto cell = table->cellAt(row_index, column_index);
+                    cell.firstCursorPosition().insertText(data[row_index][column_index]);
+                }
+            }
+
+            qDebug() << QFileInfo(filepath).dir();
+
+            {
+                bool ok = QFileInfo(filepath).dir().mkpath(".");
+                Q_ASSERT(ok);
+            }
+
+            QTextDocumentWriter writer(filepath, "odf");
+            writer.write(&document);
+        }
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {

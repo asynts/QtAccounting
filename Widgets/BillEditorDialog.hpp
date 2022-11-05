@@ -6,9 +6,8 @@
 #include <QPushButton>
 #include <QDialog>
 #include <QStyledItemDelegate>
-#include <QFileDialog>
 #include <QStandardPaths>
-#include <QTextDocumentWriter>
+#include <QDir>
 
 #include "Models/BillModel.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
@@ -107,22 +106,20 @@ namespace Accounting::Widgets
         void slotExport()
         {
             auto filepath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-            filepath.append("Asynts");
             filepath.append(QDir::separator());
-            filepath.append("Accounting");
+            filepath.append("Bills");
             filepath.append(QDir::separator());
             filepath.append(QString::number(QDateTime::currentMSecsSinceEpoch()).rightJustified(16, '0'));
             filepath.append("_");
             filepath.append(m_bill_model->id());
+            filepath.append(".ods");
 
-            qDebug() << "Exporting to" << filepath;
-
-            // FIXME: Use 'QTextDocumentWriter' to create file.
+            m_bill_model->exportTo(filepath);
         }
 
     private:
         Ui::BillEditorDialog m_ui;
 
-        Models::BillModel*const m_bill_model;
+        Models::BillModel *m_bill_model;
     };
 }
