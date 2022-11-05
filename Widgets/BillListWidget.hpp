@@ -22,7 +22,15 @@ namespace Accounting::Widgets
             : QStyledItemDelegate(parent) { }
 
         virtual bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem& option, const QModelIndex& index) override {
+            qDebug() << event->type();
+
             if (!model->checkIndex(index)) {
+                return false;
+            }
+
+            // All mouse events are delivered here for some reason.
+            // The name 'editorEvent' is misleading.
+            if (event->type() != QEvent::MouseButtonDblClick) {
                 return false;
             }
 
@@ -47,6 +55,7 @@ namespace Accounting::Widgets
 
             m_ui.m_bills_QTableView->setModel(database_model);
             m_ui.m_bills_QTableView->setItemDelegate(new BillItemDelegate(this));
+            m_ui.m_bills_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
 
             connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
                     this, &BillListWidget::slotNewBill);

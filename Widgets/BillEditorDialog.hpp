@@ -26,6 +26,12 @@ namespace Accounting::Widgets
                 return false;
             }
 
+            // All mouse events are delivered here for some reason.
+            // The name 'editorEvent' is misleading.
+            if (event->type() != QEvent::MouseButtonDblClick) {
+                return false;
+            }
+
             auto *bill_model = qobject_cast<Models::BillModel*>(model);
             auto *transaction_model = reinterpret_cast<Models::TransactionModel*>(index.internalPointer());
 
@@ -52,6 +58,7 @@ namespace Accounting::Widgets
 
             m_ui.m_transactions_QTableView->setModel(bill_model);
             m_ui.m_transactions_QTableView->setItemDelegate(new TransactionItemDelegate(this));
+            m_ui.m_transactions_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
 
             m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(bill_model->status()));
 
