@@ -54,24 +54,40 @@ namespace Accounting::Widgets
 
             setWindowTitle(QString("Edit Bill '%1'").arg(bill_model->id()));
 
-            fill_QComboBox_with_enum<Models::BillModel::Status>(m_ui.m_status_QComboBox);
+            {
+                m_ui.m_transactions_QTableView->setModel(bill_model);
+                m_ui.m_transactions_QTableView->setItemDelegate(new TransactionItemDelegate(this));
+                m_ui.m_transactions_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
+            }
 
-            m_ui.m_transactions_QTableView->setModel(bill_model);
-            m_ui.m_transactions_QTableView->setItemDelegate(new TransactionItemDelegate(this));
-            m_ui.m_transactions_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
+            {
+                fill_QComboBox_with_enum<Models::BillModel::Status>(m_ui.m_status_QComboBox);
+                m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(bill_model->status()));
 
-            m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(bill_model->status()));
+                connect(m_ui.m_status_QComboBox, &QComboBox::currentIndexChanged,
+                        this, &BillEditorDialog::slotStatusChanged);
+            }
 
-            connect(m_ui.m_status_QComboBox, &QComboBox::currentIndexChanged,
-                    this, &BillEditorDialog::slotStatusChanged);
+            {
+                m_ui.m_date_QDateEdit->setDate(bill_model->date());
 
-            connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
-                    this, &BillEditorDialog::slotNewTransaction);
+                connect(m_ui.m_date_QDateEdit, &QDateEdit::editingFinished,
+                        this, &BillEditorDialog::slotDateChanged);
+            }
+
+            {
+                connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
+                        this, &BillEditorDialog::slotNewTransaction);
+            }
         }
 
     private slots:
         void slotStatusChanged() {
             m_bill_model->setStatus(static_cast<Models::BillModel::Status>(m_ui.m_status_QComboBox->currentIndex()));
+        }
+
+        void slotDateChanged() {
+            m_bill_model->setDate(m_ui.m_date_QDateEdit->date());
         }
 
         void slotNewTransaction()

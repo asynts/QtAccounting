@@ -15,7 +15,7 @@ namespace Accounting::Models
             : QAbstractItemModel(parent) { }
 
         BillModel* createBill() {
-            auto *bill_model = new BillModel(generate_id(), BillModel::Status::Staged, this);
+            auto *bill_model = new BillModel(generate_id(), QDate::currentDate(), BillModel::Status::Staged, this);
 
             int row = m_bills.size();
 
@@ -60,7 +60,7 @@ namespace Accounting::Models
         virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
             // Id
             // Status
-            // Edit
+            // Date
             return 3;
         }
 
@@ -81,6 +81,10 @@ namespace Accounting::Models
 
             if (index.column() == 1) {
                 return QVariant::fromValue(bill->status());
+            }
+
+            if (index.column() == 2) {
+                return bill->date().toString("yyyy-MM-dd");
             }
 
             return QVariant();

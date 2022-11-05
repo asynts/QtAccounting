@@ -9,8 +9,6 @@ namespace Accounting::Models
 {
     // FIXME: Rename to 'TransactionListModel'.
     class BillModel final : public QAbstractItemModel {
-        Q_OBJECT
-
     public:
         enum class Status {
             Staged,
@@ -19,9 +17,18 @@ namespace Accounting::Models
         };
         Q_ENUM(Status);
 
-        explicit BillModel(QString id, Status status, QObject *parent = nullptr)
+    private:
+        Q_OBJECT
+
+        Q_PROPERTY(QString id READ id BINDABLE bindableId NOTIFY signalChanged);
+        Q_PROPERTY(QDate date READ date WRITE setDate BINDABLE bindableDate NOTIFY signalChanged);
+        Q_PROPERTY(Status status READ status WRITE setStatus BINDABLE bindableStatus NOTIFY signalChanged);
+
+    public:
+        explicit BillModel(QString id, QDate date, Status status, QObject *parent = nullptr)
             : QAbstractItemModel(parent)
             , m_id(id)
+            , m_date(date)
             , m_status(status) { }
 
         QString id() const { return m_id.value(); }
@@ -29,7 +36,11 @@ namespace Accounting::Models
 
         Status status() const { return m_status.value(); }
         void setStatus(Status value) { m_status = value; }
-        QBindable<Status> bindableDate() { return QBindable<Status>(&m_status); }
+        QBindable<Status> bindableStatus() { return QBindable<Status>(&m_status); }
+
+        QDate date() const { return m_date.value(); }
+        void setDate(QDate value) { m_date = value; }
+        QBindable<QDate> bindableDate() { return QBindable<QDate>(&m_date); }
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
@@ -117,6 +128,7 @@ namespace Accounting::Models
         QList<TransactionModel*> m_transactions;
 
         Q_OBJECT_BINDABLE_PROPERTY(BillModel, QString, m_id, &BillModel::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(BillModel, QDate, m_date, &BillModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(BillModel, Status, m_status, &BillModel::signalChanged);
     };
 }
