@@ -25,13 +25,6 @@
       </property>
      </widget>
     </item>
-    <item>
-     <widget class="QDialogButtonBox" name="m_buttons_QDialogButtonBox">
-      <property name="standardButtons">
-       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-      </property>
-     </widget>
-    </item>
    </layout>
   </widget>
  </widget>

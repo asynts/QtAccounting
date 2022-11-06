@@ -37,18 +37,9 @@ namespace Accounting
                     message_box.exec();
                 }
             }
-
-            connect(m_ui.m_buttons_QDialogButtonBox, &QDialogButtonBox::rejected,
-                    this, &MainWindow::slotDiscard);
-
-            connect(m_ui.m_buttons_QDialogButtonBox, &QDialogButtonBox::accepted,
-                    this, &MainWindow::slotCommit);
-
-            // FIXME: Call 'slotDiscard' if close button of window is pressed.
         }
 
-    private slots:
-        void slotDiscard() {
+        virtual void closeEvent(QCloseEvent *event) override {
             QMessageBox message_box;
             message_box.setText("The database has been modified.");
             message_box.setInformativeText("Do you want to save changes?");
@@ -57,21 +48,16 @@ namespace Accounting
             int retval = message_box.exec();
 
             if (retval == QMessageBox::StandardButton::Cancel) {
-                // Do nothing.
+                event->ignore();
             } else if (retval == QMessageBox::StandardButton::Discard) {
-                close();
+                event->accept();
             } else if (retval == QMessageBox::StandardButton::Save) {
-                slotCommit();
+                auto database = m_database_model->serialize();
+                Persistance::save_to_disk(database);
+                event->accept();
             } else {
                 Q_UNREACHABLE();
             }
-        }
-
-        void slotCommit() {
-            auto database = m_database_model->serialize();
-            Persistance::save_to_disk(database);
-
-            close();
         }
 
     private:
