@@ -15,7 +15,6 @@
 
 namespace Accounting::Models
 {
-    // FIXME: Rename to 'TransactionListModel'.
     class BillModel final : public QAbstractItemModel {
     public:
         enum class Status {
@@ -33,7 +32,7 @@ namespace Accounting::Models
             ColumnStatus,
             ColumnId,
 
-            ColumnCount
+            COLUMN_COUNT
         };
         Q_ENUM(Columns);
 
@@ -137,7 +136,7 @@ namespace Accounting::Models
         }
 
         virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
-            return Columns::ColumnCount;
+            return Columns::COLUMN_COUNT;
         }
 
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {

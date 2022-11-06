@@ -7,8 +7,17 @@
 
 namespace Accounting::Models
 {
-    // FIXME: Rename to 'BillListModel'.
     class DatabaseModel final : public QAbstractItemModel {
+    public:
+        enum Columns {
+            ColumnDate,
+            ColumnStatus,
+            ColumnId,
+
+            COLUMN_COUNT
+        };
+
+    private:
         Q_OBJECT
 
     public:
@@ -87,10 +96,7 @@ namespace Accounting::Models
         }
 
         virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
-            // Id
-            // Status
-            // Date
-            return 3;
+            return Columns::COLUMN_COUNT;
         }
 
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
@@ -104,15 +110,15 @@ namespace Accounting::Models
 
             auto *bill = m_bills[index.row()];
 
-            if (index.column() == 0) {
+            if (index.column() == Columns::ColumnId) {
                 return bill->id();
             }
 
-            if (index.column() == 1) {
+            if (index.column() == Columns::ColumnStatus) {
                 return QVariant::fromValue(bill->status());
             }
 
-            if (index.column() == 2) {
+            if (index.column() == Columns::ColumnDate) {
                 return bill->date().toString("yyyy-MM-dd");
             }
 
