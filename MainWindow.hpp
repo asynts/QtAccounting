@@ -65,7 +65,7 @@ namespace Accounting
                 auto localPath = Persistance::save_to_disk(database);
 
                 // Upload file to S3.
-                QString remotePath = "/Database";
+                QString remotePath = "/Database/";
                 remotePath.append(QFileInfo(localPath).fileName());
                 Persistance::upload_file(localPath, remotePath);
 
