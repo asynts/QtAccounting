@@ -3,6 +3,7 @@
 #include <QAbstractItemModel>
 
 #include "Models/BillModel.hpp"
+#include "Persistance.hpp"
 
 namespace Accounting::Models
 {
@@ -29,6 +30,17 @@ namespace Accounting::Models
                     });
 
             return bill_model;
+        }
+
+        Persistance::Database serialize() const {
+            QList<Persistance::Bill> serialized_bills;
+            for (auto *bill_model : m_bills) {
+                serialized_bills.append(bill_model->serialize());
+            }
+
+            return Persistance::Database{
+                .m_bills = serialized_bills,
+            };
         }
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {

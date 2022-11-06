@@ -11,6 +11,7 @@
 
 #include "Models/TransactionModel.hpp"
 #include "Util.hpp"
+#include "Persistance.hpp"
 
 namespace Accounting::Models
 {
@@ -23,6 +24,10 @@ namespace Accounting::Models
             ConfirmedPaid,
         };
         Q_ENUM(Status);
+
+        // FIXME: Implement
+        static QString status_to_string(Status);
+        static Status status_from_string(QString);
 
     private:
         Q_OBJECT
@@ -243,6 +248,20 @@ namespace Accounting::Models
 
             QTextDocumentWriter writer(filepath, "odf");
             writer.write(&document);
+        }
+
+        Persistance::Bill serialize() const {
+            QList<Persistance::Transaction> serialized_transactions;
+            for (auto *transacton_model : m_transactions) {
+                serialized_transactions.append(transacton_model->serialize());
+            }
+
+            return Persistance::Bill{
+                .m_id = id(),
+                .m_date = date(),
+                .m_status = status_to_string(status()),
+                .m_transactions = serialized_transactions,
+            };
         }
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {

@@ -4,6 +4,8 @@
 #include <QBindable>
 #include <QDate>
 
+#include "Persistance.hpp"
+
 namespace Accounting::Models
 {
     class TransactionModel final : public QObject {
@@ -36,6 +38,15 @@ namespace Accounting::Models
         QString category() const { return m_category.value(); }
         void setCategory(QString value) { m_category = value; }
         QBindable<QString> bindableCategory() { return QBindable<QString>(&m_category); }
+
+        Persistance::Transaction serialize() const {
+            return Persistance::Transaction{
+                .m_id = id(),
+                .m_date = date(),
+                .m_amount = amount(),
+                .m_category = category(),
+            };
+        }
 
     signals:
         void signalChanged();
