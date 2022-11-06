@@ -22,7 +22,6 @@ set(PROJECT_SOURCES
     Models/TransactionModel.hpp
     Models/DatabaseModel.hpp
     Persistance/Database.hpp
-    Persistance/DeclareMigration.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp

@@ -29,6 +29,7 @@ namespace Accounting::Widgets
 
             {
                 m_ui.m_category_QComboBox->addItem("Groceries");
+                m_ui.m_category_QComboBox->addItem("Transport");
 
                 if (transaction_model == nullptr) {
                     m_ui.m_category_QComboBox->setCurrentIndex(0);

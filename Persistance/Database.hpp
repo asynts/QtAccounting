@@ -6,43 +6,43 @@
 #include <QStandardPaths>
 #include <QDir>
 
-#include "Persistance/DeclareMigration.hpp"
-
 // This file is used for two purposes:
 //
 // -   Save/load database to/from disk.
 //
 // -   Serve as migration script.
 //
+//     The script is standalone and only depends on Qt.
+//
 // The former is obvious, the latter is not.
+//
 // Suppose, we want to add a new field to 'Transaction':
 //
 //  1. Copy this file into the 'Migrations' folder.
 //
 //  2. Update 'NewTransaction' and 'migrate(const Transaction&)'.
 //
-//  3. Increment 'NEW_BINARY_VERSION'.
+//  3. Increment 'ACCOUTNING_NEW_BINARY_VERSON'.
 //
 //  4. Update namespace to be 'Accounting::Migrations::From${OLD_BINARY_VERSION}To${NEW_BINARY_VERSION}'.
 //
-//  5. Include the new file from 'main.cpp'.
+//  5. Include the new file from 'MainWindow.cpp'.
 //
-// You can run the migration script using 'load_migrate_save'.
-// The script is standalone and only depends on Qt.
+//  6. Add call to 'Accounting::Migrations::From${OLD_BINARY_VERSION}To${NEW_BINARY_VERSION}::load_migrate_save()'.
 //
 // Then, update this file in-place:
 //
 //  1. Update 'Transaction' and 'migrate(const Transaction&)'.
 //
-//  2. Increment 'NEW_BINARY_VERSION' and 'OLD_BINARY_VERSION'.
+//  2. Increment 'ACCOUTNING_NEW_BINARY_VERSON' and 'ACCOUTNING_OLD_BINARY_VERSON'.
 
-#define ACCOUTNING_OLD_BINARY_VERSON 1
-#define ACCOUTNING_NEW_BINARY_VERSON 1
+#define ACCOUTNING_OLD_BINARY_VERSON 1ull
+#define ACCOUTNING_NEW_BINARY_VERSON 1ull
+
+#define ACCOUNTING_MAGIC_NUMBER 7250402524647310127ull
 
 namespace Accounting::Persistance
 {
-    constexpr quint64 MAGIC_NUMBER = 7250402524647310127;
-
     struct Transaction {
         QString m_id;
         QDate m_date;
@@ -166,7 +166,7 @@ namespace Accounting::Persistance
         file.open(QIODeviceBase::WriteOnly);
 
         QDataStream stream(&file);
-        stream << MAGIC_NUMBER;
+        stream << ACCOUNTING_MAGIC_NUMBER;
         stream << ACCOUTNING_NEW_BINARY_VERSON;
         stream << database;
 
@@ -183,21 +183,6 @@ namespace Accounting::Persistance
         }
 
         return filepath;
-    }
-
-    inline void automatic_migration(quint64 binary_version) {
-        // This should not be used from a migration script.
-        Q_ASSERT(ACCOUTNING_OLD_BINARY_VERSON == ACCOUTNING_NEW_BINARY_VERSON);
-
-        // We can only migrate forward.
-        Q_ASSERT(binary_version <= ACCOUTNING_OLD_BINARY_VERSON);
-
-        // Migrate to the next binary version.
-        MigrationId migration_id{
-            .m_old_binary_version = binary_version,
-            .m_new_binary_version = binary_version + 1,
-        };
-        migrations()[migration_id].run();
     }
 
     inline std::optional<Database> load_from_disk() {
@@ -218,15 +203,11 @@ namespace Accounting::Persistance
 
         quint64 magic_number;
         stream >> magic_number;
-        Q_ASSERT(magic_number == MAGIC_NUMBER);
+        Q_ASSERT(magic_number == ACCOUNTING_MAGIC_NUMBER);
 
         quint64 binary_version;
         stream >> binary_version;
-
-        if (binary_version != ACCOUTNING_OLD_BINARY_VERSON) {
-            file.close();
-            automatic_migration(binary_version);
-        }
+        Q_ASSERT(binary_version == ACCOUTNING_OLD_BINARY_VERSON);
 
         Database database;
         stream >> database;
@@ -241,9 +222,8 @@ namespace Accounting::Persistance
         Q_ASSERT(database_opt.has_value());
         save_to_disk(migrate(database_opt.value()));
     }
-
-    REGISTER_MIGRATION(&load_migrate_save, ACCOUTNING_OLD_BINARY_VERSON, ACCOUTNING_NEW_BINARY_VERSON);
 }
 
 #undef ACCOUTNING_OLD_BINARY_VERSION
 #undef ACCOUTNING_NEW_BINARY_VERSION
+#undef ACCOUNTING_MAGIC_NUMBER
