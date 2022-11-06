@@ -78,9 +78,11 @@ namespace Accounting::Persistance
     }
 
     inline QString save_to_disk(const Database& database) {
-        auto filepath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        filepath.append(QDir::separator());
-        filepath.append("Database");
+        auto dirpath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        dirpath.append(QDir::separator());
+        dirpath.append("Database");
+
+        auto filepath = dirpath;
         filepath.append(QDir::separator());
         filepath.append(QString::number(QDateTime::currentMSecsSinceEpoch()).rightJustified(16, '0'));
         filepath.append("_Database.bin");
@@ -102,10 +104,30 @@ namespace Accounting::Persistance
 
         file.close();
 
+        // Create symbolic link to discover current version.
+        {
+            auto current_path = QDir(dirpath).filePath("Database.bin");
+
+            // This may fail if this is the first time we are creating this file.
+            QFile::remove(current_path);
+
+            QFile::link(filepath, current_path);
+        }
+
         return filepath;
     }
 
-    inline Database load_from_disk(QString filepath) {
+    inline std::optional<Database> load_from_disk() {
+        auto filepath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        filepath.append(QDir::separator());
+        filepath.append("Database");
+        filepath.append(QDir::separator());
+        filepath.append("Database.bin");
+
+        if (!QFile::exists(filepath)) {
+            return std::nullopt;
+        }
+
         QFile file(filepath);
         file.open(QIODeviceBase::ReadOnly);
 

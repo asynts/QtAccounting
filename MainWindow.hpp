@@ -24,6 +24,20 @@ namespace Accounting
             m_database_model = new Models::DatabaseModel(this);
             m_ui.m_bills_BillListWidget->setModel(m_database_model);
 
+            // Try to load database from disk.
+            {
+                auto database_opt = Persistance::load_from_disk();
+
+                if (database_opt.has_value()) {
+                    m_database_model->deserialize(database_opt.value());
+                } else {
+                    QMessageBox message_box;
+                    message_box.setText("No existing database found, loading empty database.");
+                    message_box.setStandardButtons(QMessageBox::StandardButton::Ok);
+                    message_box.exec();
+                }
+            }
+
             connect(m_ui.m_buttons_QDialogButtonBox, &QDialogButtonBox::rejected,
                     this, &MainWindow::slotDiscard);
 
