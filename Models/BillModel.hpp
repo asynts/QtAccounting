@@ -58,7 +58,13 @@ namespace Accounting::Models
         qreal totalAmount() const {
             qreal total = 0.0;
             for (auto *transaction_model : m_transactions) {
-                total += transaction_model->amount();
+                if (transaction_model->status() == TransactionModel::Status::Normal) {
+                    total += transaction_model->amount();
+                } else if (transaction_model->status() == TransactionModel::Status::AlreadyPaid) {
+                    // Exclude from total.
+                } else {
+                    Q_UNREACHABLE();
+                }
             }
             return total;
         }

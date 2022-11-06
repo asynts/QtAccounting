@@ -16,6 +16,11 @@ namespace Accounting::Models
         boldFont.setBold(true);
         boldCharFormat.setFont(boldFont);
 
+        QTextCharFormat strikeOutCharFormat;
+        QFont strikeOutFont = strikeOutCharFormat.font();
+        strikeOutFont.setStrikeOut(true);
+        strikeOutCharFormat.setFont(strikeOutFont);
+
         constexpr int column_count = 4;
 
         QList<std::array<QString, column_count>> data_displayText;
@@ -77,6 +82,16 @@ namespace Accounting::Models
 
         // Transactions.
         for (TransactionModel *transaction_model : m_transactions) {
+            QTextCharFormat charFormat;
+
+            if (transaction_model->status() == TransactionModel::Status::Normal) {
+                charFormat = normalCharFormat;
+            } else if (transaction_model->status() == TransactionModel::Status::AlreadyPaid) {
+                charFormat = strikeOutCharFormat;
+            } else {
+                Q_UNREACHABLE();
+            }
+
             data_displayText.append({
                 transaction_model->id(),
                 transaction_model->date().toString("yyyy-MM-dd"),
@@ -84,10 +99,10 @@ namespace Accounting::Models
                 QString::number(transaction_model->amount(), 'f', 2),
             });
             data_charFormat.append({
-                normalCharFormat,
-                normalCharFormat,
-                normalCharFormat,
-                normalCharFormat,
+                charFormat,
+                charFormat,
+                charFormat,
+                charFormat,
             });
         }
 
