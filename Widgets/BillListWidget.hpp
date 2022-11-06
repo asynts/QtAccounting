@@ -22,8 +22,6 @@ namespace Accounting::Widgets
             : QStyledItemDelegate(parent) { }
 
         virtual bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem& option, const QModelIndex& index) override {
-            qDebug() << event->type();
-
             if (!model->checkIndex(index)) {
                 return false;
             }

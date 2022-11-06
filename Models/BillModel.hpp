@@ -7,6 +7,7 @@
 #include <QTextTable>
 #include <QTextDocumentWriter>
 #include <QDir>
+#include <QSettings>
 
 #include "Models/TransactionModel.hpp"
 #include "Util.hpp"
@@ -48,11 +49,20 @@ namespace Accounting::Models
         void setDate(QDate value) { m_date = value; }
         QBindable<QDate> bindableDate() { return QBindable<QDate>(&m_date); }
 
+        qreal totalAmount() const {
+            qreal total = 0.0;
+            for (auto *transaction_model : m_transactions) {
+                total += transaction_model->amount();
+            }
+            return total;
+        }
+
         // FIXME: Implement this in '.cpp' file.
         // FIXME: Maybe even create a helper class for this?
         void exportTo(QString filepath) {
             qDebug() << "Exporting to" << filepath;
 
+            QSettings settings;
             QTextDocument document;
             QTextCursor cursor(&document);
 
@@ -63,12 +73,6 @@ namespace Accounting::Models
             boldFont.setBold(true);
             boldCharFormat.setFont(boldFont);
 
-            QTextFrameFormat noBorderFrameFormat;
-            noBorderFrameFormat.setBorderStyle(QTextFrameFormat::BorderStyle_None);
-
-            QTextFrameFormat borderFrameFormat;
-            noBorderFrameFormat.setBorder(2.0);
-
             // FIXME: Move this into a function.
             {
                 constexpr int column_count = 4;
@@ -78,6 +82,7 @@ namespace Accounting::Models
                 QList<std::array<QTextCharFormat, column_count>> data_charFormat;
 
                 // Date.
+                int date_row = data_displayText.size();
                 data_displayText.append({
                     "date",
                     date().toString("yyyy-MM-dd"),
@@ -92,6 +97,7 @@ namespace Accounting::Models
                 });
 
                 // Bill ID.
+                int bill_id_row = data_displayText.size();
                 data_displayText.append({
                     "bill_id",
                     id(),
@@ -149,19 +155,18 @@ namespace Accounting::Models
                     });
                 }
 
-                // IBAN
-                const int iban_row = data_displayText.size();
+                // Total.
                 data_displayText.append({
-                    "IBAN",
-                    "GB 33BU KB20 2015 5555 5555", // This is an example: https://www.iban.com/testibans
                     "",
-                    ""
+                    "",
+                    "Total",
+                    QString::number(totalAmount(), 'f', 2),
                 });
                 data_charFormat.append({
+                    normalCharFormat,
+                    normalCharFormat,
                     boldCharFormat,
-                    normalCharFormat,
-                    normalCharFormat,
-                    normalCharFormat,
+                    boldCharFormat,
                 });
 
                 // Empty row.
@@ -178,12 +183,41 @@ namespace Accounting::Models
                     normalCharFormat,
                 });
 
+                // Receiver.
+                const int receiver_row = data_displayText.size();
+                data_displayText.append({
+                    "Receiver",
+                    settings.value("Receiver/Name").value<QString>(),
+                    "",
+                    ""
+                });
+                data_charFormat.append({
+                    boldCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                });
+
+                // IBAN
+                const int iban_row = data_displayText.size();
+                data_displayText.append({
+                    "IBAN",
+                    settings.value("Receiver/IBAN").value<QString>(),
+                    "",
+                    ""
+                });
+                data_charFormat.append({
+                    boldCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                    normalCharFormat,
+                });
+
                 // FIXME: Split this into a function and generate two tables with different borders.
 
                 // Write to output file.
                 Q_ASSERT(data_displayText.size() == data_charFormat.size());
                 QTextTable *table = cursor.insertTable(data_displayText.size(), column_count);
-                table->setFrameFormat(noBorderFrameFormat);
                 for (int row_index = 0; row_index < data_displayText.size(); ++row_index) {
                     for (int column_index = 0; column_index < column_count; ++column_index) {
                         auto cell = table->cellAt(row_index, column_index);
@@ -195,8 +229,11 @@ namespace Accounting::Models
                     }
                 }
 
-                // The IBAN won't fit otherwise.
+                // The values won't fit otherwise.
                 table->mergeCells(iban_row, 1, 1, 3);
+                table->mergeCells(receiver_row, 1, 1, 3);
+                table->mergeCells(bill_id_row, 1, 1, 3);
+                table->mergeCells(date_row, 1, 1, 3);
             }
 
             {
