@@ -17,6 +17,9 @@ namespace Accounting::Models
         Q_PROPERTY(QString category READ category WRITE setCategory BINDABLE bindableCategory NOTIFY signalChanged);
 
     public:
+        explicit TransactionModel(QObject *parent = nullptr)
+            : QObject(parent) { }
+
         explicit TransactionModel(QString id, QDate date, qreal amount, QString category, QObject *parent = nullptr)
             : QObject(parent)
             , m_id(id)
@@ -46,6 +49,13 @@ namespace Accounting::Models
                 .m_amount = amount(),
                 .m_category = category(),
             };
+        }
+
+        void deserialize(const Persistance::Transaction& value) {
+            m_id = value.m_id;
+            m_date = value.m_date;
+            m_amount = value.m_amount;
+            m_category = value.m_category;
         }
 
     signals:

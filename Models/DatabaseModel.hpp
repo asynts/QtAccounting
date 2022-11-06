@@ -43,6 +43,23 @@ namespace Accounting::Models
             };
         }
 
+        void deserialize(const Persistance::Database& value) {
+            beginResetModel();
+
+            for (auto *bill_model : m_bills) {
+                bill_model->deleteLater();
+            }
+            m_bills.clear();
+
+            for (auto& bill : value.m_bills) {
+                auto *bill_model = new BillModel(this);
+                bill_model->deserialize(bill);
+                m_bills.append(bill_model);
+            }
+
+            endResetModel();
+        }
+
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
                 return QModelIndex();

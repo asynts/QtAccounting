@@ -37,6 +37,9 @@ namespace Accounting::Models
         Q_PROPERTY(Status status READ status WRITE setStatus BINDABLE bindableStatus NOTIFY signalChanged);
 
     public:
+        explicit BillModel(QObject *parent = nullptr)
+            : QAbstractItemModel(parent) { }
+
         explicit BillModel(QString id, QDate date, Status status, QObject *parent = nullptr)
             : QAbstractItemModel(parent)
             , m_id(id)
@@ -264,6 +267,27 @@ namespace Accounting::Models
             };
         }
 
+        void deserialize(const Persistance::Bill& value) {
+            m_id = value.m_id;
+            m_date = value.m_date;
+            m_status = status_from_string(value.m_status);
+
+            beginResetModel();
+
+            for (auto& transaction_model : m_transactions) {
+                transaction_model->deleteLater();
+            }
+            m_transactions.clear();
+
+            for (auto& transaction : value.m_transactions) {
+                auto *transaction_model = new TransactionModel(this);
+                transaction_model->deserialize(transaction);
+                m_transactions.append(transaction_model);
+            }
+
+            endResetModel();
+        }
+
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
                 return QModelIndex();
@@ -332,15 +356,15 @@ namespace Accounting::Models
 
     public slots:
         void createTransaction(QDate date, qreal amount, QString category) {
-            auto *transaction_object = new TransactionModel(generate_id(), date, amount, category, this);
+            auto *transaction_model = new TransactionModel(generate_id(), date, amount, category, this);
 
             int row = m_transactions.size();
 
             beginInsertRows(QModelIndex(), row, row);
-            m_transactions.append(transaction_object);
+            m_transactions.append(transaction_model);
             endInsertRows();
 
-            connect(transaction_object, &TransactionModel::signalChanged,
+            connect(transaction_model, &TransactionModel::signalChanged,
                     this, [=, this]() {
                         emit dataChanged(index(row, 0), index(row, columnCount() - 1));
                     });
