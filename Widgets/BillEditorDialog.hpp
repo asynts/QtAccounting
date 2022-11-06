@@ -8,6 +8,7 @@
 #include <QStyledItemDelegate>
 #include <QStandardPaths>
 #include <QDir>
+#include <QDesktopServices>
 
 #include "Models/BillModel.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
@@ -115,6 +116,8 @@ namespace Accounting::Widgets
             filepath.append(".odt");
 
             m_bill_model->exportTo(filepath);
+
+            QDesktopServices::openUrl(QUrl::fromLocalFile(filepath));
         }
 
     private:
