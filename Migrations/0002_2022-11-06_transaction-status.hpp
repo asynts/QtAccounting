@@ -36,12 +36,12 @@
 //
 //  2. Increment 'ACCOUTNING_NEW_BINARY_VERSON' and 'ACCOUTNING_OLD_BINARY_VERSON'.
 
-#define ACCOUTNING_OLD_BINARY_VERSION 3ull
+#define ACCOUTNING_OLD_BINARY_VERSION 2ull
 #define ACCOUTNING_NEW_BINARY_VERSION 3ull
 
 #define ACCOUNTING_MAGIC_NUMBER 7250402524647310127ull
 
-namespace Accounting::Persistance
+namespace Accounting::Migrations::From2To3
 {
     struct Transaction {
         QString m_id;
@@ -49,7 +49,6 @@ namespace Accounting::Persistance
         qreal m_amount;
         QString m_category;
         qint64 m_creation_timestamp;
-        QString m_status;
     };
 
     struct Bill {
@@ -64,7 +63,15 @@ namespace Accounting::Persistance
         QList<Bill> m_bills;
     };
 
-    using NewTransaction = Transaction;
+    struct NewTransaction {
+        QString m_id;
+        QDate m_date;
+        qreal m_amount;
+        QString m_category;
+        qint64 m_creation_timestamp;
+        QString m_status;
+    };
+
     inline NewTransaction migrate(const Transaction& transaction) {
         return NewTransaction{
             .m_id = transaction.m_id,
@@ -72,11 +79,18 @@ namespace Accounting::Persistance
             .m_amount = transaction.m_amount,
             .m_category = transaction.m_category,
             .m_creation_timestamp = transaction.m_creation_timestamp,
-            .m_status = transaction.m_status,
+            .m_status = "Normal",
         };
     }
 
-    using NewBill = Bill;
+    struct NewBill {
+        QString m_id;
+        QDate m_date;
+        QString m_status;
+        QList<NewTransaction> m_transactions;
+        qint64 m_creation_timestamp;
+    };
+
     inline NewBill migrate(const Bill& bill) {
         QList<NewTransaction> transactions;
         for (auto& transaction : bill.m_transactions) {
@@ -92,7 +106,10 @@ namespace Accounting::Persistance
         };
     }
 
-    using NewDatabase = Database;
+    struct NewDatabase {
+        QList<NewBill> m_bills;
+    };
+
     inline NewDatabase migrate(const Database& database) {
         QList<NewBill> bills;
         for (auto& bill : database.m_bills) {
@@ -109,8 +126,7 @@ namespace Accounting::Persistance
            >> value.m_date
            >> value.m_amount
            >> value.m_category
-           >> value.m_creation_timestamp
-           >> value.m_status;
+           >> value.m_creation_timestamp;
 
         return in;
     }

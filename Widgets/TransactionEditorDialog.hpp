@@ -21,10 +21,19 @@ namespace Accounting::Widgets
         {
             m_ui.setupUi(this);
 
-            if (transaction_model== nullptr) {
+            if (transaction_model == nullptr) {
                 setWindowTitle("New Transaction");
             } else {
                 setWindowTitle(QString("Edit Transaction '%1'").arg(transaction_model->id()));
+            }
+
+            {
+                fill_QComboBox_with_enum<Models::TransactionModel::Status>(m_ui.m_status_QComboBox);
+                if (transaction_model == nullptr) {
+                    m_ui.m_status_QComboBox->setCurrentIndex(0);
+                } else {
+                    m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(transaction_model->status()));
+                }
             }
 
             {
@@ -111,6 +120,7 @@ namespace Accounting::Widgets
             auto amount = std::abs(m_ui.m_amount_QLineEdit->text().toDouble());
             auto date = m_ui.m_date_QDateEdit->date();
             auto category = m_ui.m_category_QComboBox->currentText().trimmed();
+            auto status = static_cast<Models::TransactionModel::Status>(m_ui.m_status_QComboBox->currentIndex());
 
             // Is this an expense?
             if (m_ui.m_type_QComboBox->currentIndex() == 0) {
@@ -118,11 +128,12 @@ namespace Accounting::Widgets
             }
 
             if (m_old_transaction_model == nullptr) {
-                m_parent_bill_model->createTransaction(date, amount, category);
+                m_parent_bill_model->createTransaction(date, amount, category, status);
             } else {
                 m_old_transaction_model->setAmount(amount);
                 m_old_transaction_model->setDate(date);
                 m_old_transaction_model->setCategory(category);
+                m_old_transaction_model->setStatus(status);
             }
 
             done(QDialog::Accepted);

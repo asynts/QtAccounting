@@ -25,17 +25,6 @@ namespace Accounting::Models
         };
         Q_ENUM(Status);
 
-        static Status status_from_string(QString key) {
-            bool ok;
-            auto value = QMetaEnum::fromType<Status>().keyToValue(key.toUtf8(), &ok);
-            Q_ASSERT(ok);
-
-            return static_cast<Status>(value);
-        }
-        static QString status_to_string(Status value) {
-            return QMetaEnum::fromType<Status>().valueToKey(static_cast<int>(value));
-        }
-
     private:
         Q_OBJECT
 
@@ -85,7 +74,7 @@ namespace Accounting::Models
             return Persistance::Bill{
                 .m_id = id(),
                 .m_date = date(),
-                .m_status = status_to_string(status()),
+                .m_status = enum_type_to_string(status()),
                 .m_transactions = serialized_transactions,
                 .m_creation_timestamp = m_creation_timestamp,
             };
@@ -94,7 +83,7 @@ namespace Accounting::Models
         void deserialize(const Persistance::Bill& value) {
             m_id = value.m_id;
             m_date = value.m_date;
-            m_status = status_from_string(value.m_status);
+            m_status = enum_type_from_string<Status>(value.m_status);
             m_creation_timestamp = value.m_creation_timestamp;
 
             beginResetModel();
@@ -135,7 +124,8 @@ namespace Accounting::Models
             // Amount
             // Category
             // Id
-            return 5;
+            // Status
+            return 6;
         }
 
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
@@ -173,6 +163,10 @@ namespace Accounting::Models
                 return transaction->id();
             }
 
+            if (index.column() == 5) {
+                return enum_type_to_string(transaction->status());
+            }
+
             return QVariant();
         }
 
@@ -180,8 +174,8 @@ namespace Accounting::Models
         void signalChanged();
 
     public slots:
-        void createTransaction(QDate date, qreal amount, QString category) {
-            auto *transaction_model = new TransactionModel(generate_id(), date, amount, category, QDateTime::currentMSecsSinceEpoch(), this);
+        void createTransaction(QDate date, qreal amount, QString category, TransactionModel::Status status) {
+            auto *transaction_model = new TransactionModel(generate_id(), date, amount, category, status, QDateTime::currentMSecsSinceEpoch(), this);
 
             int row = m_transactions.size();
 

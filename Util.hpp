@@ -45,7 +45,7 @@ namespace Accounting
 
     // This assumes that the enum is 0-indexed.
     template<typename EnumType>
-    inline void fill_QComboBox_with_enum(QComboBox *combo_box) {
+    void fill_QComboBox_with_enum(QComboBox *combo_box) {
         combo_box->clear();
 
         auto meta_enum = QMetaEnum::fromType<EnumType>();
@@ -53,4 +53,19 @@ namespace Accounting
             combo_box->addItem(meta_enum.key(key));
         }
     }
+
+    template<typename EnumType>
+    EnumType enum_type_from_string(QString key) {
+        bool ok;
+        auto value = QMetaEnum::fromType<EnumType>().keyToValue(key.toUtf8(), &ok);
+        Q_ASSERT(ok);
+
+        return static_cast<EnumType>(value);
+    }
+
+    template<typename EnumType>
+    QString enum_type_to_string(EnumType value) {
+        return QMetaEnum::fromType<EnumType>().valueToKey(static_cast<int>(value));
+    }
+
 }

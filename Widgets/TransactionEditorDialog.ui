@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>384</width>
-    <height>175</height>
+    <height>213</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,19 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QFormLayout" name="formLayout">
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="m_amount_QLineEdit"/>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Category</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="m_category_QComboBox">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label">
@@ -28,6 +39,9 @@
         <string>Amount</string>
        </property>
       </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="m_amount_QLineEdit"/>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_2">
@@ -53,17 +67,13 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Category</string>
-       </property>
-      </widget>
+     <item row="5" column="1">
+      <widget class="QComboBox" name="m_status_QComboBox"/>
      </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="m_category_QComboBox">
-       <property name="editable">
-        <bool>true</bool>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Status</string>
        </property>
       </widget>
      </item>

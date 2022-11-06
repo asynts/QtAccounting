@@ -5,28 +5,39 @@
 #include <QDate>
 
 #include "Persistance/Database.hpp"
+#include "Util.hpp"
 
 namespace Accounting::Models
 {
     class TransactionModel final : public QObject {
+    public:
+        enum class Status {
+            Normal,
+            AlreadyPaid,
+        };
+        Q_ENUM(Status);
+
+    private:
         Q_OBJECT
 
         Q_PROPERTY(QString id READ id BINDABLE bindableId NOTIFY signalChanged);
         Q_PROPERTY(QDate date READ date WRITE setDate BINDABLE bindableDate NOTIFY signalChanged);
         Q_PROPERTY(qreal amount READ amount WRITE setAmount BINDABLE bindableAmount NOTIFY signalChanged);
         Q_PROPERTY(QString category READ category WRITE setCategory BINDABLE bindableCategory NOTIFY signalChanged);
+        Q_PROPERTY(Status status READ status WRITE setStatus BINDABLE bindableStatus NOTIFY signalChanged);
 
     public:
         explicit TransactionModel(QObject *parent = nullptr)
             : QObject(parent)
             , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch()) { }
 
-        explicit TransactionModel(QString id, QDate date, qreal amount, QString category, qint64 creation_timestamp, QObject *parent = nullptr)
+        explicit TransactionModel(QString id, QDate date, qreal amount, QString category, Status status, qint64 creation_timestamp, QObject *parent = nullptr)
             : QObject(parent)
             , m_id(id)
             , m_date(date)
             , m_amount(amount)
             , m_category(category)
+            , m_status(status)
             , m_creation_timestamp(creation_timestamp) { }
 
         QString id() const { return m_id.value(); }
@@ -44,6 +55,10 @@ namespace Accounting::Models
         void setCategory(QString value) { m_category = value; }
         QBindable<QString> bindableCategory() { return QBindable<QString>(&m_category); }
 
+        Status status() const { return m_status.value(); }
+        void setStatus(Status value) { m_status = value; }
+        QBindable<Status> bindableStatus() { return QBindable<Status>(&m_status); }
+
         Persistance::Transaction serialize() const {
             return Persistance::Transaction{
                 .m_id = id(),
@@ -51,6 +66,7 @@ namespace Accounting::Models
                 .m_amount = amount(),
                 .m_category = category(),
                 .m_creation_timestamp = m_creation_timestamp,
+                .m_status = enum_type_to_string(status()),
             };
         }
 
@@ -60,6 +76,7 @@ namespace Accounting::Models
             m_amount = value.m_amount;
             m_category = value.m_category;
             m_creation_timestamp = value.m_creation_timestamp;
+            m_status = enum_type_from_string<Status>(value.m_status);
         }
 
     signals:
@@ -72,5 +89,6 @@ namespace Accounting::Models
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QDate, m_date, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, qreal, m_amount, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QString, m_category, &TransactionModel::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, Status, m_status, &TransactionModel::signalChanged);
     };
 }
