@@ -25,9 +25,16 @@ namespace Accounting::Models
         };
         Q_ENUM(Status);
 
-        // FIXME: Implement
-        static QString status_to_string(Status);
-        static Status status_from_string(QString);
+        static Status status_from_string(QString key) {
+            bool ok;
+            auto value = QMetaEnum::fromType<Status>().keyToValue(key.toUtf8(), &ok);
+            Q_ASSERT(ok);
+
+            return static_cast<Status>(value);
+        }
+        static QString status_to_string(Status value) {
+            return QMetaEnum::fromType<Status>().valueToKey(static_cast<int>(value));
+        }
 
     private:
         Q_OBJECT

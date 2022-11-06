@@ -45,28 +45,31 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        explicit BillListWidget(Models::DatabaseModel *database_model, QWidget *parent = nullptr)
+        explicit BillListWidget(QWidget *parent = nullptr)
             : QWidget(parent)
-            , m_database_model(database_model)
         {
             m_ui.setupUi(this);
-
-            m_ui.m_bills_QTableView->setModel(database_model);
-            m_ui.m_bills_QTableView->setItemDelegate(new BillItemDelegate(this));
-            m_ui.m_bills_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
 
             connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
                     this, &BillListWidget::slotNewBill);
         }
 
+        void setModel(Models::DatabaseModel *database_model) {
+            m_ui.m_bills_QTableView->setModel(database_model);
+            m_ui.m_bills_QTableView->setItemDelegate(new BillItemDelegate(this));
+            m_ui.m_bills_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
+            m_database_model = database_model;
+        }
+
     private slots:
         void slotNewBill() {
+            Q_ASSERT(m_database_model != nullptr);
             m_database_model->createBill();
         }
 
     private:
         Ui::BillListWidget m_ui;
 
-        Models::DatabaseModel *m_database_model;
+        Models::DatabaseModel *m_database_model = nullptr;
     };
 }

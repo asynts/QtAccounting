@@ -29,7 +29,7 @@ namespace Accounting::Persistance
         QList<Bill> m_bills;
     };
 
-    QDataStream& operator>>(QDataStream& in, Transaction& value) {
+    inline QDataStream& operator>>(QDataStream& in, Transaction& value) {
         in >> value.m_id
            >> value.m_date
            >> value.m_amount
@@ -38,7 +38,7 @@ namespace Accounting::Persistance
         return in;
     }
 
-    QDataStream& operator>>(QDataStream& in, Bill& value) {
+    inline QDataStream& operator>>(QDataStream& in, Bill& value) {
         in >> value.m_id
            >> value.m_date
            >> value.m_status
@@ -47,13 +47,13 @@ namespace Accounting::Persistance
         return in;
     }
 
-    QDataStream& operator>>(QDataStream& in, Database& value) {
+    inline QDataStream& operator>>(QDataStream& in, Database& value) {
         in >> value.m_bills;
 
         return in;
     }
 
-    QDataStream& operator<<(QDataStream& out, const Transaction& value) {
+    inline QDataStream& operator<<(QDataStream& out, const Transaction& value) {
         out << value.m_id
             << value.m_date
             << value.m_amount
@@ -62,7 +62,7 @@ namespace Accounting::Persistance
         return out;
     }
 
-    QDataStream& operator<<(QDataStream& out, const Bill& value) {
+    inline QDataStream& operator<<(QDataStream& out, const Bill& value) {
         out << value.m_id
             << value.m_date
             << value.m_status
@@ -71,13 +71,13 @@ namespace Accounting::Persistance
         return out;
     }
 
-    QDataStream& operator<<(QDataStream& out, const Database& value) {
+    inline QDataStream& operator<<(QDataStream& out, const Database& value) {
         out << value.m_bills;
 
         return out;
     }
 
-    QString save_to_disk(const Database& database) {
+    inline QString save_to_disk(const Database& database) {
         auto filepath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
         filepath.append(QDir::separator());
         filepath.append("Database");
@@ -86,6 +86,11 @@ namespace Accounting::Persistance
         filepath.append("_Database.bin");
 
         qDebug() << "Writting output file to" << filepath;
+
+        {
+            bool ok = QFileInfo(filepath).dir().mkpath(".");
+            Q_ASSERT(ok);
+        }
 
         QFile file(filepath);
         file.open(QIODeviceBase::WriteOnly);
@@ -100,7 +105,7 @@ namespace Accounting::Persistance
         return filepath;
     }
 
-    Database load_from_disk(QString filepath) {
+    inline Database load_from_disk(QString filepath) {
         QFile file(filepath);
         file.open(QIODeviceBase::ReadOnly);
 

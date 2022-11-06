@@ -13,8 +13,36 @@
   <property name="windowTitle">
    <string>Bills</string>
   </property>
-  <widget class="QWidget" name="m_central_QWidget"/>
+  <widget class="QWidget" name="m_central_QWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="Accounting::Widgets::BillListWidget" name="m_bills_BillListWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QDialogButtonBox" name="m_buttons_QDialogButtonBox">
+      <property name="standardButtons">
+       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Accounting::Widgets::BillListWidget</class>
+   <extends>QWidget</extends>
+   <header>Widgets/BillListWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
