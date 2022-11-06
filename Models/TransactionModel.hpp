@@ -4,7 +4,7 @@
 #include <QBindable>
 #include <QDate>
 
-#include "Persistance.hpp"
+#include "Persistance/Database.hpp"
 
 namespace Accounting::Models
 {

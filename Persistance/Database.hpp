@@ -6,10 +6,42 @@
 #include <QStandardPaths>
 #include <QDir>
 
+#include "Persistance/DeclareMigration.hpp"
+
+// This file is used for two purposes:
+//
+// -   Save/load database to/from disk.
+//
+// -   Serve as migration script.
+//
+// The former is obvious, the latter is not.
+// Suppose, we want to add a new field to 'Transaction':
+//
+//  1. Copy this file into the 'Migrations' folder.
+//
+//  2. Update 'NewTransaction' and 'migrate(const Transaction&)'.
+//
+//  3. Increment 'NEW_BINARY_VERSION'.
+//
+//  4. Update namespace to be 'Accounting::Migrations::From${OLD_BINARY_VERSION}To${NEW_BINARY_VERSION}'.
+//
+//  5. Include the new file from 'main.cpp'.
+//
+// You can run the migration script using 'load_migrate_save'.
+// The script is standalone and only depends on Qt.
+//
+// Then, update this file in-place:
+//
+//  1. Update 'Transaction' and 'migrate(const Transaction&)'.
+//
+//  2. Increment 'NEW_BINARY_VERSION' and 'OLD_BINARY_VERSION'.
+
+#define ACCOUTNING_OLD_BINARY_VERSON 1
+#define ACCOUTNING_NEW_BINARY_VERSON 1
+
 namespace Accounting::Persistance
 {
     constexpr quint64 MAGIC_NUMBER = 7250402524647310127;
-    constexpr quint64 BINARY_VERSON = 1;
 
     struct Transaction {
         QString m_id;
@@ -28,6 +60,44 @@ namespace Accounting::Persistance
     struct Database {
         QList<Bill> m_bills;
     };
+
+    using NewTransaction = Transaction;
+    inline NewTransaction migrate(const Transaction& transaction) {
+        return NewTransaction{
+            .m_id = transaction.m_id,
+            .m_date = transaction.m_date,
+            .m_amount = transaction.m_amount,
+            .m_category = transaction.m_category,
+        };
+    }
+
+    using NewBill = Bill;
+    inline NewBill migrate(const Bill& bill) {
+        QList<NewTransaction> transactions;
+        for (auto& transaction : bill.m_transactions) {
+            transactions.append(migrate(transaction));
+        }
+
+        return NewBill{
+            .m_id = bill.m_id,
+            .m_date = bill.m_date,
+            .m_status = bill.m_status,
+            .m_transactions = transactions,
+        };
+    }
+
+    using NewDatabase = Database;
+    inline NewDatabase migrate(const Database& database) {
+        QList<NewBill> bills;
+        for (auto& bill : database.m_bills) {
+            bills.append(migrate(bill));
+        }
+
+        return NewDatabase{
+            .m_bills = bills,
+        };
+    }
+
 
     inline QDataStream& operator>>(QDataStream& in, Transaction& value) {
         in >> value.m_id
@@ -77,7 +147,7 @@ namespace Accounting::Persistance
         return out;
     }
 
-    inline QString save_to_disk(const Database& database) {
+    inline QString save_to_disk(const NewDatabase& database) {
         auto dirpath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
         dirpath.append(QDir::separator());
         dirpath.append("Database");
@@ -86,8 +156,6 @@ namespace Accounting::Persistance
         filepath.append(QDir::separator());
         filepath.append(QString::number(QDateTime::currentMSecsSinceEpoch()).rightJustified(16, '0'));
         filepath.append("_Database.bin");
-
-        qDebug() << "Writting output file to" << filepath;
 
         {
             bool ok = QFileInfo(filepath).dir().mkpath(".");
@@ -99,7 +167,7 @@ namespace Accounting::Persistance
 
         QDataStream stream(&file);
         stream << MAGIC_NUMBER;
-        stream << BINARY_VERSON;
+        stream << ACCOUTNING_NEW_BINARY_VERSON;
         stream << database;
 
         file.close();
@@ -115,6 +183,21 @@ namespace Accounting::Persistance
         }
 
         return filepath;
+    }
+
+    inline void automatic_migration(quint64 binary_version) {
+        // This should not be used from a migration script.
+        Q_ASSERT(ACCOUTNING_OLD_BINARY_VERSON == ACCOUTNING_NEW_BINARY_VERSON);
+
+        // We can only migrate forward.
+        Q_ASSERT(binary_version <= ACCOUTNING_OLD_BINARY_VERSON);
+
+        // Migrate to the next binary version.
+        MigrationId migration_id{
+            .m_old_binary_version = binary_version,
+            .m_new_binary_version = binary_version + 1,
+        };
+        migrations()[migration_id].run();
     }
 
     inline std::optional<Database> load_from_disk() {
@@ -139,7 +222,11 @@ namespace Accounting::Persistance
 
         quint64 binary_version;
         stream >> binary_version;
-        Q_ASSERT(binary_version == BINARY_VERSON);
+
+        if (binary_version != ACCOUTNING_OLD_BINARY_VERSON) {
+            file.close();
+            automatic_migration(binary_version);
+        }
 
         Database database;
         stream >> database;
@@ -148,4 +235,15 @@ namespace Accounting::Persistance
 
         return database;
     }
+
+    inline void load_migrate_save() {
+        auto database_opt = load_from_disk();
+        Q_ASSERT(database_opt.has_value());
+        save_to_disk(migrate(database_opt.value()));
+    }
+
+    REGISTER_MIGRATION(&load_migrate_save, ACCOUTNING_OLD_BINARY_VERSON, ACCOUTNING_NEW_BINARY_VERSON);
 }
+
+#undef ACCOUTNING_OLD_BINARY_VERSION
+#undef ACCOUTNING_NEW_BINARY_VERSION

@@ -11,7 +11,7 @@
 
 #include "Models/TransactionModel.hpp"
 #include "Util.hpp"
-#include "Persistance.hpp"
+#include "Persistance/Database.hpp"
 
 namespace Accounting::Models
 {

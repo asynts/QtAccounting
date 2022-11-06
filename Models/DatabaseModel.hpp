@@ -3,7 +3,7 @@
 #include <QAbstractItemModel>
 
 #include "Models/BillModel.hpp"
-#include "Persistance.hpp"
+#include "Persistance/Database.hpp"
 
 namespace Accounting::Models
 {

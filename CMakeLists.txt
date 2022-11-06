@@ -21,7 +21,8 @@ set(PROJECT_SOURCES
     Models/BillModel.hpp
     Models/TransactionModel.hpp
     Models/DatabaseModel.hpp
-    Persistance.hpp
+    Persistance/Database.hpp
+    Persistance/DeclareMigration.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp
