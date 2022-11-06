@@ -19,6 +19,7 @@ set(PROJECT_SOURCES
     Widgets/BillEditorDialog.hpp
     Widgets/TransactionEditorDialog.hpp
     Models/BillModel.hpp
+    Models/BillModel.cpp
     Models/TransactionModel.hpp
     Models/DatabaseModel.hpp
     Persistance/Database.hpp
