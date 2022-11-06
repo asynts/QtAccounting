@@ -25,6 +25,18 @@ namespace Accounting::Models
         };
         Q_ENUM(Status);
 
+        enum Columns {
+            ColumnDate,
+            ColumnExpense,
+            ColumnAmount,
+            ColumnCategory,
+            ColumnStatus,
+            ColumnId,
+
+            ColumnCount
+        };
+        Q_ENUM(Columns);
+
     private:
         Q_OBJECT
 
@@ -125,13 +137,7 @@ namespace Accounting::Models
         }
 
         virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
-            // Date
-            // Expense
-            // Amount
-            // Category
-            // Id
-            // Status
-            return 6;
+            return Columns::ColumnCount;
         }
 
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
@@ -145,11 +151,11 @@ namespace Accounting::Models
 
             auto *transaction = m_transactions[index.row()];
 
-            if (index.column() == 0) {
+            if (index.column() == Columns::ColumnDate) {
                 return transaction->date().toString("yyyy-MM-dd");
             }
 
-            if (index.column() == 1) {
+            if (index.column() == Columns::ColumnExpense) {
                 if (transaction->amount() <= 0.00) {
                     return "EXPENSE";
                 } else {
@@ -157,19 +163,19 @@ namespace Accounting::Models
                 }
             }
 
-            if (index.column() == 2) {
+            if (index.column() == Columns::ColumnAmount) {
                 return QString::number(std::abs(transaction->amount()), 'f', 2);
             }
 
-            if (index.column() == 3) {
+            if (index.column() == Columns::ColumnCategory) {
                 return transaction->category();
             }
 
-            if (index.column() == 4) {
+            if (index.column() == Columns::ColumnId) {
                 return transaction->id();
             }
 
-            if (index.column() == 5) {
+            if (index.column() == Columns::ColumnStatus) {
                 return enum_type_to_string(transaction->status());
             }
 
