@@ -26,7 +26,6 @@ namespace Accounting::Models
 
         enum Columns {
             ColumnDate,
-            ColumnExpense,
             ColumnAmount,
             ColumnCategory,
             ColumnStatus,
@@ -158,8 +157,6 @@ namespace Accounting::Models
                 return "Amount";
             } else if (section == Columns::ColumnCategory) {
                 return "Category";
-            } else if (section == Columns::ColumnExpense) {
-                return "Expense";
             } else {
                  Q_UNREACHABLE();
             }
@@ -178,14 +175,8 @@ namespace Accounting::Models
 
             if (index.column() == Columns::ColumnDate) {
                 return transaction->date().toString("yyyy-MM-dd");
-            } else if (index.column() == Columns::ColumnExpense) {
-                if (transaction->amount() <= 0.00) {
-                    return "EXPENSE";
-                } else {
-                    return "INCOME";
-                }
             } else if (index.column() == Columns::ColumnAmount) {
-                return QString::number(std::abs(transaction->amount()), 'f', 2);
+                return QString::number(transaction->amount(), 'f', 2);
             } else if (index.column() == Columns::ColumnCategory) {
                 return transaction->category();
             } else if (index.column() == Columns::ColumnId) {

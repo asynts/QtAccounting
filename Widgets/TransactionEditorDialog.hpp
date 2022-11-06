@@ -51,30 +51,13 @@ namespace Accounting::Widgets
             }
 
             {
-                m_ui.m_type_QComboBox->addItem("Expense");
-                m_ui.m_type_QComboBox->addItem("Income");
-
-                if (transaction_model == nullptr) {
-                    m_ui.m_type_QComboBox->setCurrentIndex(0); // Expense
-                } else if (transaction_model->amount() <= 0.00){
-                    m_ui.m_type_QComboBox->setCurrentIndex(0); // Expense
-                } else {
-                    m_ui.m_type_QComboBox->setCurrentIndex(1); // Income
-                }
-
-                connect(m_ui.m_type_QComboBox, &QComboBox::currentIndexChanged,
-                        this, &TransactionEditorDialog::slotValidate);
-            }
-
-            {
                 auto *validator = new QDoubleValidator(this);
-                validator->setBottom(0.00);
                 m_ui.m_amount_QLineEdit->setValidator(validator);
 
                 if (transaction_model == nullptr) {
                     m_ui.m_amount_QLineEdit->setText("0.00");
                 } else {
-                    m_ui.m_amount_QLineEdit->setText(QString::number(std::abs(transaction_model->amount()), 'f', 2));
+                    m_ui.m_amount_QLineEdit->setText(QString::number(transaction_model->amount(), 'f', 2));
                 }
 
                 connect(m_ui.m_amount_QLineEdit, &QLineEdit::textChanged,
@@ -117,15 +100,10 @@ namespace Accounting::Widgets
         }
 
         virtual void accept() override {
-            auto amount = std::abs(m_ui.m_amount_QLineEdit->text().toDouble());
+            auto amount = m_ui.m_amount_QLineEdit->text().toDouble();
             auto date = m_ui.m_date_QDateEdit->date();
             auto category = m_ui.m_category_QComboBox->currentText().trimmed();
             auto status = static_cast<Models::TransactionModel::Status>(m_ui.m_status_QComboBox->currentIndex());
-
-            // Is this an expense?
-            if (m_ui.m_type_QComboBox->currentIndex() == 0) {
-                amount *= -1;
-            }
 
             if (m_old_transaction_model == nullptr) {
                 m_parent_bill_model->createTransaction(date, amount, category, status);
