@@ -99,6 +99,26 @@ namespace Accounting::Models
             return Columns::COLUMN_COUNT;
         }
 
+        virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
+            if (orientation == Qt::Orientation::Vertical) {
+                return QAbstractItemModel::headerData(section, orientation, role);
+            }
+
+            if (role != Qt::DisplayRole) {
+                return QVariant();
+            }
+
+            if (section == Columns::ColumnId) {
+                return "Id";
+            } else if (section == Columns::ColumnStatus) {
+                return "Status";
+            } else if (section == Columns::ColumnDate) {
+                return "Date";
+            } else {
+                 Q_UNREACHABLE();
+            }
+        }
+
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
             if (!checkIndex(index)) {
                 return QVariant();
@@ -112,13 +132,9 @@ namespace Accounting::Models
 
             if (index.column() == Columns::ColumnId) {
                 return bill->id();
-            }
-
-            if (index.column() == Columns::ColumnStatus) {
+            } else if (index.column() == Columns::ColumnStatus) {
                 return QVariant::fromValue(bill->status());
-            }
-
-            if (index.column() == Columns::ColumnDate) {
+            } else if (index.column() == Columns::ColumnDate) {
                 return bill->date().toString("yyyy-MM-dd");
             }
 

@@ -139,6 +139,32 @@ namespace Accounting::Models
             return Columns::COLUMN_COUNT;
         }
 
+        virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
+            if (orientation == Qt::Orientation::Vertical) {
+                return QAbstractItemModel::headerData(section, orientation, role);
+            }
+
+            if (role != Qt::DisplayRole) {
+                return QVariant();
+            }
+
+            if (section == Columns::ColumnId) {
+                return "Id";
+            } else if (section == Columns::ColumnStatus) {
+                return "Status";
+            } else if (section == Columns::ColumnDate) {
+                return "Date";
+            } else if (section == Columns::ColumnAmount) {
+                return "Amount";
+            } else if (section == Columns::ColumnCategory) {
+                return "Category";
+            } else if (section == Columns::ColumnExpense) {
+                return "Expense";
+            } else {
+                 Q_UNREACHABLE();
+            }
+        }
+
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
             if (index.row() < 0 || index.row() > rowCount()) {
                 return QVariant();
@@ -152,29 +178,19 @@ namespace Accounting::Models
 
             if (index.column() == Columns::ColumnDate) {
                 return transaction->date().toString("yyyy-MM-dd");
-            }
-
-            if (index.column() == Columns::ColumnExpense) {
+            } else if (index.column() == Columns::ColumnExpense) {
                 if (transaction->amount() <= 0.00) {
                     return "EXPENSE";
                 } else {
                     return "INCOME";
                 }
-            }
-
-            if (index.column() == Columns::ColumnAmount) {
+            } else if (index.column() == Columns::ColumnAmount) {
                 return QString::number(std::abs(transaction->amount()), 'f', 2);
-            }
-
-            if (index.column() == Columns::ColumnCategory) {
+            } else if (index.column() == Columns::ColumnCategory) {
                 return transaction->category();
-            }
-
-            if (index.column() == Columns::ColumnId) {
+            } else if (index.column() == Columns::ColumnId) {
                 return transaction->id();
-            }
-
-            if (index.column() == Columns::ColumnStatus) {
+            } else if (index.column() == Columns::ColumnStatus) {
                 return enum_type_to_string(transaction->status());
             }
 
