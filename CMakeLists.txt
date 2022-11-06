@@ -13,6 +13,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(AWSSDK REQUIRED COMPONENTS s3)
 
 set(PROJECT_SOURCES
     Widgets/BillListWidget.hpp
@@ -23,6 +24,7 @@ set(PROJECT_SOURCES
     Models/TransactionModel.hpp
     Models/DatabaseModel.hpp
     Persistance/Database.hpp
+    Persistance/S3.hpp
     MainWindow.hpp
     Util.hpp
     main.cpp
@@ -33,6 +35,8 @@ set(PROJECT_SOURCES
     Notes/0001_form-layout-expands.md
     Notes/0002_understanding-model-view.md
     Notes/0003_generate-spreadsheet-odf.md
+
+    README.md
 )
 
 qt_wrap_ui(PROJECT_SOURCES
@@ -64,7 +68,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(Accounting PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(Accounting PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${AWSSDK_LINK_LIBRARIES})
 
 set_target_properties(Accounting PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER accounting.apps.asynts.com

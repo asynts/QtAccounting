@@ -1,4 +1,5 @@
 #include "Models/BillModel.hpp"
+#include "Persistance/S3.hpp"
 
 namespace Accounting::Models
 {
@@ -154,7 +155,15 @@ namespace Accounting::Models
             Q_ASSERT(ok);
         }
 
+        // Write the file to disk.
         QTextDocumentWriter writer(filepath, "odf");
         writer.write(&document);
+
+        // Upload the file to S3.
+        QString remotePath = "/Bills";
+        remotePath.append(QDir::separator());
+        remotePath.append(QFileInfo(filepath).fileName());
+
+        Persistance::upload_file(filepath, remotePath);
     }
 }

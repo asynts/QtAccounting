@@ -6,6 +6,7 @@
 
 #include "Models/DatabaseModel.hpp"
 #include "Widgets/BillListWidget.hpp"
+#include "Persistance/S3.hpp"
 
 #include "ui_MainWindow.h"
 
@@ -59,7 +60,15 @@ namespace Accounting
                 event->accept();
             } else if (retval == QMessageBox::StandardButton::Save) {
                 auto database = m_database_model->serialize();
-                Persistance::save_to_disk(database);
+
+                // Save locally.
+                auto localPath = Persistance::save_to_disk(database);
+
+                // Upload file to S3.
+                QString remotePath = "/Database";
+                remotePath.append(QFileInfo(localPath).fileName());
+                Persistance::upload_file(localPath, remotePath);
+
                 event->accept();
             } else {
                 Q_UNREACHABLE();
