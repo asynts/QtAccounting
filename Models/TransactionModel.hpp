@@ -18,14 +18,16 @@ namespace Accounting::Models
 
     public:
         explicit TransactionModel(QObject *parent = nullptr)
-            : QObject(parent) { }
+            : QObject(parent)
+            , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch()) { }
 
-        explicit TransactionModel(QString id, QDate date, qreal amount, QString category, QObject *parent = nullptr)
+        explicit TransactionModel(QString id, QDate date, qreal amount, QString category, qint64 creation_timestamp, QObject *parent = nullptr)
             : QObject(parent)
             , m_id(id)
             , m_date(date)
             , m_amount(amount)
-            , m_category(category) { }
+            , m_category(category)
+            , m_creation_timestamp(creation_timestamp) { }
 
         QString id() const { return m_id.value(); }
         QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
@@ -48,6 +50,7 @@ namespace Accounting::Models
                 .m_date = date(),
                 .m_amount = amount(),
                 .m_category = category(),
+                .m_creation_timestamp = m_creation_timestamp,
             };
         }
 
@@ -56,12 +59,15 @@ namespace Accounting::Models
             m_date = value.m_date;
             m_amount = value.m_amount;
             m_category = value.m_category;
+            m_creation_timestamp = value.m_creation_timestamp;
         }
 
     signals:
         void signalChanged();
 
     private:
+        qint64 m_creation_timestamp;
+
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QString, m_id, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QDate, m_date, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, qreal, m_amount, &TransactionModel::signalChanged);

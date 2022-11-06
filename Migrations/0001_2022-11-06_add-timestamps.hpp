@@ -36,19 +36,18 @@
 //
 //  2. Increment 'ACCOUTNING_NEW_BINARY_VERSON' and 'ACCOUTNING_OLD_BINARY_VERSON'.
 
-#define ACCOUTNING_OLD_BINARY_VERSION 2ull
+#define ACCOUTNING_OLD_BINARY_VERSION 1ull
 #define ACCOUTNING_NEW_BINARY_VERSION 2ull
 
 #define ACCOUNTING_MAGIC_NUMBER 7250402524647310127ull
 
-namespace Accounting::Persistance
+namespace Accounting::Migrations::From1To2
 {
     struct Transaction {
         QString m_id;
         QDate m_date;
         qreal m_amount;
         QString m_category;
-        qint64 m_creation_timestamp;
     };
 
     struct Bill {
@@ -56,25 +55,38 @@ namespace Accounting::Persistance
         QDate m_date;
         QString m_status;
         QList<Transaction> m_transactions;
-        qint64 m_creation_timestamp;
     };
 
     struct Database {
         QList<Bill> m_bills;
     };
 
-    using NewTransaction = Transaction;
+    struct NewTransaction {
+        QString m_id;
+        QDate m_date;
+        qreal m_amount;
+        QString m_category;
+        qint64 m_creation_timestamp;
+    };
+
     inline NewTransaction migrate(const Transaction& transaction) {
         return NewTransaction{
             .m_id = transaction.m_id,
             .m_date = transaction.m_date,
             .m_amount = transaction.m_amount,
             .m_category = transaction.m_category,
-            .m_creation_timestamp = transaction.m_creation_timestamp,
+            .m_creation_timestamp = QDateTime::currentMSecsSinceEpoch()
         };
     }
 
-    using NewBill = Bill;
+    struct NewBill {
+        QString m_id;
+        QDate m_date;
+        QString m_status;
+        QList<NewTransaction> m_transactions;
+        qint64 m_creation_timestamp;
+    };
+
     inline NewBill migrate(const Bill& bill) {
         QList<NewTransaction> transactions;
         for (auto& transaction : bill.m_transactions) {
@@ -86,11 +98,14 @@ namespace Accounting::Persistance
             .m_date = bill.m_date,
             .m_status = bill.m_status,
             .m_transactions = transactions,
-            .m_creation_timestamp = bill.m_creation_timestamp,
+            .m_creation_timestamp = QDateTime::currentMSecsSinceEpoch(),
         };
     }
 
-    using NewDatabase = Database;
+    struct NewDatabase {
+        QList<NewBill> m_bills;
+    };
+
     inline NewDatabase migrate(const Database& database) {
         QList<NewBill> bills;
         for (auto& bill : database.m_bills) {
@@ -106,8 +121,7 @@ namespace Accounting::Persistance
         in >> value.m_id
            >> value.m_date
            >> value.m_amount
-           >> value.m_category
-           >> value.m_creation_timestamp;
+           >> value.m_category;
 
         return in;
     }
@@ -116,8 +130,7 @@ namespace Accounting::Persistance
         in >> value.m_id
            >> value.m_date
            >> value.m_status
-           >> value.m_transactions
-           >> value.m_creation_timestamp;
+           >> value.m_transactions;
 
         return in;
     }

@@ -9,6 +9,8 @@
 
 #include "ui_MainWindow.h"
 
+// #include "Migrations/0001_2022-11-06_add-timestamps.hpp"
+
 namespace Accounting
 {
     class MainWindow final : public QMainWindow
@@ -20,6 +22,8 @@ namespace Accounting
             : QMainWindow(parent)
         {
             m_ui.setupUi(this);
+
+            // Migrations::From1To2::load_migrate_save();
 
             m_database_model = new Models::DatabaseModel(this);
             m_ui.m_bills_BillListWidget->setModel(m_database_model);
@@ -41,7 +45,7 @@ namespace Accounting
 
         virtual void closeEvent(QCloseEvent *event) override {
             QMessageBox message_box;
-            message_box.setText("The database has been modified.");
+            message_box.setText("The database may have been modified.");
             message_box.setInformativeText("Do you want to save changes?");
             message_box.setStandardButtons(QMessageBox::StandardButton::Save | QMessageBox::StandardButton::Discard | QMessageBox::StandardButton::Cancel);
             message_box.setDefaultButton(QMessageBox::StandardButton::Cancel);

@@ -16,7 +16,7 @@ namespace Accounting::Models
             : QAbstractItemModel(parent) { }
 
         BillModel* createBill() {
-            auto *bill_model = new BillModel(generate_id(), QDate::currentDate(), BillModel::Status::Staged, this);
+            auto *bill_model = new BillModel(generate_id(), QDate::currentDate(), BillModel::Status::Staged, QDateTime::currentMSecsSinceEpoch(), this);
 
             int row = m_bills.size();
 

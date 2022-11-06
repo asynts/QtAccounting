@@ -45,13 +45,15 @@ namespace Accounting::Models
 
     public:
         explicit BillModel(QObject *parent = nullptr)
-            : QAbstractItemModel(parent) { }
+            : QAbstractItemModel(parent)
+            , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch()) { }
 
-        explicit BillModel(QString id, QDate date, Status status, QObject *parent = nullptr)
+        explicit BillModel(QString id, QDate date, Status status, qint64 creation_timestamp, QObject *parent = nullptr)
             : QAbstractItemModel(parent)
             , m_id(id)
             , m_date(date)
-            , m_status(status) { }
+            , m_status(status)
+            , m_creation_timestamp(creation_timestamp) { }
 
         QString id() const { return m_id.value(); }
         QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
@@ -271,6 +273,7 @@ namespace Accounting::Models
                 .m_date = date(),
                 .m_status = status_to_string(status()),
                 .m_transactions = serialized_transactions,
+                .m_creation_timestamp = m_creation_timestamp,
             };
         }
 
@@ -278,6 +281,7 @@ namespace Accounting::Models
             m_id = value.m_id;
             m_date = value.m_date;
             m_status = status_from_string(value.m_status);
+            m_creation_timestamp = value.m_creation_timestamp;
 
             beginResetModel();
 
@@ -363,7 +367,7 @@ namespace Accounting::Models
 
     public slots:
         void createTransaction(QDate date, qreal amount, QString category) {
-            auto *transaction_model = new TransactionModel(generate_id(), date, amount, category, this);
+            auto *transaction_model = new TransactionModel(generate_id(), date, amount, category, QDateTime::currentMSecsSinceEpoch(), this);
 
             int row = m_transactions.size();
 
@@ -378,6 +382,8 @@ namespace Accounting::Models
         }
 
     private:
+        qint64 m_creation_timestamp;
+
         QList<TransactionModel*> m_transactions;
 
         Q_OBJECT_BINDABLE_PROPERTY(BillModel, QString, m_id, &BillModel::signalChanged);

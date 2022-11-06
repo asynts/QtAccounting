@@ -26,6 +26,8 @@ set(PROJECT_SOURCES
     Util.hpp
     main.cpp
 
+    Migrations/0001_2022-11-06_add-timestamps.hpp
+
     Notes/0001_form-layout-expands.md
     Notes/0002_understanding-model-view.md
     Notes/0003_generate-spreadsheet-odf.md
