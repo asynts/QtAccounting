@@ -33,7 +33,7 @@ namespace Accounting
 
             // Try to load database from disk.
             {
-                auto database_opt = Persistance::load_from_disk();
+                auto database_opt = Persistance::load();
 
                 if (database_opt.has_value()) {
                     m_database_model->deserialize(database_opt.value());
@@ -60,14 +60,7 @@ namespace Accounting
                 event->accept();
             } else if (retval == QMessageBox::StandardButton::Save) {
                 auto database = m_database_model->serialize();
-
-                // Save locally.
-                auto localPath = Persistance::save_to_disk(database);
-
-                // Upload file to S3.
-                QString remotePath = "/Database/";
-                remotePath.append(QFileInfo(localPath).fileName());
-                Persistance::upload_file(localPath, remotePath);
+                Persistance::save(database);
 
                 event->accept();
             } else {

@@ -158,22 +158,10 @@ namespace Accounting::Persistance
         return out;
     }
 
-    inline QString save_to_disk(const NewDatabase& database) {
-        auto dirpath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        dirpath.append(QDir::separator());
-        dirpath.append("Database");
+    inline void write_to_disk(const NewDatabase& database, std::filesystem::path toPath) {
+        std::filesystem::create_directories(toPath.parent_path());
 
-        auto filepath = dirpath;
-        filepath.append(QDir::separator());
-        filepath.append(QString::number(QDateTime::currentMSecsSinceEpoch()).rightJustified(16, '0'));
-        filepath.append("_Database.bin");
-
-        {
-            bool ok = QFileInfo(filepath).dir().mkpath(".");
-            Q_ASSERT(ok);
-        }
-
-        QFile file(filepath);
+        QFile file(toPath);
         file.open(QIODeviceBase::WriteOnly);
 
         QDataStream stream(&file);
@@ -182,32 +170,10 @@ namespace Accounting::Persistance
         stream << database;
 
         file.close();
-
-        // Create symbolic link to discover current version.
-        {
-            auto current_path = QDir(dirpath).filePath("Database.bin");
-
-            // This may fail if this is the first time we are creating this file.
-            QFile::remove(current_path);
-
-            QFile::link(filepath, current_path);
-        }
-
-        return filepath;
     }
 
-    inline std::optional<Database> load_from_disk() {
-        auto filepath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        filepath.append(QDir::separator());
-        filepath.append("Database");
-        filepath.append(QDir::separator());
-        filepath.append("Database.bin");
-
-        if (!QFile::exists(filepath)) {
-            return std::nullopt;
-        }
-
-        QFile file(filepath);
+    inline Database read_from_disk(std::filesystem::path fromPath) {
+        QFile file(fromPath);
         file.open(QIODeviceBase::ReadOnly);
 
         QDataStream stream(&file);
@@ -228,10 +194,9 @@ namespace Accounting::Persistance
         return database;
     }
 
-    inline void load_migrate_save() {
-        auto database_opt = load_from_disk();
-        Q_ASSERT(database_opt.has_value());
-        save_to_disk(migrate(database_opt.value()));
+    inline void migrate_on_disk(std::filesystem::path fromPath, std::filesystem::path toPath) {
+        auto database = read_from_disk(fromPath);
+        write_to_disk(migrate(database), toPath);
     }
 }
 

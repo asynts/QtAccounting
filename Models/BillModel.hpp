@@ -79,7 +79,7 @@ namespace Accounting::Models
             return total;
         }
 
-        void exportTo(QString filepath);
+        void exportTo(std::filesystem::path path);
 
         Persistance::Bill serialize() const {
             QList<Persistance::Transaction> serialized_transactions;

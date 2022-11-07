@@ -3,9 +3,7 @@
 
 namespace Accounting::Models
 {
-    void BillModel::exportTo(QString filepath) {
-        qDebug() << "Exporting to" << filepath;
-
+    void BillModel::exportTo(std::filesystem::path path) {
         QSettings settings;
         QTextDocument document;
         QTextCursor cursor(&document);
@@ -150,20 +148,13 @@ namespace Accounting::Models
         }
 
         // Ensure that the directory exists.
-        {
-            bool ok = QFileInfo(filepath).dir().mkpath(".");
-            Q_ASSERT(ok);
-        }
+        std::filesystem::create_directories(path.parent_path());
 
         // Write the file to disk.
-        QTextDocumentWriter writer(filepath, "odf");
+        QTextDocumentWriter writer(QString::fromStdString(path), "odf");
         writer.write(&document);
 
         // Upload the file to S3.
-        QString remotePath = "/Bills";
-        remotePath.append(QDir::separator());
-        remotePath.append(QFileInfo(filepath).fileName());
-
-        Persistance::upload_file(filepath, remotePath);
+        Persistance::upload_file_to_s3(path, fmt::format("/Bills/{}", path.filename().string()));
     }
 }

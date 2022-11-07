@@ -19,7 +19,7 @@
 
 namespace Accounting::Persistance
 {
-    constexpr const char *ALLOCATION_TAG = "AccountingTag";
+    constexpr const char *AWS_ALLOCATION_TAG = "AccountingTag";
 
     inline Aws::S3::S3Client get_s3_client() {
         static std::optional<Aws::S3::S3Client> s3_client;
@@ -41,57 +41,42 @@ namespace Accounting::Persistance
         return s3_client.value();
     }
 
-    /*
-    inline void upload_file(QString localPath, QString remotePath) {
-        std::string remotePath_std = remotePath.toStdString();
-        std::string localPath_std = localPath.toStdString();
+    inline std::filesystem::path generate_local_path(std::filesystem::path relativePath, std::string filename) {
+        std::filesystem::path path{ QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation).toStdString() };
+        path /= relativePath;
+        path /= fmt::format("{:016x}_{}", QDateTime::currentMSecsSinceEpoch(), filename);
 
-        auto client = s3_client();
-
-        Aws::S3::Model::PutObjectRequest request;
-        request.SetBucket("accounting-23fbf6ce-ff25-4f6a-a75a-b50bf814fc62");
-        request.SetKey(remotePath_std);
-
-        std::shared_ptr<Aws::IOStream> inputData = Aws::MakeShared<Aws::FStream>("S3", localPath_std, std::ios_base::in | std::ios_base::binary);
-        Q_ASSERT(*inputData);
-
-        request.SetBody(inputData);
-
-        // FIXME: Do this asynchronous
-        // FIXME: Deal with errors
-        auto outcome = client.PutObject(request);
-        Q_ASSERT(outcome.IsSuccess());
-    }
-    */
-
-    inline void update_symbolic_link(std::filesystem::path path) {
-        // FIXME
+        return path;
     }
 
-    inline std::filesystem::path fetch_latest_from_s3() {
-        std::filesystem::path localPath{ QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation).toStdString() };
-        localPath /= "Database";
-        localPath /= fmt::format("{:016x}_Database.bin", QDateTime::currentMSecsSinceEpoch());
+    inline std::optional<std::filesystem::path> fetch_file_from_s3(std::filesystem::path remotePath) {
+        auto localPath = generate_local_path("/Database", "Database.bin");
 
         Aws::S3::Model::GetObjectRequest request;
         request.SetBucket("accounting-23fbf6ce-ff25-4f6a-a75a-b50bf814fc62");
-        request.SetKey("/Database/Database.bin");
+        request.SetKey(remotePath);
         request.SetResponseStreamFactory([localPath] {
-            return Aws::New<Aws::FStream>(ALLOCATION_TAG, localPath, std::ios_base::out | std::ios_base::binary);
+            return Aws::New<Aws::FStream>(AWS_ALLOCATION_TAG, localPath, std::ios_base::out | std::ios_base::binary);
         });
 
         // FIXME: Async.
         // FIXME: Error handling.
+        // FIXME: If not exists return 'std::nullopt'.
         auto outcome = get_s3_client().GetObject(request);
-        Q_ASSERT(outcome.IsSuccess());
 
-        return localPath;
+        if (outcome.IsSuccess()) {
+            return localPath;
+        }
+
+        if (outcome.GetError().GetErrorType() == Aws::S3::S3Errors::NO_SUCH_KEY) {
+            return std::nullopt;
+        }
+
+        Q_UNREACHABLE();
     }
 
-    inline void upload_latest_to_s3(std::filesystem::path localPath) {
-        auto inputStream = Aws::MakeShared<Aws::FStream>(ALLOCATION_TAG, localPath, std::ios_base::in | std::ios_base::binary);
-
-        std::string remotePath = fmt::format("/Database/{}", localPath.filename().string());
+    inline void upload_file_to_s3(std::filesystem::path localPath, std::filesystem::path remotePath) {
+        auto inputStream = Aws::MakeShared<Aws::FStream>(AWS_ALLOCATION_TAG, localPath, std::ios_base::in | std::ios_base::binary);
 
         Aws::S3::Model::PutObjectRequest request;
         request.SetBucket("accounting-23fbf6ce-ff25-4f6a-a75a-b50bf814fc62");
@@ -102,5 +87,22 @@ namespace Accounting::Persistance
         // FIXME: Error handling.
         auto outcome = get_s3_client().PutObject(request);
         Q_ASSERT(outcome.IsSuccess());
+    }
+
+    inline std::optional<Database> load() {
+        auto path_opt = fetch_file_from_s3("/Database/Database.bin");
+
+        if (!path_opt.has_value()) {
+            return std::nullopt;
+        }
+
+        return read_from_disk(path_opt.value());
+    }
+
+    inline void save(const Database& database) {
+        auto path = generate_local_path("/Database", "Database.bin");
+        write_to_disk(database, path);
+        upload_file_to_s3(path, fmt::format("/Database/{}", path.filename().string()));
+        upload_file_to_s3(path, "/Database/Database.bin");
     }
 }

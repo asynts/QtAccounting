@@ -10,8 +10,11 @@
 #include <QDir>
 #include <QDesktopServices>
 
+#include <fmt/format.h>
+
 #include "Models/BillModel.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
+#include "Persistance/S3.hpp"
 
 #include "ui_BillEditorDialog.h"
 
@@ -106,18 +109,9 @@ namespace Accounting::Widgets
 
         void slotExport()
         {
-            auto filepath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-            filepath.append(QDir::separator());
-            filepath.append("Bills");
-            filepath.append(QDir::separator());
-            filepath.append(QString::number(QDateTime::currentMSecsSinceEpoch()).rightJustified(16, '0'));
-            filepath.append("_");
-            filepath.append(m_bill_model->id());
-            filepath.append(".odt");
-
-            m_bill_model->exportTo(filepath);
-
-            QDesktopServices::openUrl(QUrl::fromLocalFile(filepath));
+            auto path = Persistance::generate_local_path("/Bills", fmt::format("{}_Bill.odt", m_bill_model->id().toStdString()));
+            m_bill_model->exportTo(path);
+            QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path)));
         }
 
     private:
