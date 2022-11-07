@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(AWSSDK REQUIRED COMPONENTS s3)
+find_package(fmt REQUIRED)
 
 set(PROJECT_SOURCES
     Widgets/BillListWidget.hpp
@@ -68,7 +69,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(Accounting PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${AWSSDK_LINK_LIBRARIES})
+target_link_libraries(Accounting PRIVATE Qt${QT_VERSION_MAJOR}::Widgets ${AWSSDK_LINK_LIBRARIES} fmt::fmt)
 
 set_target_properties(Accounting PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER accounting.apps.asynts.com
