@@ -21,13 +21,17 @@ int main(int argc, char *argv[])
 
     // Setup AWS.
     Aws::SDKOptions options;
-    options.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Debug;
-    InitAPI(options);
+    options.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Trace;
+    Aws::InitAPI(options);
 
     QApplication application(argc, argv);
 
     Accounting::MainWindow main_window;
     main_window.show();
 
-    return application.exec();
+    int retval = application.exec();
+
+    Aws::ShutdownAPI(options);
+
+    return retval;
 }

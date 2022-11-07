@@ -50,7 +50,7 @@ namespace Accounting::Persistance
     }
 
     inline std::optional<std::filesystem::path> fetch_file_from_s3(std::filesystem::path remotePath) {
-        auto localPath = generate_local_path("/Database", "Database.bin");
+        auto localPath = generate_local_path("Database", "Database.bin");
 
         Aws::S3::Model::GetObjectRequest request;
         request.SetBucket("accounting-23fbf6ce-ff25-4f6a-a75a-b50bf814fc62");
@@ -68,7 +68,12 @@ namespace Accounting::Persistance
             return localPath;
         }
 
-        if (outcome.GetError().GetErrorType() == Aws::S3::S3Errors::NO_SUCH_KEY) {
+        // FIXME: According to the documentation, this should return 'Aws::S3::S3Errors::NO_SUCH_KEY' if the key doesn't exist.
+        //        However, it seems that the function misbehaves.
+        //
+        //        https://sdk.amazonaws.com/cpp/api/LATEST/class_aws_1_1_s3_1_1_s3_client.html#a89fe252d5e360abcd5887b2b3f581870
+        //
+        if (outcome.GetError().GetErrorType() == Aws::S3::S3Errors::RESOURCE_NOT_FOUND) {
             return std::nullopt;
         }
 
@@ -100,7 +105,7 @@ namespace Accounting::Persistance
     }
 
     inline void save(const Database& database) {
-        auto path = generate_local_path("/Database", "Database.bin");
+        auto path = generate_local_path("Database", "Database.bin");
         write_to_disk(database, path);
         upload_file_to_s3(path, fmt::format("/Database/{}", path.filename().string()));
         upload_file_to_s3(path, "/Database/Database.bin");

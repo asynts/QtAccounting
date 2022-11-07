@@ -109,7 +109,7 @@ namespace Accounting::Widgets
 
         void slotExport()
         {
-            auto path = Persistance::generate_local_path("/Bills", fmt::format("{}_Bill.odt", m_bill_model->id().toStdString()));
+            auto path = Persistance::generate_local_path("Bills", fmt::format("{}_Bill.odt", m_bill_model->id().toStdString()));
             m_bill_model->exportTo(path);
             QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path)));
         }
