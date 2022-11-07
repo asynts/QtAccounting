@@ -110,4 +110,18 @@ namespace Accounting::Persistance
         upload_file_to_s3(path, fmt::format("/Database/{}", path.filename().string()));
         upload_file_to_s3(path, "/Database/Database.bin");
     }
+
+    using MigrationFunction = void(*)(std::filesystem::path fromPath, std::filesystem::path toPath);
+
+    inline void migrate(MigrationFunction migrationFunction) {
+        auto fromPath_opt = fetch_file_from_s3("/Database/Database.bin");
+        Q_ASSERT(fromPath_opt.has_value());
+
+        auto toPath = generate_local_path("Database", "Database.bin");
+
+        migrationFunction(fromPath_opt.value(), toPath);
+
+        upload_file_to_s3(toPath, fmt::format("/Database/{}", toPath.filename().string()));
+        upload_file_to_s3(toPath, "/Database/Database.bin");
+    }
 }

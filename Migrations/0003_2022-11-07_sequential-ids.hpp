@@ -20,7 +20,7 @@
 //
 //  1. Copy this file into the 'Migrations' folder.
 //
-//  2. Update 'NewTransaction' and 'migrate_structure(const Transaction&)'.
+//  2. Update 'NewTransaction' and 'migrate(const Transaction&)'.
 //
 //  3. Increment 'ACCOUTNING_NEW_BINARY_VERSON'.
 //
@@ -28,20 +28,20 @@
 //
 //  5. Include the new file from 'MainWindow.cpp'.
 //
-//  6. Add call to 'Accounting::Persistance::migrate(Accounting::Migrations::From${OLD_BINARY_VERSION}To${NEW_BINARY_VERSION}::migrate_on_disk)'.
+//  6. Add call to 'Accounting::Migrations::From${OLD_BINARY_VERSION}To${NEW_BINARY_VERSION}::load_migrate_save()'.
 //
 // Then, update this file in-place:
 //
-//  1. Update 'Transaction' and 'migrate_structure(const Transaction&)'.
+//  1. Update 'Transaction' and 'migrate(const Transaction&)'.
 //
 //  2. Increment 'ACCOUTNING_NEW_BINARY_VERSON' and 'ACCOUTNING_OLD_BINARY_VERSON'.
 
-#define ACCOUTNING_OLD_BINARY_VERSION 4ull
+#define ACCOUTNING_OLD_BINARY_VERSION 3ull
 #define ACCOUTNING_NEW_BINARY_VERSION 4ull
 
 #define ACCOUNTING_MAGIC_NUMBER 7250402524647310127ull
 
-namespace Accounting::Persistance
+namespace Accounting::Migrations::From3To4
 {
     struct Transaction {
         QString m_id;
@@ -62,11 +62,10 @@ namespace Accounting::Persistance
 
     struct Database {
         QList<Bill> m_bills;
-        quint64 m_next_id;
     };
 
     using NewTransaction = Transaction;
-    inline NewTransaction migrate_structure(const Transaction& transaction) {
+    inline NewTransaction migrate(const Transaction& transaction) {
         return NewTransaction{
             .m_id = transaction.m_id,
             .m_date = transaction.m_date,
@@ -78,10 +77,10 @@ namespace Accounting::Persistance
     }
 
     using NewBill = Bill;
-    inline NewBill migrate_structure(const Bill& bill) {
+    inline NewBill migrate(const Bill& bill) {
         QList<NewTransaction> transactions;
         for (auto& transaction : bill.m_transactions) {
-            transactions.append(migrate_structure(transaction));
+            transactions.append(migrate(transaction));
         }
 
         return NewBill{
@@ -93,16 +92,20 @@ namespace Accounting::Persistance
         };
     }
 
-    using NewDatabase = Database;
-    inline NewDatabase migrate_structure(const Database& database) {
+    struct NewDatabase {
+        QList<Bill> m_bills;
+        quint64 m_next_id;
+    };
+
+    inline NewDatabase migrate(const Database& database) {
         QList<NewBill> bills;
         for (auto& bill : database.m_bills) {
-            bills.append(migrate_structure(bill));
+            bills.append(migrate(bill));
         }
 
         return NewDatabase{
             .m_bills = bills,
-            .m_next_id = database.m_next_id,
+            .m_next_id = 1,
         };
     }
 
@@ -128,8 +131,7 @@ namespace Accounting::Persistance
     }
 
     inline QDataStream& operator>>(QDataStream& in, Database& value) {
-        in >> value.m_bills
-           >> value.m_next_id;
+        in >> value.m_bills;
 
         return in;
     }
@@ -200,7 +202,7 @@ namespace Accounting::Persistance
 
     inline void migrate_on_disk(std::filesystem::path fromPath, std::filesystem::path toPath) {
         auto database = read_from_disk(fromPath);
-        write_to_disk(migrate_structure(database), toPath);
+        write_to_disk(migrate(database), toPath);
     }
 }
 

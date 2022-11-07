@@ -10,9 +10,6 @@
 
 #include "ui_MainWindow.h"
 
-// #include "Migrations/0001_2022-11-06_add-timestamps.hpp"
-// #include "Migrations/0002_2022-11-06_transaction-status.hpp"
-
 namespace Accounting
 {
     class MainWindow final : public QMainWindow
@@ -24,9 +21,6 @@ namespace Accounting
             : QMainWindow(parent)
         {
             m_ui.setupUi(this);
-
-            // Migrations::From1To2::load_migrate_save();
-            // Migrations::From2To3::load_migrate_save();
 
             m_database_model = new Models::DatabaseModel(this);
             m_ui.m_bills_BillListWidget->setModel(m_database_model);

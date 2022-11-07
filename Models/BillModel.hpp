@@ -15,6 +15,8 @@
 
 namespace Accounting::Models
 {
+    class DatabaseModel;
+
     class BillModel final : public QAbstractItemModel {
     public:
         enum class Status {
@@ -43,16 +45,8 @@ namespace Accounting::Models
         Q_PROPERTY(Status status READ status WRITE setStatus BINDABLE bindableStatus NOTIFY signalChanged);
 
     public:
-        explicit BillModel(QObject *parent = nullptr)
-            : QAbstractItemModel(parent)
-            , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch()) { }
-
-        explicit BillModel(QString id, QDate date, Status status, qint64 creation_timestamp, QObject *parent = nullptr)
-            : QAbstractItemModel(parent)
-            , m_id(id)
-            , m_date(date)
-            , m_status(status)
-            , m_creation_timestamp(creation_timestamp) { }
+        explicit BillModel(DatabaseModel *parent_database_model);
+        explicit BillModel(QString id, QDate date, Status status, qint64 creation_timestamp, DatabaseModel *parent_database_model);
 
         QString id() const { return m_id.value(); }
         QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
@@ -192,23 +186,11 @@ namespace Accounting::Models
         void signalChanged();
 
     public slots:
-        void createTransaction(QDate date, qreal amount, QString category, TransactionModel::Status status) {
-            auto *transaction_model = new TransactionModel(generate_id(), date, amount, category, status, QDateTime::currentMSecsSinceEpoch(), this);
-
-            int row = m_transactions.size();
-
-            beginInsertRows(QModelIndex(), row, row);
-            m_transactions.append(transaction_model);
-            endInsertRows();
-
-            connect(transaction_model, &TransactionModel::signalChanged,
-                    this, [=, this]() {
-                        emit dataChanged(index(row, 0), index(row, columnCount() - 1));
-                    });
-        }
+        void createTransaction(QDate date, qreal amount, QString category, TransactionModel::Status status);
 
     private:
         qint64 m_creation_timestamp;
+        DatabaseModel *m_database_model;
 
         QList<TransactionModel*> m_transactions;
 

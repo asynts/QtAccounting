@@ -26,7 +26,7 @@ namespace Accounting::Models
             : QAbstractItemModel(parent) { }
 
         BillModel* createBill() {
-            auto *bill_model = new BillModel(generate_id(), QDate::currentDate(), BillModel::Status::Staged, QDateTime::currentMSecsSinceEpoch(), this);
+            auto *bill_model = new BillModel(new_id(), QDate::currentDate(), BillModel::Status::Staged, QDateTime::currentMSecsSinceEpoch(), this);
 
             int row = m_bills.size();
 
@@ -50,10 +50,13 @@ namespace Accounting::Models
 
             return Persistance::Database{
                 .m_bills = serialized_bills,
+                .m_next_id = m_next_id,
             };
         }
 
         void deserialize(const Persistance::Database& value) {
+            m_next_id = value.m_next_id;
+
             beginResetModel();
 
             for (auto *bill_model : m_bills) {
@@ -68,6 +71,10 @@ namespace Accounting::Models
             }
 
             endResetModel();
+        }
+
+        QString new_id() {
+            return hash_and_stringify_id(m_next_id++);
         }
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
@@ -148,5 +155,6 @@ namespace Accounting::Models
 
     private:
         QList<BillModel*> m_bills;
+        quint64 m_next_id = 1;
     };
 }

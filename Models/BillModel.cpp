@@ -1,8 +1,37 @@
 #include "Models/BillModel.hpp"
+#include "Models/DatabaseModel.hpp"
 #include "Persistance/S3.hpp"
 
 namespace Accounting::Models
 {
+    BillModel::BillModel(DatabaseModel *parent_database_model)
+        : QAbstractItemModel(parent_database_model)
+        , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch())
+        , m_database_model(parent_database_model) { }
+
+    BillModel::BillModel(QString id, QDate date, Status status, qint64 creation_timestamp, DatabaseModel *parent_database_model)
+        : QAbstractItemModel(parent_database_model)
+        , m_id(id)
+        , m_date(date)
+        , m_status(status)
+        , m_creation_timestamp(creation_timestamp)
+        , m_database_model(parent_database_model) { }
+
+    void BillModel::createTransaction(QDate date, qreal amount, QString category, TransactionModel::Status status) {
+        auto *transaction_model = new TransactionModel(m_database_model->new_id(), date, amount, category, status, QDateTime::currentMSecsSinceEpoch(), this);
+
+        int row = m_transactions.size();
+
+        beginInsertRows(QModelIndex(), row, row);
+        m_transactions.append(transaction_model);
+        endInsertRows();
+
+        connect(transaction_model, &TransactionModel::signalChanged,
+                this, [=, this]() {
+                    emit dataChanged(index(row, 0), index(row, columnCount() - 1));
+                });
+    }
+
     void BillModel::exportTo(std::filesystem::path path) {
         QSettings settings;
         QTextDocument document;

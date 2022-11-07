@@ -10,6 +10,30 @@
 
 namespace Accounting
 {
+    // Credit: https://github.com/skeeto/hash-prospector#three-round-functions
+    inline quint32 hash_triple32(quint32 x)
+    {
+        x ^= x >> 17;
+        x *= 0xed5ad4bb;
+        x ^= x >> 11;
+        x *= 0xac4c1b51;
+        x ^= x >> 15;
+        x *= 0x31848bab;
+        x ^= x >> 14;
+        return x;
+    }
+    inline quint32 hash_triple32_inverse(quint32 x)
+    {
+        x ^= x >> 14 ^ x >> 28;
+        x *= 0x32b21703;
+        x ^= x >> 15 ^ x >> 30;
+        x *= 0x469e0db1;
+        x ^= x >> 11 ^ x >> 22;
+        x *= 0x79a85073;
+        x ^= x >> 17;
+        return x;
+    }
+
     // This is similar to Base64, but avoids special characters and characters that could be confused by humans.
     // We don't actually need to provide a function to parse a Base58 value, since we never use it.
     inline QString to_base_58(quint64 value) {
@@ -27,12 +51,16 @@ namespace Accounting
         return result;
     }
 
-    // FIXME: Rename to 'generate_random_id'.
-    inline QString generate_id() {
-        // Generate 48 bit value.
-        auto value = QRandomGenerator64::global()->bounded(Q_INT64_C(1) << 48);
+    // Ids must be generated in sequence to avoid collisions.
+    inline QString hash_and_stringify_id(quint64 sequential_id) {
+        // We has the value to ensure that it looks random.
+        auto hashed_id = hash_triple32(sequential_id);
 
-        return to_base_58(value);
+        // Only take 20 bits, we don't need more than that.
+        hashed_id &= (1 << 20) - 1;
+
+        // Use Base58 to turn into a relatively short string.
+        return to_base_58(hashed_id);
     }
 
     // This is useful for background.

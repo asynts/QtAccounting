@@ -32,6 +32,7 @@ set(PROJECT_SOURCES
 
     Migrations/0001_2022-11-06_add-timestamps.hpp
     Migrations/0002_2022-11-06_transaction-status.hpp
+    Migrations/0003_2022-11-07_sequential-ids.hpp
 
     Notes/0001_form-layout-expands.md
     Notes/0002_understanding-model-view.md
