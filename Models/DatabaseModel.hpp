@@ -11,6 +11,7 @@ namespace Accounting::Models
     public:
         enum Columns {
             ColumnDate,
+            ColumnTotal,
             ColumnStatus,
             ColumnId,
 
@@ -114,6 +115,8 @@ namespace Accounting::Models
                 return "Status";
             } else if (section == Columns::ColumnDate) {
                 return "Date";
+            } else if (section == Columns::ColumnTotal) {
+                return "Total";
             } else {
                  Q_UNREACHABLE();
             }
@@ -136,6 +139,8 @@ namespace Accounting::Models
                 return QVariant::fromValue(bill->status());
             } else if (index.column() == Columns::ColumnDate) {
                 return bill->date().toString("yyyy-MM-dd");
+            } else if (index.column() == Columns::ColumnTotal) {
+                return QString::number(bill->totalAmount(), 'f', 2);
             }
 
             return QVariant();
