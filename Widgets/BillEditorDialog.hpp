@@ -64,6 +64,9 @@ namespace Accounting::Widgets
                 m_ui.m_transactions_QTableView->setModel(bill_model);
                 m_ui.m_transactions_QTableView->setItemDelegate(new TransactionItemDelegate(this));
                 m_ui.m_transactions_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
+
+                m_ui.m_transactions_QTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+                m_ui.m_transactions_QTableView->horizontalHeader()->setSectionResizeMode(Models::BillModel::Columns::ColumnCategory, QHeaderView::ResizeMode::Stretch);
             }
 
             {
