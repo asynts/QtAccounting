@@ -9,7 +9,7 @@ namespace Accounting::Models
 {
     class DatabaseModel;
 
-    class AbstractTransactionListModel : public QAbstractItemModel {
+    class TransactionListModel final : public QAbstractItemModel {
     public:
         enum Columns {
             ColumnDate,
@@ -26,29 +26,29 @@ namespace Accounting::Models
         Q_OBJECT
 
     public:
-        explicit AbstractTransactionListModel(DatabaseModel *parent_database_model);
+        explicit TransactionListModel(DatabaseModel *parent_database_model);
 
-        virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override final {
+        virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
                 return QModelIndex();
             }
 
-            return createIndex(row, column, reinterpret_cast<void*>(transaction_models_internal()[row]));
+            return createIndex(row, column, reinterpret_cast<void*>(m_owned_transaction_models[row]));
         }
 
-        virtual QModelIndex parent(const QModelIndex& index) const override final {
+        virtual QModelIndex parent(const QModelIndex& index) const override {
             return QModelIndex();
         }
 
-        virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override final {
-            return transaction_models_internal().size();
+        virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override {
+            return m_owned_transaction_models.size();
         }
 
-        virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override final {
+        virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
             return Columns::COLUMN_COUNT;
         }
 
-        virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override final {
+        virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
             if (orientation == Qt::Orientation::Vertical) {
                 return QAbstractItemModel::headerData(section, orientation, role);
             }
@@ -60,7 +60,7 @@ namespace Accounting::Models
             return enum_type_to_string<Columns>(section);
         }
 
-        virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override final {
+        virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
             if (index.row() < 0 || index.row() > rowCount()) {
                 return QVariant();
             }
@@ -69,7 +69,7 @@ namespace Accounting::Models
                 return QVariant();
             }
 
-            auto *transaction_model = transaction_models_internal()[index.row()];
+            auto *transaction_model = m_owned_transaction_models[index.row()];
 
             if (index.column() == Columns::ColumnDate) {
                 return transaction_model->date().toString("yyyy-MM-dd");
@@ -86,8 +86,8 @@ namespace Accounting::Models
             return QVariant();
         }
 
-    protected:
-        virtual const QList<TransactionModel*> transaction_models_internal() const = 0;
+    private:
+        QList<TransactionModel*> m_owned_transaction_models;
 
         DatabaseModel *m_parent_database_model;
     };

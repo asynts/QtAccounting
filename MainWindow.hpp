@@ -5,6 +5,7 @@
 #include <QMessageBox>
 
 #include "Models/DatabaseModel.hpp"
+#include "Models/PocketMoneyProxyModel.hpp"
 #include "Widgets/BillListWidget.hpp"
 #include "Persistance/S3.hpp"
 
@@ -37,6 +38,10 @@ namespace Accounting
                     message_box.setStandardButtons(QMessageBox::StandardButton::Ok);
                     message_box.exec();
                 }
+            }
+
+            {
+                m_ui.m_pocketMoney_QTableView->setModel(m_database_model->pocketMoneyModel());
             }
         }
 

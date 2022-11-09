@@ -16,13 +16,30 @@
   <widget class="QWidget" name="m_central_QWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="Accounting::Widgets::BillListWidget" name="m_bills_BillListWidget" native="true">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>1</number>
       </property>
+      <widget class="QWidget" name="bills">
+       <attribute name="title">
+        <string>Bills</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="Accounting::Widgets::BillListWidget" name="m_bills_BillListWidget" native="true"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pocketMoney">
+       <attribute name="title">
+        <string>Pocket Money</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QTableView" name="m_pocketMoney_QTableView"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>

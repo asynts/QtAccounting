@@ -52,6 +52,7 @@ namespace Accounting::Persistance
         QString m_category;
         qint64 m_creation_timestamp;
         QString m_status;
+        bool m_is_pocket_money;
     };
 
     struct Bill {
@@ -76,6 +77,7 @@ namespace Accounting::Persistance
             .m_category = transaction.m_category,
             .m_creation_timestamp = transaction.m_creation_timestamp,
             .m_status = transaction.m_status,
+            .m_is_pocket_money = transaction.m_is_pocket_money,
         };
     }
 
@@ -114,7 +116,8 @@ namespace Accounting::Persistance
            >> value.m_amount
            >> value.m_category
            >> value.m_creation_timestamp
-           >> value.m_status;
+           >> value.m_status
+           >> value.m_is_pocket_money;
 
         return in;
     }
@@ -142,7 +145,8 @@ namespace Accounting::Persistance
             << value.m_amount
             << value.m_category
             << value.m_creation_timestamp
-            << value.m_status;
+            << value.m_status
+            << value.m_is_pocket_money;
 
         return out;
     }

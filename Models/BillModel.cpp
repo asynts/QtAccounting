@@ -16,7 +16,7 @@ namespace Accounting::Models
         , m_creation_timestamp(creation_timestamp) { }
 
     void BillModel::createTransaction(QDate date, qreal amount, QString category, TransactionModel::Status status) {
-        auto *transaction_model = new TransactionModel(m_parent_database_model->new_id(), date, amount, category, status, QDateTime::currentMSecsSinceEpoch(), this);
+        auto *transaction_model = new TransactionModel(m_parent_database_model->consume_next_id(), date, amount, category, status, QDateTime::currentMSecsSinceEpoch(), this);
         m_parent_database_model->trackTransaction(transaction_model);
 
         int row = m_owned_transactions.size();
