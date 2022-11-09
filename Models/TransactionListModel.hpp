@@ -2,7 +2,7 @@
 
 #include <QAbstractItemModel>
 
-#include "Entities/TransactionEntity.hpp"
+#include "Models/TransactionModel.hpp"
 #include "Util.hpp"
 
 namespace Accounting::Models
@@ -28,11 +28,11 @@ namespace Accounting::Models
     public:
         explicit TransactionListModel(DatabaseModel *parent_database_model);
 
-        void appendTransaction(Entities::TransactionEntity *transaction) {
-            int index = m_owned_transaction_models.size();
+        void appendTransaction(TransactionModel *transaction) {
+            int index = m_owned_transactions.size();
 
             beginInsertRows(QModelIndex(), index, index);
-            m_owned_transaction_models.append(transaction);
+            m_owned_transactions.append(transaction);
             endInsertRows();
         }
 
@@ -41,7 +41,7 @@ namespace Accounting::Models
                 return QModelIndex();
             }
 
-            return createIndex(row, column, reinterpret_cast<void*>(m_owned_transaction_models[row]));
+            return createIndex(row, column, reinterpret_cast<void*>(m_owned_transactions[row]));
         }
 
         virtual QModelIndex parent(const QModelIndex& index) const override {
@@ -49,7 +49,7 @@ namespace Accounting::Models
         }
 
         virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override {
-            return m_owned_transaction_models.size();
+            return m_owned_transactions.size();
         }
 
         virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
@@ -77,7 +77,7 @@ namespace Accounting::Models
                 return QVariant();
             }
 
-            auto *transaction_model = m_owned_transaction_models[index.row()];
+            auto *transaction_model = m_owned_transactions[index.row()];
 
             if (index.column() == Columns::ColumnDate) {
                 return transaction_model->date().toString("yyyy-MM-dd");
@@ -95,7 +95,7 @@ namespace Accounting::Models
         }
 
     private:
-        QList<Entities::TransactionEntity*> m_owned_transaction_models;
+        QList<TransactionModel*> m_owned_transactions;
 
         DatabaseModel *m_parent_database_model;
     };

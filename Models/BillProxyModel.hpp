@@ -5,7 +5,7 @@
 #include <QSortFilterProxyModel>
 
 #include "Persistance/Database.hpp"
-#include "Entities/TransactionEntity.hpp"
+#include "Models/TransactionModel.hpp"
 #include "Util.hpp"
 
 namespace Accounting::Models
@@ -31,11 +31,11 @@ namespace Accounting::Models
     public:
         explicit BillProxyModel(DatabaseModel *database_model, QObject *parent = nullptr);
 
-        Entities::TransactionEntity* createTransaction(
+        TransactionModel* createTransaction(
                 QDate date,
                 qreal amount,
                 QString category,
-                Entities::TransactionEntity::Status status,
+                TransactionModel::Status status,
                 bool is_pocket_money);
 
         QString id() const { return m_id.value(); }
@@ -53,9 +53,9 @@ namespace Accounting::Models
         qreal totalAmount() const {
             qreal result = 0.0;
             for (int row = 0; row < rowCount(); ++row) {
-                auto *transaction = reinterpret_cast<Entities::TransactionEntity*>(index(row, 0).internalPointer());
+                auto *transaction = reinterpret_cast<TransactionModel*>(index(row, 0).internalPointer());
 
-                if (transaction->status() == Entities::TransactionEntity::Status::Normal) {
+                if (transaction->status() == TransactionModel::Status::Normal) {
                     result += transaction->amount();
                 }
             }
@@ -80,7 +80,7 @@ namespace Accounting::Models
 
         virtual bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override {
             auto sourceIndex = sourceModel()->index(sourceRow, 0, sourceParent);
-            auto *transaction_model = reinterpret_cast<Entities::TransactionEntity*>(sourceIndex.internalPointer());
+            auto *transaction_model = reinterpret_cast<TransactionModel*>(sourceIndex.internalPointer());
 
             return transaction_model->parentBillId() == m_id;
         }
