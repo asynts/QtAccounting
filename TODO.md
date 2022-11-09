@@ -14,6 +14,8 @@
 
 ## Tweaks
 
+-   Copy S3 policy into README file.
+
 ## Next 0.X.0
 
 -   Keep track of pocket money.

@@ -43,6 +43,10 @@ namespace Accounting::Models
             return m_pocketMoney_model;
         }
 
+        BillListModel* billListModel() {
+            return m_billList_model;
+        }
+
     private:
         TransactionListModel *m_transactionList_model;
         BillListModel *m_billList_model;

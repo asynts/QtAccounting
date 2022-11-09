@@ -11,14 +11,14 @@ namespace Accounting::Models
         setSourceModel(database_model->transactionListModel());
     }
 
-    Entities::TransactionEntity* BillProxyModel::createTransaction(
+    TransactionModel* BillProxyModel::createTransaction(
             QDate date,
             qreal amount,
             QString category,
-            Entities::TransactionEntity::Status status,
+            TransactionModel::Status status,
             bool is_pocket_money)
     {
-        auto *transaction = new Entities::TransactionEntity(this);
+        auto *transaction = new TransactionModel(this);
         transaction->setId(m_database_model->consume_next_id());
         transaction->setParentBillId(id());
         transaction->setDate(date);

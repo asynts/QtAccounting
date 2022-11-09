@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QTimerEvent>
 #include <QMessageBox>
+#include <QCloseEvent>
 
 #include "Models/DatabaseModel.hpp"
 #include "Models/PocketMoneyProxyModel.hpp"

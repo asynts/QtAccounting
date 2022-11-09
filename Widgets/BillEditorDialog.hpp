@@ -12,8 +12,7 @@
 
 #include <fmt/format.h>
 
-#include "Entities/BillEntity.hpp"
-#include "Models/DatabaseModel.hpp"
+#include "Models/BillProxyModel.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
 #include "Persistance/S3.hpp"
 
@@ -39,8 +38,8 @@ namespace Accounting::Widgets
                 return false;
             }
 
-            auto *bill = qobject_cast<Entities::BillEntity*>(model);
-            auto *transaction = reinterpret_cast<Entities::TransactionEntity*>(index.internalPointer());
+            auto *bill = qobject_cast<Models::BillProxyModel*>(model);
+            auto *transaction = reinterpret_cast<Models::TransactionModel*>(index.internalPointer());
 
             TransactionEditorDialog dialog(bill, transaction);
             dialog.exec();
@@ -53,7 +52,7 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        explicit BillEditorDialog(Entities::BillEntity *bill, QWidget *parent = nullptr)
+        explicit BillEditorDialog(Models::BillProxyModel *bill, QWidget *parent = nullptr)
             : QDialog(parent)
             , m_bill(bill)
         {
@@ -62,16 +61,18 @@ namespace Accounting::Widgets
             setWindowTitle(QString("Edit Bill '%1'").arg(bill->id()));
 
             {
-                // FIXME: m_ui.m_transactions_QTableView->setModel(bill);
+                m_ui.m_transactions_QTableView->setModel(bill);
                 m_ui.m_transactions_QTableView->setItemDelegate(new TransactionItemDelegate(this));
                 m_ui.m_transactions_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
 
                 m_ui.m_transactions_QTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-                m_ui.m_transactions_QTableView->horizontalHeader()->setSectionResizeMode(Models::BillModel::Columns::ColumnCategory, QHeaderView::ResizeMode::Stretch);
+                m_ui.m_transactions_QTableView->horizontalHeader()->setSectionResizeMode(
+                            Models::TransactionListModel::Columns::ColumnCategory,
+                            QHeaderView::ResizeMode::Stretch);
             }
 
             {
-                fill_QComboBox_with_enum<Entities::BillEntity::Status>(m_ui.m_status_QComboBox);
+                fill_QComboBox_with_enum<Models::BillProxyModel::Status>(m_ui.m_status_QComboBox);
                 m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(bill->status()));
 
                 connect(m_ui.m_status_QComboBox, &QComboBox::currentIndexChanged,
@@ -116,7 +117,7 @@ namespace Accounting::Widgets
         }
 
         void slotStatusChanged() {
-            m_bill->setStatus(static_cast<Entities::BillEntity::Status>(m_ui.m_status_QComboBox->currentIndex()));
+            m_bill->setStatus(static_cast<Models::BillProxyModel::Status>(m_ui.m_status_QComboBox->currentIndex()));
         }
 
         void slotDateChanged() {
@@ -131,7 +132,7 @@ namespace Accounting::Widgets
 
         void slotExport()
         {
-            auto path = Persistance::generate_local_path("Bills", fmt::format("{}_Bill.odt", m_bill_model->id().toStdString()));
+            auto path = Persistance::generate_local_path("Bills", fmt::format("{}_Bill.odt", m_bill->id().toStdString()));
             // FIXME: m_bill_model->exportTo(path);
             QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path)));
         }
@@ -139,6 +140,6 @@ namespace Accounting::Widgets
     private:
         Ui::BillEditorDialog m_ui;
 
-        Entities::BillEntity *m_bill;
+        Models::BillProxyModel *m_bill;
     };
 }

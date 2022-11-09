@@ -6,8 +6,8 @@
 #include <QPushButton>
 #include <QMessageBox>
 
-#include "Entities/BillEntity.hpp"
-#include "Entities/TransactionEntity.hpp"
+#include "Models/TransactionModel.hpp"
+#include "Models/BillProxyModel.hpp"
 
 #include "ui_TransactionEditorDialog.h"
 
@@ -17,7 +17,7 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        explicit TransactionEditorDialog(Entities::BillEntity *parent_bill, Entities::TransactionEntity *transaction, QWidget *parent = nullptr)
+        explicit TransactionEditorDialog(Models::BillProxyModel *parent_bill, Models::TransactionModel *transaction, QWidget *parent = nullptr)
             : QDialog(parent)
             , m_old_transaction(transaction)
             , m_parent_bill(parent_bill)
@@ -31,7 +31,7 @@ namespace Accounting::Widgets
             }
 
             {
-                fill_QComboBox_with_enum<Entities::TransactionEntity::Status>(m_ui.m_status_QComboBox);
+                fill_QComboBox_with_enum<Models::TransactionModel::Status>(m_ui.m_status_QComboBox);
                 if (transaction == nullptr) {
                     m_ui.m_status_QComboBox->setCurrentIndex(0);
                 } else {
@@ -128,7 +128,7 @@ namespace Accounting::Widgets
             auto amount = m_ui.m_amount_QLineEdit->text().toDouble();
             auto date = m_ui.m_date_QDateEdit->date();
             auto category = m_ui.m_category_QComboBox->currentText().trimmed();
-            auto status = static_cast<Entities::TransactionEntity::Status>(m_ui.m_status_QComboBox->currentIndex());
+            auto status = static_cast<Models::TransactionModel::Status>(m_ui.m_status_QComboBox->currentIndex());
 
             if (m_old_transaction == nullptr) {
                 // FIXME: m_parent_bill->createTransaction(date, amount, category, status);
@@ -145,7 +145,7 @@ namespace Accounting::Widgets
     private:
         Ui::TransactionEditorDialog m_ui;
 
-        Entities::BillEntity *m_parent_bill;
-        Entities::TransactionEntity *m_old_transaction;
+        Models::BillProxyModel *m_parent_bill;
+        Models::TransactionModel *m_old_transaction;
     };
 }

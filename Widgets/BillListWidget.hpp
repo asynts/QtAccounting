@@ -32,7 +32,7 @@ namespace Accounting::Widgets
                 return false;
             }
 
-            auto *bill_model = reinterpret_cast<Models::BillModel*>(index.internalPointer());
+            auto *bill_model = reinterpret_cast<Models::BillProxyModel*>(index.internalPointer());
 
             BillEditorDialog dialog(bill_model);
             dialog.exec();
@@ -55,7 +55,7 @@ namespace Accounting::Widgets
         }
 
         void setModel(Models::DatabaseModel *database_model) {
-            m_ui.m_bills_QTableView->setModel(database_model);
+            m_ui.m_bills_QTableView->setModel(database_model->billListModel());
             m_ui.m_bills_QTableView->setItemDelegate(new BillItemDelegate(this));
             m_ui.m_bills_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
             m_ui.m_bills_QTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
@@ -65,7 +65,9 @@ namespace Accounting::Widgets
     private slots:
         void slotNewBill() {
             Q_ASSERT(m_database_model != nullptr);
-            m_database_model->createBill();
+
+            // FIXME: Open dialog?
+            m_database_model->billListModel()->createBill();
         }
 
     private:
