@@ -70,6 +70,13 @@
     </layout>
    </item>
    <item>
+    <widget class="QPushButton" name="m_delete_QPushButton">
+     <property name="text">
+      <string>Delete Transaction</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="m_buttons_QDialogButtonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

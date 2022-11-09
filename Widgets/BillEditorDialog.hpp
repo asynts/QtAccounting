@@ -13,6 +13,7 @@
 #include <fmt/format.h>
 
 #include "Models/BillModel.hpp"
+#include "Models/DatabaseModel.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
 #include "Persistance/S3.hpp"
 
@@ -93,9 +94,27 @@ namespace Accounting::Widgets
                 connect(m_ui.m_export_QPushButton, &QPushButton::clicked,
                         this, &BillEditorDialog::slotExport);
             }
+
+            {
+                connect(m_ui.m_delete_QPushButton, &QPushButton::clicked,
+                        this, &BillEditorDialog::slotDelete);
+            }
         }
 
     private slots:
+        void slotDelete() {
+            int reply = QMessageBox::question(
+                        this,
+                        "Delete?",
+                        QString::fromStdString(fmt::format("Are you sure that you want to delete bill '{}'?", m_bill_model->id().toStdString())),
+                        QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+
+            if (reply == QMessageBox::StandardButton::Yes) {
+                m_bill_model->deleteMyself();
+                done(QDialog::DialogCode::Accepted);
+            }
+        }
+
         void slotStatusChanged() {
             m_bill_model->setStatus(static_cast<Models::BillModel::Status>(m_ui.m_status_QComboBox->currentIndex()));
         }

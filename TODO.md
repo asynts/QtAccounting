@@ -1,6 +1,6 @@
-### 0.3.0
+## 0.3.0
 
-#### Tweaks
+### Tweaks
 
 -   Get Bucket name from settings.
 
@@ -8,11 +8,13 @@
 
 -   `backup.sh` script.
 
-### Tweaks
-
-### 0.X.0
+### Features
 
 -   Allow deletion of transactions and bills.
+
+## Tweaks
+
+## Next 0.X.0
 
 -   Keep track of pocket money.
 
@@ -28,7 +30,7 @@
 
 -   Error handling everywhere.
 
-### 0.Y.0
+## 0.Y.0
 
 -   Implement tab-stops properly.
 
@@ -38,7 +40,7 @@
 
 -   Automatic migration.
 
-### 0.Z.0
+## 0.Z.0
 
 -   Use QML.
 

@@ -32,6 +32,21 @@ namespace Accounting::Models
                 });
     }
 
+    void BillModel::deleteTransaction(Accounting::Models::TransactionModel *transaction_model) {
+        auto index = m_transactions.indexOf(transaction_model);
+        Q_ASSERT(index >= 0);
+
+        beginRemoveRows(QModelIndex(), index, index);
+        m_transactions.remove(index);
+        endRemoveRows();
+
+        transaction_model->deleteLater();
+    }
+
+    void BillModel::deleteMyself() {
+        m_database_model->deleteBill(this);
+    }
+
     void BillModel::exportTo(std::filesystem::path path) {
         QSettings settings;
         QTextDocument document;

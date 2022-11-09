@@ -1,7 +1,10 @@
 #pragma once
 
+#include <fmt/format.h>
+
 #include <QDialog>
 #include <QPushButton>
+#include <QMessageBox>
 
 #include "Models/BillModel.hpp"
 #include "Models/TransactionModel.hpp"
@@ -75,10 +78,32 @@ namespace Accounting::Widgets
                         this, &TransactionEditorDialog::slotValidate);
             }
 
+            {
+                m_ui.m_delete_QPushButton->setEnabled(transaction_model != nullptr);
+
+                connect(m_ui.m_delete_QPushButton, &QPushButton::clicked,
+                        this, &TransactionEditorDialog::slotDelete);
+            }
+
             slotValidate();
         }
 
     private slots:
+        void slotDelete() {
+            Q_ASSERT(m_old_transaction_model != nullptr);
+
+            int reply = QMessageBox::question(
+                        this,
+                        "Delete?",
+                        QString::fromStdString(fmt::format("Are you sure that you want to delete transaction '{}'?", m_old_transaction_model->id().toStdString())),
+                        QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+
+            if (reply == QMessageBox::StandardButton::Yes) {
+                m_parent_bill_model->deleteTransaction(m_old_transaction_model);
+                done(QDialog::DialogCode::Accepted);
+            }
+        }
+
         bool slotValidate() {
             bool is_valid = true;
 

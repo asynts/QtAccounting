@@ -187,6 +187,8 @@ namespace Accounting::Models
 
     public slots:
         void createTransaction(QDate date, qreal amount, QString category, TransactionModel::Status status);
+        void deleteTransaction(Accounting::Models::TransactionModel *transaction_model);
+        void deleteMyself();
 
     private:
         qint64 m_creation_timestamp;

@@ -48,6 +48,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="m_delete_QPushButton">
+     <property name="text">
+      <string>Delete Bill</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QTableView" name="m_transactions_QTableView"/>
    </item>
    <item>

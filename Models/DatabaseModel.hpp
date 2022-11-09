@@ -42,6 +42,17 @@ namespace Accounting::Models
             return bill_model;
         }
 
+        void deleteBill(BillModel *bill_model) {
+            auto index = m_bills.indexOf(bill_model);
+            Q_ASSERT(index >= 0);
+
+            beginRemoveRows(QModelIndex(), index, index);
+            m_bills.remove(index);
+            endRemoveRows();
+
+            bill_model->deleteLater();
+        }
+
         Persistance::Database serialize() const {
             QList<Persistance::Bill> serialized_bills;
             for (auto *bill_model : m_bills) {
