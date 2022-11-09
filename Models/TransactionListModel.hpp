@@ -29,11 +29,23 @@ namespace Accounting::Models
         explicit TransactionListModel(DatabaseModel *parent_database_model);
 
         void appendTransaction(TransactionModel *transaction) {
+            setParent(this);
+
             int index = m_owned_transactions.size();
 
             beginInsertRows(QModelIndex(), index, index);
             m_owned_transactions.append(transaction);
             endInsertRows();
+        }
+
+        void deleteAll() {
+            beginResetModel();
+            m_owned_transactions.clear();
+            endResetModel();
+        }
+
+        const QList<TransactionModel*> transactions() const {
+            return m_owned_transactions;
         }
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {

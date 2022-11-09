@@ -22,13 +22,40 @@ namespace Accounting::Models
         }
 
         Persistance::Database serialize() const {
-            // FIXME
-            Q_UNREACHABLE();
+            QList<Persistance::Transaction> transactions;
+            for (auto *transaction : m_transactionList_model->transactions()) {
+                transactions.append(transaction->serialize());
+            }
+
+            QList<Persistance::Bill> bills;
+            for (auto *bill : m_billList_model->bills()) {
+                bills.append(bill->serialize());
+            }
+
+            return Persistance::Database{
+                .m_bills = bills,
+                .m_next_id = m_next_id,
+                .m_transactions = transactions,
+            };
         }
 
         void deserialize(const Persistance::Database& value) {
-            // FIXME
-            Q_UNREACHABLE();
+            m_billList_model->deleteAll();
+            m_transactionList_model->deleteAll();
+
+            for (auto& transaction : value.m_transactions) {
+                auto *transaction_model = new TransactionModel(this);
+                transaction_model->deserialize(transaction);
+                m_transactionList_model->appendTransaction(transaction_model);
+            }
+
+            for (auto& bill : value.m_bills) {
+                auto *bill_model = new BillProxyModel(this);
+                bill_model->deserialize(bill);
+                m_billList_model->appendBill(bill_model);
+            }
+
+            m_next_id = value.m_next_id;
         }
 
         QString consume_next_id() {

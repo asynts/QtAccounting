@@ -28,11 +28,23 @@ namespace Accounting::Models
         explicit BillListModel(DatabaseModel *parent_database_model);
 
         void appendBill(BillProxyModel *bill) {
+            bill->setParent(this);
+
             int index = m_owned_bills.size();
 
             beginInsertRows(QModelIndex(), index, index);
             m_owned_bills.append(bill);
             endInsertRows();
+        }
+
+        void deleteAll() {
+            beginResetModel();
+            m_owned_bills.clear();
+            endResetModel();
+        }
+
+        const QList<BillProxyModel*> bills() const {
+            return m_owned_bills;
         }
 
         BillProxyModel* createBill();

@@ -36,8 +36,8 @@
 //
 //  2. Increment 'ACCOUTNING_NEW_BINARY_VERSON' and 'ACCOUTNING_OLD_BINARY_VERSON'.
 
-#define ACCOUTNING_OLD_BINARY_VERSION 4ull
-#define ACCOUTNING_NEW_BINARY_VERSION 4ull
+#define ACCOUTNING_OLD_BINARY_VERSION 6ull
+#define ACCOUTNING_NEW_BINARY_VERSION 6ull
 
 #define ACCOUNTING_MAGIC_NUMBER 7250402524647310127ull
 
@@ -60,13 +60,13 @@ namespace Accounting::Persistance
         QString m_id;
         QDate m_date;
         QString m_status;
-        QList<Transaction> m_transactions;
         qint64 m_creation_timestamp;
     };
 
     struct Database {
         QList<Bill> m_bills;
         quint64 m_next_id;
+        QList<Transaction> m_transactions;
     };
 
     using NewTransaction = Transaction;
@@ -84,16 +84,10 @@ namespace Accounting::Persistance
 
     using NewBill = Bill;
     inline NewBill migrate_structure(const Bill& bill) {
-        QList<NewTransaction> transactions;
-        for (auto& transaction : bill.m_transactions) {
-            transactions.append(migrate_structure(transaction));
-        }
-
         return NewBill{
             .m_id = bill.m_id,
             .m_date = bill.m_date,
             .m_status = bill.m_status,
-            .m_transactions = transactions,
             .m_creation_timestamp = bill.m_creation_timestamp,
         };
     }
@@ -105,9 +99,15 @@ namespace Accounting::Persistance
             bills.append(migrate_structure(bill));
         }
 
+        QList<NewTransaction> transactions;
+        for (auto& transaction: database.m_transactions) {
+            transactions.append(migrate_structure(transaction));
+        }
+
         return NewDatabase{
             .m_bills = bills,
             .m_next_id = database.m_next_id,
+            .m_transactions = transactions,
         };
     }
 
@@ -127,7 +127,6 @@ namespace Accounting::Persistance
         in >> value.m_id
            >> value.m_date
            >> value.m_status
-           >> value.m_transactions
            >> value.m_creation_timestamp;
 
         return in;
@@ -135,7 +134,8 @@ namespace Accounting::Persistance
 
     inline QDataStream& operator>>(QDataStream& in, Database& value) {
         in >> value.m_bills
-           >> value.m_next_id;
+           >> value.m_next_id
+           >> value.m_transactions;
 
         return in;
     }
@@ -156,7 +156,6 @@ namespace Accounting::Persistance
         out << value.m_id
             << value.m_date
             << value.m_status
-            << value.m_transactions
             << value.m_creation_timestamp;
 
         return out;
@@ -164,7 +163,8 @@ namespace Accounting::Persistance
 
     inline QDataStream& operator<<(QDataStream& out, const NewDatabase& value) {
         out << value.m_bills
-            << value.m_next_id;
+            << value.m_next_id
+            << value.m_transactions;
 
         return out;
     }

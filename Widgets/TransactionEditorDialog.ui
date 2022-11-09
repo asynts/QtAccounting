@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>384</width>
-    <height>181</height>
+    <height>239</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -66,6 +66,16 @@
      </item>
      <item row="4" column="1">
       <widget class="QComboBox" name="m_status_QComboBox"/>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Pocket Money?</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="m_pocketMoney_QComboBox"/>
      </item>
     </layout>
    </item>

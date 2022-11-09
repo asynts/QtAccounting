@@ -26,6 +26,7 @@ namespace Accounting::Models
         Q_PROPERTY(QString category READ category WRITE setCategory BINDABLE bindableCategory NOTIFY signalChanged);
         Q_PROPERTY(Status status READ status WRITE setStatus BINDABLE bindableStatus NOTIFY signalChanged);
         Q_PROPERTY(bool isPocketMoney READ isPocketMoney WRITE setIsPocketMoney BINDABLE bindableIsPocketMoney NOTIFY signalChanged);
+        Q_PROPERTY(qint64 creationTimestamp READ creationTimestamp WRITE setCreationTimestamp BINDABLE bindableCreationTimestamp NOTIFY signalChanged);
 
     public:
         explicit TransactionModel(QObject *parent = nullptr)
@@ -60,6 +61,10 @@ namespace Accounting::Models
         void setIsPocketMoney(bool value) { m_is_pocket_money = value; }
         QBindable<bool> bindableIsPocketMoney() { return QBindable<bool>(&m_is_pocket_money); }
 
+        qint64 creationTimestamp() const { return m_is_pocket_money.value(); }
+        void setCreationTimestamp(qint64 value) { m_is_pocket_money = value; }
+        QBindable<qint64> bindableCreationTimestamp() { return QBindable<qint64>(&m_is_pocket_money); }
+
         Persistance::Transaction serialize() const {
             return Persistance::Transaction{
                 .m_id = id(),
@@ -88,8 +93,6 @@ namespace Accounting::Models
         void signalChanged();
 
     private:
-        qint64 m_creation_timestamp;
-
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QString, m_id, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QString, m_parent_bill_id, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QDate, m_date, &TransactionModel::signalChanged);
@@ -97,5 +100,6 @@ namespace Accounting::Models
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QString, m_category, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, Status, m_status, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, bool, m_is_pocket_money, &TransactionModel::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, qint64, m_creation_timestamp, &TransactionModel::signalChanged);
     };
 }

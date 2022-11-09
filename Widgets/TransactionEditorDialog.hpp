@@ -42,6 +42,7 @@ namespace Accounting::Widgets
             {
                 m_ui.m_category_QComboBox->addItem("Groceries");
                 m_ui.m_category_QComboBox->addItem("Transport");
+                m_ui.m_category_QComboBox->addItem("Pocket Money");
 
                 if (transaction == nullptr) {
                     m_ui.m_category_QComboBox->setCurrentIndex(0);
@@ -85,6 +86,17 @@ namespace Accounting::Widgets
                         this, &TransactionEditorDialog::slotDelete);
             }
 
+            {
+                m_ui.m_pocketMoney_QComboBox->addItem("No");
+                m_ui.m_pocketMoney_QComboBox->addItem("Yes");
+
+                if (transaction != nullptr && transaction->isPocketMoney()) {
+                    m_ui.m_pocketMoney_QComboBox->setCurrentIndex(1);
+                } else {
+                    m_ui.m_pocketMoney_QComboBox->setCurrentIndex(0);
+                }
+            }
+
             slotValidate();
         }
 
@@ -119,6 +131,10 @@ namespace Accounting::Widgets
                 is_valid = false;
             }
 
+            if (m_ui.m_pocketMoney_QComboBox->currentIndex() == 1 && m_ui.m_category_QComboBox->currentText() != "Pocket Money") {
+                is_valid = false;
+            }
+
             m_ui.m_buttons_QDialogButtonBox->button(QDialogButtonBox::Ok)->setEnabled(is_valid);
 
             return is_valid;
@@ -129,9 +145,10 @@ namespace Accounting::Widgets
             auto date = m_ui.m_date_QDateEdit->date();
             auto category = m_ui.m_category_QComboBox->currentText().trimmed();
             auto status = static_cast<Models::TransactionModel::Status>(m_ui.m_status_QComboBox->currentIndex());
+            auto is_pocket_money = m_ui.m_pocketMoney_QComboBox->currentIndex() == 1;
 
             if (m_old_transaction == nullptr) {
-                // FIXME: m_parent_bill->createTransaction(date, amount, category, status);
+                m_parent_bill->createTransaction(date, amount, category, status, is_pocket_money);
             } else {
                 m_old_transaction->setAmount(amount);
                 m_old_transaction->setDate(date);
