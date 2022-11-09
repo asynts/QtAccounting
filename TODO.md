@@ -6,9 +6,9 @@
 
 -   Add `${BINARY_VERSION}` in uploaded filename.
 
-### Tweaks
-
 -   `backup.sh` script.
+
+### Tweaks
 
 -   Use `std::filesystem::path` everywhere.
 

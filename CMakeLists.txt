@@ -34,6 +34,8 @@ set(PROJECT_SOURCES
     Notes/0002_understanding-model-view.md
     Notes/0003_generate-spreadsheet-odf.md
 
+    Scripts/backup.sh
+
     LICENSE
     README.md
     TODO.md
