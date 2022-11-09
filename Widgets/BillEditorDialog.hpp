@@ -13,6 +13,7 @@
 #include <fmt/format.h>
 
 #include "Models/BillProxyModel.hpp"
+#include "Models/TransactionListModel.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
 #include "Persistance/S3.hpp"
 

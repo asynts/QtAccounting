@@ -43,6 +43,12 @@ namespace Accounting
 
             {
                 m_ui.m_pocketMoney_QTableView->setModel(m_database_model->pocketMoneyModel());
+
+                m_ui.m_pocketMoney_QTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+                m_ui.m_pocketMoney_QTableView->horizontalHeader()->setSectionResizeMode(
+                            Models::TransactionListModel::Columns::ColumnCategory,
+                            QHeaderView::ResizeMode::Stretch);
+
             }
         }
 

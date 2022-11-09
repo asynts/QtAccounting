@@ -58,7 +58,7 @@ namespace Accounting::Widgets
             m_ui.m_bills_QTableView->setModel(database_model->billListModel());
             m_ui.m_bills_QTableView->setItemDelegate(new BillItemDelegate(this));
             m_ui.m_bills_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
-            m_ui.m_bills_QTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+            m_ui.m_bills_QTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::Stretch);
             m_database_model = database_model;
         }
 
