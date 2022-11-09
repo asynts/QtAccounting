@@ -24,6 +24,8 @@ set(PROJECT_SOURCES
     Models/BillModel.cpp
     Models/TransactionModel.hpp
     Models/DatabaseModel.hpp
+    Models/AbstractTransactionListModel.hpp
+    Models/AbstractTransactionListModel.cpp
     Persistance/Database.hpp
     Persistance/S3.hpp
     MainWindow.hpp

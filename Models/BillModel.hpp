@@ -10,6 +10,7 @@
 #include <QSettings>
 
 #include "Models/TransactionModel.hpp"
+#include "Models/AbstractTransactionListModel.hpp"
 #include "Util.hpp"
 #include "Persistance/Database.hpp"
 
@@ -17,7 +18,7 @@ namespace Accounting::Models
 {
     class DatabaseModel;
 
-    class BillModel final : public QAbstractItemModel {
+    class BillModel final : public AbstractTransactionListModel {
     public:
         enum class Status {
             Staged,
@@ -25,17 +26,6 @@ namespace Accounting::Models
             ConfirmedPaid,
         };
         Q_ENUM(Status);
-
-        enum Columns {
-            ColumnDate,
-            ColumnAmount,
-            ColumnCategory,
-            ColumnStatus,
-            ColumnId,
-
-            COLUMN_COUNT
-        };
-        Q_ENUM(Columns);
 
     private:
         Q_OBJECT
@@ -61,7 +51,7 @@ namespace Accounting::Models
 
         qreal totalAmount() const {
             qreal total = 0.0;
-            for (auto *transaction_model : m_transactions) {
+            for (auto *transaction_model : m_owned_transactions) {
                 if (transaction_model->status() == TransactionModel::Status::Normal) {
                     total += transaction_model->amount();
                 } else if (transaction_model->status() == TransactionModel::Status::AlreadyPaid) {
@@ -77,7 +67,7 @@ namespace Accounting::Models
 
         Persistance::Bill serialize() const {
             QList<Persistance::Transaction> serialized_transactions;
-            for (auto *transacton_model : m_transactions) {
+            for (auto *transacton_model : m_owned_transactions) {
                 serialized_transactions.append(transacton_model->serialize());
             }
 
@@ -90,97 +80,7 @@ namespace Accounting::Models
             };
         }
 
-        void deserialize(const Persistance::Bill& value) {
-            m_id = value.m_id;
-            m_date = value.m_date;
-            m_status = enum_type_from_string<Status>(value.m_status);
-            m_creation_timestamp = value.m_creation_timestamp;
-
-            beginResetModel();
-
-            for (auto& transaction_model : m_transactions) {
-                transaction_model->deleteLater();
-            }
-            m_transactions.clear();
-
-            for (auto& transaction : value.m_transactions) {
-                auto *transaction_model = new TransactionModel(this);
-                transaction_model->deserialize(transaction);
-                m_transactions.append(transaction_model);
-            }
-
-            endResetModel();
-        }
-
-        virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
-            if (row < 0 || row >= rowCount()) {
-                return QModelIndex();
-            }
-
-            return createIndex(row, column, reinterpret_cast<void*>(m_transactions[row]));
-        }
-
-        virtual QModelIndex parent(const QModelIndex& index) const override {
-            return QModelIndex();
-        }
-
-        virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override {
-            return m_transactions.size();
-        }
-
-        virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
-            return Columns::COLUMN_COUNT;
-        }
-
-        virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
-            if (orientation == Qt::Orientation::Vertical) {
-                return QAbstractItemModel::headerData(section, orientation, role);
-            }
-
-            if (role != Qt::DisplayRole) {
-                return QVariant();
-            }
-
-            if (section == Columns::ColumnId) {
-                return "Id";
-            } else if (section == Columns::ColumnStatus) {
-                return "Status";
-            } else if (section == Columns::ColumnDate) {
-                return "Date";
-            } else if (section == Columns::ColumnAmount) {
-                return "Amount";
-            } else if (section == Columns::ColumnCategory) {
-                return "Category";
-            } else {
-                 Q_UNREACHABLE();
-            }
-        }
-
-        virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
-            if (index.row() < 0 || index.row() > rowCount()) {
-                return QVariant();
-            }
-
-            if (role != Qt::DisplayRole) {
-                return QVariant();
-            }
-
-            auto *transaction = m_transactions[index.row()];
-
-            if (index.column() == Columns::ColumnDate) {
-                return transaction->date().toString("yyyy-MM-dd");
-            } else if (index.column() == Columns::ColumnAmount) {
-                return QString::number(transaction->amount(), 'f', 2);
-            } else if (index.column() == Columns::ColumnCategory) {
-                return transaction->category();
-            } else if (index.column() == Columns::ColumnId) {
-                return transaction->id();
-            } else if (index.column() == Columns::ColumnStatus) {
-                return enum_type_to_string(transaction->status());
-            }
-
-            return QVariant();
-        }
+        void deserialize(const Persistance::Bill& value);
 
     signals:
         void signalChanged();
@@ -190,11 +90,15 @@ namespace Accounting::Models
         void deleteTransaction(Accounting::Models::TransactionModel *transaction_model);
         void deleteMyself();
 
+    protected:
+        virtual const QList<TransactionModel*> transaction_models_internal() const override {
+            return m_owned_transactions;
+        }
+
     private:
         qint64 m_creation_timestamp;
-        DatabaseModel *m_database_model;
 
-        QList<TransactionModel*> m_transactions;
+        QList<TransactionModel*> m_owned_transactions;
 
         Q_OBJECT_BINDABLE_PROPERTY(BillModel, QString, m_id, &BillModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(BillModel, QDate, m_date, &BillModel::signalChanged);

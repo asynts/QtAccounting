@@ -28,10 +28,10 @@ namespace Accounting::Models
         BillModel* createBill() {
             auto *bill_model = new BillModel(new_id(), QDate::currentDate(), BillModel::Status::Staged, QDateTime::currentMSecsSinceEpoch(), this);
 
-            int row = m_bills.size();
+            int row = m_owned_bill_models.size();
 
             beginInsertRows(QModelIndex(), row, row);
-            m_bills.append(bill_model);
+            m_owned_bill_models.append(bill_model);
             endInsertRows();
 
             connect(bill_model, &BillModel::signalChanged,
@@ -43,11 +43,11 @@ namespace Accounting::Models
         }
 
         void deleteBill(BillModel *bill_model) {
-            auto index = m_bills.indexOf(bill_model);
+            auto index = m_owned_bill_models.indexOf(bill_model);
             Q_ASSERT(index >= 0);
 
             beginRemoveRows(QModelIndex(), index, index);
-            m_bills.remove(index);
+            m_owned_bill_models.remove(index);
             endRemoveRows();
 
             bill_model->deleteLater();
@@ -55,7 +55,7 @@ namespace Accounting::Models
 
         Persistance::Database serialize() const {
             QList<Persistance::Bill> serialized_bills;
-            for (auto *bill_model : m_bills) {
+            for (auto *bill_model : m_owned_bill_models) {
                 serialized_bills.append(bill_model->serialize());
             }
 
@@ -70,15 +70,15 @@ namespace Accounting::Models
 
             beginResetModel();
 
-            for (auto *bill_model : m_bills) {
+            for (auto *bill_model : m_owned_bill_models) {
                 bill_model->deleteLater();
             }
-            m_bills.clear();
+            m_owned_bill_models.clear();
 
             for (auto& bill : value.m_bills) {
                 auto *bill_model = new BillModel(this);
                 bill_model->deserialize(bill);
-                m_bills.append(bill_model);
+                m_owned_bill_models.append(bill_model);
             }
 
             endResetModel();
@@ -88,12 +88,22 @@ namespace Accounting::Models
             return hash_and_stringify_id(m_next_id++);
         }
 
+        void trackTransaction(TransactionModel *transaction_model) {
+            Q_ASSERT(m_tracked_transaction_models.find(transaction_model->id()) == m_tracked_transaction_models.end());
+            m_tracked_transaction_models.insert(transaction_model->id(), transaction_model);
+        }
+
+        void untrackTransaction(TransactionModel *transaction_model) {
+            int countRemoved = m_tracked_transaction_models.remove(transaction_model->id());
+            Q_ASSERT(countRemoved == 1);
+        }
+
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
                 return QModelIndex();
             }
 
-            return createIndex(row, column, reinterpret_cast<void*>(m_bills[row]));
+            return createIndex(row, column, reinterpret_cast<void*>(m_owned_bill_models[row]));
         }
 
         virtual Qt::ItemFlags flags(const QModelIndex& index) const override {
@@ -111,7 +121,7 @@ namespace Accounting::Models
         }
 
         virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override {
-            return m_bills.size();
+            return m_owned_bill_models.size();
         }
 
         virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
@@ -149,7 +159,7 @@ namespace Accounting::Models
                 return QVariant();
             }
 
-            auto *bill = m_bills[index.row()];
+            auto *bill = m_owned_bill_models[index.row()];
 
             if (index.column() == Columns::ColumnId) {
                 return bill->id();
@@ -165,7 +175,8 @@ namespace Accounting::Models
         }
 
     private:
-        QList<BillModel*> m_bills;
+        QMap<QString, TransactionModel*> m_tracked_transaction_models;
+        QList<BillModel*> m_owned_bill_models;
         quint64 m_next_id = 1;
     };
 }

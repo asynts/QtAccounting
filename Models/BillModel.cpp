@@ -5,25 +5,24 @@
 namespace Accounting::Models
 {
     BillModel::BillModel(DatabaseModel *parent_database_model)
-        : QAbstractItemModel(parent_database_model)
-        , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch())
-        , m_database_model(parent_database_model) { }
+        : AbstractTransactionListModel(parent_database_model)
+        , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch()) { }
 
     BillModel::BillModel(QString id, QDate date, Status status, qint64 creation_timestamp, DatabaseModel *parent_database_model)
-        : QAbstractItemModel(parent_database_model)
+        : AbstractTransactionListModel(parent_database_model)
         , m_id(id)
         , m_date(date)
         , m_status(status)
-        , m_creation_timestamp(creation_timestamp)
-        , m_database_model(parent_database_model) { }
+        , m_creation_timestamp(creation_timestamp) { }
 
     void BillModel::createTransaction(QDate date, qreal amount, QString category, TransactionModel::Status status) {
-        auto *transaction_model = new TransactionModel(m_database_model->new_id(), date, amount, category, status, QDateTime::currentMSecsSinceEpoch(), this);
+        auto *transaction_model = new TransactionModel(m_parent_database_model->new_id(), date, amount, category, status, QDateTime::currentMSecsSinceEpoch(), this);
+        m_parent_database_model->trackTransaction(transaction_model);
 
-        int row = m_transactions.size();
+        int row = m_owned_transactions.size();
 
         beginInsertRows(QModelIndex(), row, row);
-        m_transactions.append(transaction_model);
+        m_owned_transactions.append(transaction_model);
         endInsertRows();
 
         connect(transaction_model, &TransactionModel::signalChanged,
@@ -33,18 +32,42 @@ namespace Accounting::Models
     }
 
     void BillModel::deleteTransaction(Accounting::Models::TransactionModel *transaction_model) {
-        auto index = m_transactions.indexOf(transaction_model);
+        auto index = m_owned_transactions.indexOf(transaction_model);
         Q_ASSERT(index >= 0);
 
         beginRemoveRows(QModelIndex(), index, index);
-        m_transactions.remove(index);
+        m_owned_transactions.remove(index);
         endRemoveRows();
 
         transaction_model->deleteLater();
     }
 
     void BillModel::deleteMyself() {
-        m_database_model->deleteBill(this);
+        m_parent_database_model->deleteBill(this);
+    }
+
+    void BillModel::deserialize(const Persistance::Bill& value) {
+        m_id = value.m_id;
+        m_date = value.m_date;
+        m_status = enum_type_from_string<Status>(value.m_status);
+        m_creation_timestamp = value.m_creation_timestamp;
+
+        beginResetModel();
+
+        for (auto *transaction_model : m_owned_transactions) {
+            m_parent_database_model->untrackTransaction(transaction_model);
+            transaction_model->deleteLater();
+        }
+        m_owned_transactions.clear();
+
+        for (auto& transaction : value.m_transactions) {
+            auto *transaction_model = new TransactionModel(this);
+            transaction_model->deserialize(transaction);
+            m_parent_database_model->trackTransaction(transaction_model);
+            m_owned_transactions.append(transaction_model);
+        }
+
+        endResetModel();
     }
 
     void BillModel::exportTo(std::filesystem::path path) {
@@ -124,7 +147,7 @@ namespace Accounting::Models
         });
 
         // Transactions.
-        for (TransactionModel *transaction_model : m_transactions) {
+        for (TransactionModel *transaction_model : m_owned_transactions) {
             QTextCharFormat charFormat;
 
             if (transaction_model->status() == TransactionModel::Status::Normal) {

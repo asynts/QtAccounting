@@ -96,4 +96,8 @@ namespace Accounting
         return QMetaEnum::fromType<EnumType>().valueToKey(static_cast<int>(value));
     }
 
+    template<typename EnumType>
+    QString enum_type_to_string(int value) {
+        return enum_type_to_string<EnumType>(static_cast<EnumType>(value));
+    }
 }
