@@ -2,14 +2,13 @@
 
 #include <QObject>
 #include <QBindable>
-#include <QDate>
 
 #include "Persistance/Database.hpp"
 #include "Util.hpp"
 
-namespace Accounting::Models
+namespace Accounting::Entities
 {
-    class TransactionModel final : public QObject {
+    class TransactionEntity final : public QObject {
     public:
         enum class Status {
             Normal,
@@ -28,18 +27,9 @@ namespace Accounting::Models
         Q_PROPERTY(bool isPocketMoney READ isPocketMoney WRITE setIsPocketMoney BINDABLE bindableIsPocketMoney NOTIFY signalChanged);
 
     public:
-        explicit TransactionModel(QObject *parent = nullptr)
+        explicit TransactionEntity(QObject *parent = nullptr)
             : QObject(parent)
             , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch()) { }
-
-        explicit TransactionModel(QString id, QDate date, qreal amount, QString category, Status status, qint64 creation_timestamp, QObject *parent = nullptr)
-            : QObject(parent)
-            , m_id(id)
-            , m_date(date)
-            , m_amount(amount)
-            , m_category(category)
-            , m_status(status)
-            , m_creation_timestamp(creation_timestamp) { }
 
         QString id() const { return m_id.value(); }
         QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
@@ -92,11 +82,11 @@ namespace Accounting::Models
     private:
         qint64 m_creation_timestamp;
 
-        Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QString, m_id, &TransactionModel::signalChanged);
-        Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QDate, m_date, &TransactionModel::signalChanged);
-        Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, qreal, m_amount, &TransactionModel::signalChanged);
-        Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QString, m_category, &TransactionModel::signalChanged);
-        Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, Status, m_status, &TransactionModel::signalChanged);
-        Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, bool, m_is_pocket_money, &TransactionModel::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, QString, m_id, &TransactionEntity::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, QDate, m_date, &TransactionEntity::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, qreal, m_amount, &TransactionEntity::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, QString, m_category, &TransactionEntity::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, Status, m_status, &TransactionEntity::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, bool, m_is_pocket_money, &TransactionEntity::signalChanged);
     };
 }

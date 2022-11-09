@@ -4,6 +4,7 @@
 
 #include "Models/TransactionListModel.hpp"
 #include "Models/PocketMoneyProxyModel.hpp"
+#include "Models/BillListModel.hpp"
 #include "Persistance/Database.hpp"
 
 namespace Accounting::Models
@@ -17,6 +18,7 @@ namespace Accounting::Models
         {
             m_transactionList_model = new TransactionListModel(this);
             m_pocketMoney_model = new PocketMoneyProxyModel(this);
+            m_billList_model = new BillListModel(this);
         }
 
         Persistance::Database serialize() const {
@@ -42,9 +44,8 @@ namespace Accounting::Models
         }
 
     private:
-        // FIXME: m_billList_model
-
         TransactionListModel *m_transactionList_model;
+        BillListModel *m_billList_model;
         PocketMoneyProxyModel *m_pocketMoney_model;
 
         quint64 m_next_id = 1;

@@ -2,19 +2,18 @@
 
 #include <QAbstractItemModel>
 
-#include "Entities/TransactionEntity.hpp"
+#include "Entities/BillEntity.hpp"
 #include "Util.hpp"
 
 namespace Accounting::Models
 {
     class DatabaseModel;
 
-    class TransactionListModel final : public QAbstractItemModel {
+    class BillListModel final : public QAbstractItemModel {
     public:
         enum Columns {
             ColumnDate,
-            ColumnAmount,
-            ColumnCategory,
+            ColumnTotal,
             ColumnStatus,
             ColumnId,
 
@@ -26,14 +25,14 @@ namespace Accounting::Models
         Q_OBJECT
 
     public:
-        explicit TransactionListModel(DatabaseModel *parent_database_model);
+        explicit BillListModel(DatabaseModel *parent_database_model);
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
                 return QModelIndex();
             }
 
-            return createIndex(row, column, reinterpret_cast<void*>(m_owned_transaction_models[row]));
+            return createIndex(row, column, reinterpret_cast<void*>(m_owned_bills[row]));
         }
 
         virtual QModelIndex parent(const QModelIndex& index) const override {
@@ -41,7 +40,7 @@ namespace Accounting::Models
         }
 
         virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override {
-            return m_owned_transaction_models.size();
+            return m_owned_bills.size();
         }
 
         virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
@@ -61,7 +60,7 @@ namespace Accounting::Models
         }
 
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
-            if (index.row() < 0 || index.row() > rowCount()) {
+            if (!checkIndex(index)) {
                 return QVariant();
             }
 
@@ -69,25 +68,24 @@ namespace Accounting::Models
                 return QVariant();
             }
 
-            auto *transaction_model = m_owned_transaction_models[index.row()];
+            auto *bill_entity = m_owned_bills[index.row()];
 
-            if (index.column() == Columns::ColumnDate) {
-                return transaction_model->date().toString("yyyy-MM-dd");
-            } else if (index.column() == Columns::ColumnAmount) {
-                return QString::number(transaction_model->amount(), 'f', 2);
-            } else if (index.column() == Columns::ColumnCategory) {
-                return transaction_model->category();
-            } else if (index.column() == Columns::ColumnId) {
-                return transaction_model->id();
+            if (index.column() == Columns::ColumnId) {
+                return bill_entity->id();
             } else if (index.column() == Columns::ColumnStatus) {
-                return enum_type_to_string(transaction_model->status());
+                return QVariant::fromValue(bill_entity->status());
+            } else if (index.column() == Columns::ColumnDate) {
+                return bill_entity->date().toString("yyyy-MM-dd");
+            } else if (index.column() == Columns::ColumnTotal) {
+                // return QString::number(bill->totalAmount(), 'f', 2);
+                Q_UNIMPLEMENTED();
             }
 
             return QVariant();
         }
 
     private:
-        QList<Entities::TransactionEntity*> m_owned_transaction_models;
+        QList<Entities::BillEntity*> m_owned_bills;
 
         DatabaseModel *m_parent_database_model;
     };

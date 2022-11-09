@@ -20,14 +20,15 @@ set(PROJECT_SOURCES
     Widgets/BillListWidget.hpp
     Widgets/BillEditorDialog.hpp
     Widgets/TransactionEditorDialog.hpp
-    Models/BillModel.hpp
-    Models/BillModel.cpp
-    Models/TransactionModel.hpp
+    Models/BillListModel.hpp
+    Models/BillListModel.cpp
     Models/DatabaseModel.hpp
     Models/TransactionListModel.hpp
     Models/TransactionListModel.cpp
     Models/PocketMoneyProxyModel.hpp
     Models/PocketMoneyProxyModel.cpp
+    Entities/BillEntity.hpp
+    Entities/TransactionEntity.hpp
     Persistance/Database.hpp
     Persistance/S3.hpp
     MainWindow.hpp

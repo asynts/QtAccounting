@@ -12,7 +12,7 @@
 
 #include <fmt/format.h>
 
-#include "Models/BillModel.hpp"
+#include "Entities/BillEntity.hpp"
 #include "Models/DatabaseModel.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
 #include "Persistance/S3.hpp"
@@ -39,10 +39,10 @@ namespace Accounting::Widgets
                 return false;
             }
 
-            auto *bill_model = qobject_cast<Models::BillModel*>(model);
-            auto *transaction_model = reinterpret_cast<Models::TransactionModel*>(index.internalPointer());
+            auto *bill = qobject_cast<Entities::BillEntity*>(model);
+            auto *transaction = reinterpret_cast<Entities::TransactionEntity*>(index.internalPointer());
 
-            TransactionEditorDialog dialog(bill_model, transaction_model);
+            TransactionEditorDialog dialog(bill, transaction);
             dialog.exec();
 
             return true;
@@ -53,16 +53,16 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        explicit BillEditorDialog(Models::BillModel *bill_model, QWidget *parent = nullptr)
+        explicit BillEditorDialog(Entities::BillEntity *bill, QWidget *parent = nullptr)
             : QDialog(parent)
-            , m_bill_model(bill_model)
+            , m_bill(bill)
         {
             m_ui.setupUi(this);
 
-            setWindowTitle(QString("Edit Bill '%1'").arg(bill_model->id()));
+            setWindowTitle(QString("Edit Bill '%1'").arg(bill->id()));
 
             {
-                m_ui.m_transactions_QTableView->setModel(bill_model);
+                // FIXME: m_ui.m_transactions_QTableView->setModel(bill);
                 m_ui.m_transactions_QTableView->setItemDelegate(new TransactionItemDelegate(this));
                 m_ui.m_transactions_QTableView->setEditTriggers(QTableView::EditTrigger::DoubleClicked);
 
@@ -71,15 +71,15 @@ namespace Accounting::Widgets
             }
 
             {
-                fill_QComboBox_with_enum<Models::BillModel::Status>(m_ui.m_status_QComboBox);
-                m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(bill_model->status()));
+                fill_QComboBox_with_enum<Entities::BillEntity::Status>(m_ui.m_status_QComboBox);
+                m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(bill->status()));
 
                 connect(m_ui.m_status_QComboBox, &QComboBox::currentIndexChanged,
                         this, &BillEditorDialog::slotStatusChanged);
             }
 
             {
-                m_ui.m_date_QDateEdit->setDate(bill_model->date());
+                m_ui.m_date_QDateEdit->setDate(bill->date());
 
                 connect(m_ui.m_date_QDateEdit, &QDateEdit::editingFinished,
                         this, &BillEditorDialog::slotDateChanged);
@@ -106,39 +106,39 @@ namespace Accounting::Widgets
             int reply = QMessageBox::question(
                         this,
                         "Delete?",
-                        QString::fromStdString(fmt::format("Are you sure that you want to delete bill '{}'?", m_bill_model->id().toStdString())),
+                        QString::fromStdString(fmt::format("Are you sure that you want to delete bill '{}'?", m_bill->id().toStdString())),
                         QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
 
             if (reply == QMessageBox::StandardButton::Yes) {
-                m_bill_model->deleteMyself();
+                // FIXME: m_bill->deleteMyself();
                 done(QDialog::DialogCode::Accepted);
             }
         }
 
         void slotStatusChanged() {
-            m_bill_model->setStatus(static_cast<Models::BillModel::Status>(m_ui.m_status_QComboBox->currentIndex()));
+            m_bill->setStatus(static_cast<Entities::BillEntity::Status>(m_ui.m_status_QComboBox->currentIndex()));
         }
 
         void slotDateChanged() {
-            m_bill_model->setDate(m_ui.m_date_QDateEdit->date());
+            m_bill->setDate(m_ui.m_date_QDateEdit->date());
         }
 
         void slotNewTransaction()
         {
-            TransactionEditorDialog dialog{ m_bill_model, nullptr };
+            TransactionEditorDialog dialog{ m_bill, nullptr };
             dialog.exec();
         }
 
         void slotExport()
         {
             auto path = Persistance::generate_local_path("Bills", fmt::format("{}_Bill.odt", m_bill_model->id().toStdString()));
-            m_bill_model->exportTo(path);
+            // FIXME: m_bill_model->exportTo(path);
             QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path)));
         }
 
     private:
         Ui::BillEditorDialog m_ui;
 
-        Models::BillModel *m_bill_model;
+        Entities::BillEntity *m_bill;
     };
 }
