@@ -53,6 +53,7 @@ namespace Accounting::Persistance
         qint64 m_creation_timestamp;
         QString m_status;
         bool m_is_pocket_money;
+        QString m_parent_bill_id;
     };
 
     struct Bill {

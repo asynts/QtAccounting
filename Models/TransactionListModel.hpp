@@ -28,6 +28,14 @@ namespace Accounting::Models
     public:
         explicit TransactionListModel(DatabaseModel *parent_database_model);
 
+        void appendTransaction(Entities::TransactionEntity *transaction) {
+            int index = m_owned_transaction_models.size();
+
+            beginInsertRows(QModelIndex(), index, index);
+            m_owned_transaction_models.append(transaction);
+            endInsertRows();
+        }
+
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
                 return QModelIndex();

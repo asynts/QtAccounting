@@ -19,7 +19,8 @@ namespace Accounting::Entities
     private:
         Q_OBJECT
 
-        Q_PROPERTY(QString id READ id BINDABLE bindableId NOTIFY signalChanged);
+        Q_PROPERTY(QString id READ id WRITE setId BINDABLE bindableId NOTIFY signalChanged);
+        Q_PROPERTY(QString parentBillId READ parentBillId WRITE setParentBillId BINDABLE bindableParentBillId NOTIFY signalChanged);
         Q_PROPERTY(QDate date READ date WRITE setDate BINDABLE bindableDate NOTIFY signalChanged);
         Q_PROPERTY(qreal amount READ amount WRITE setAmount BINDABLE bindableAmount NOTIFY signalChanged);
         Q_PROPERTY(QString category READ category WRITE setCategory BINDABLE bindableCategory NOTIFY signalChanged);
@@ -32,7 +33,12 @@ namespace Accounting::Entities
             , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch()) { }
 
         QString id() const { return m_id.value(); }
+        void setId(QString value) { m_id =  value; }
         QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }
+
+        QString parentBillId() const { return m_parent_bill_id.value(); }
+        void setParentBillId(QString value) { m_parent_bill_id =  value; }
+        QBindable<QString> bindableParentBillId() { return QBindable<QString>(&m_parent_bill_id); }
 
         QDate date() const { return m_date.value(); }
         void setDate(QDate value) { m_date = value; }
@@ -63,6 +69,7 @@ namespace Accounting::Entities
                 .m_creation_timestamp = m_creation_timestamp,
                 .m_status = enum_type_to_string(status()),
                 .m_is_pocket_money = m_is_pocket_money,
+                .m_parent_bill_id = m_parent_bill_id,
             };
         }
 
@@ -74,6 +81,7 @@ namespace Accounting::Entities
             m_creation_timestamp = value.m_creation_timestamp;
             m_status = enum_type_from_string<Status>(value.m_status);
             m_is_pocket_money = value.m_is_pocket_money;
+            m_parent_bill_id = value.m_parent_bill_id;
         }
 
     signals:
@@ -83,6 +91,7 @@ namespace Accounting::Entities
         qint64 m_creation_timestamp;
 
         Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, QString, m_id, &TransactionEntity::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, QString, m_parent_bill_id, &TransactionEntity::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, QDate, m_date, &TransactionEntity::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, qreal, m_amount, &TransactionEntity::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionEntity, QString, m_category, &TransactionEntity::signalChanged);

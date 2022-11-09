@@ -2,7 +2,7 @@
 
 #include <QAbstractItemModel>
 
-#include "Entities/BillEntity.hpp"
+#include "Models/BillProxyModel.hpp"
 #include "Util.hpp"
 
 namespace Accounting::Models
@@ -26,6 +26,16 @@ namespace Accounting::Models
 
     public:
         explicit BillListModel(DatabaseModel *parent_database_model);
+
+        void appendBill(BillProxyModel *bill) {
+            int index = m_owned_bills.size();
+
+            beginInsertRows(QModelIndex(), index, index);
+            m_owned_bills.append(bill);
+            endInsertRows();
+        }
+
+        BillProxyModel* createBill();
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
@@ -77,15 +87,14 @@ namespace Accounting::Models
             } else if (index.column() == Columns::ColumnDate) {
                 return bill_entity->date().toString("yyyy-MM-dd");
             } else if (index.column() == Columns::ColumnTotal) {
-                // return QString::number(bill->totalAmount(), 'f', 2);
-                Q_UNIMPLEMENTED();
+                return QString::number(bill_entity->totalAmount(), 'f', 2);
             }
 
             return QVariant();
         }
 
     private:
-        QList<Entities::BillEntity*> m_owned_bills;
+        QList<BillProxyModel*> m_owned_bills;
 
         DatabaseModel *m_parent_database_model;
     };

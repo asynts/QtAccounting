@@ -27,7 +27,8 @@ set(PROJECT_SOURCES
     Models/TransactionListModel.cpp
     Models/PocketMoneyProxyModel.hpp
     Models/PocketMoneyProxyModel.cpp
-    Entities/BillEntity.hpp
+    Models/BillProxyModel.hpp
+    Models/BillProxyModel.cpp
     Entities/TransactionEntity.hpp
     Persistance/Database.hpp
     Persistance/S3.hpp
