@@ -63,19 +63,15 @@ namespace Accounting::Persistance
 
         // FIXME: Async.
         // FIXME: Error handling.
-        // FIXME: If not exists return 'std::nullopt'.
         auto outcome = get_s3_client().GetObject(request);
 
         if (outcome.IsSuccess()) {
             return localPath;
         }
 
-        // FIXME: According to the documentation, this should return 'Aws::S3::S3Errors::NO_SUCH_KEY' if the key doesn't exist.
-        //        However, it seems that the function misbehaves.
-        //
-        //        https://sdk.amazonaws.com/cpp/api/LATEST/class_aws_1_1_s3_1_1_s3_client.html#a89fe252d5e360abcd5887b2b3f581870
-        //
-        if (outcome.GetError().GetErrorType() == Aws::S3::S3Errors::RESOURCE_NOT_FOUND) {
+        bool b_is_resource_not_found = outcome.GetError().GetErrorType() == Aws::S3::S3Errors::RESOURCE_NOT_FOUND;
+        bool b_is_no_such_key = outcome.GetError().GetErrorType() == Aws::S3::S3Errors::NO_SUCH_KEY;
+        if (b_is_resource_not_found || b_is_no_such_key) {
             return std::nullopt;
         }
 

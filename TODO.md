@@ -10,10 +10,6 @@
 
 ### Tweaks
 
--   Use `std::filesystem::path` everywhere.
-
--   Use `QPointer` everywhere.
-
 ### 0.X.0
 
 -   Allow deletion of transactions and bills.
