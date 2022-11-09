@@ -1,8 +1,12 @@
 ### 0.3.0
 
-### Tweaks
+#### Tweaks
+
+-   Get Bucket name from settings.
 
 -   Add `${BINARY_VERSION}` in uploaded filename.
+
+### Tweaks
 
 -   `backup.sh` script.
 
@@ -11,8 +15,6 @@
 -   Use `QPointer` everywhere.
 
 ### 0.X.0
-
--   Bucket name from settings.
 
 -   Allow deletion of transactions and bills.
 

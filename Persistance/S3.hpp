@@ -44,7 +44,7 @@ namespace Accounting::Persistance
     inline std::filesystem::path generate_local_path(std::filesystem::path relativePath, std::string filename) {
         std::filesystem::path path{ QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation).toStdString() };
         path /= relativePath;
-        path /= fmt::format("{:016x}_{}", QDateTime::currentMSecsSinceEpoch(), filename);
+        path /= fmt::format("{:016x}_{}_version{}", QDateTime::currentMSecsSinceEpoch(), filename, binary_version);
 
         return path;
     }
@@ -52,8 +52,10 @@ namespace Accounting::Persistance
     inline std::optional<std::filesystem::path> fetch_file_from_s3(std::filesystem::path remotePath) {
         auto localPath = generate_local_path("Database", "Database.bin");
 
+        QSettings settings;
+
         Aws::S3::Model::GetObjectRequest request;
-        request.SetBucket("accounting-23fbf6ce-ff25-4f6a-a75a-b50bf814fc62");
+        request.SetBucket(settings.value("AWS/BucketName").value<QString>().toStdString());
         request.SetKey(remotePath);
         request.SetResponseStreamFactory([localPath] {
             return Aws::New<Aws::FStream>(AWS_ALLOCATION_TAG, localPath, std::ios_base::out | std::ios_base::binary);
@@ -83,8 +85,10 @@ namespace Accounting::Persistance
     inline void upload_file_to_s3(std::filesystem::path localPath, std::filesystem::path remotePath) {
         auto inputStream = Aws::MakeShared<Aws::FStream>(AWS_ALLOCATION_TAG, localPath, std::ios_base::in | std::ios_base::binary);
 
+        QSettings settings;
+
         Aws::S3::Model::PutObjectRequest request;
-        request.SetBucket("accounting-23fbf6ce-ff25-4f6a-a75a-b50bf814fc62");
+        request.SetBucket(settings.value("AWS/BucketName").value<QString>().toStdString());
         request.SetKey(remotePath);
         request.SetBody(inputStream);
 

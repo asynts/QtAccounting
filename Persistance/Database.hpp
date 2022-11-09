@@ -43,6 +43,8 @@
 
 namespace Accounting::Persistance
 {
+    constexpr quint64 binary_version = ACCOUTNING_NEW_BINARY_VERSION;
+
     struct Transaction {
         QString m_id;
         QDate m_date;
