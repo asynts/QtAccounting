@@ -39,6 +39,7 @@ set(PROJECT_SOURCES
     Notes/0001_form-layout-expands.md
     Notes/0002_understanding-model-view.md
     Notes/0003_generate-spreadsheet-odf.md
+    Notes/0004_crash-binding-sigsegv.md
 
     Scripts/backup.sh
 

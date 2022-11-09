@@ -52,12 +52,18 @@ namespace Accounting::Models
 
         qreal totalAmount() const {
             qreal result = 0.0;
-            for (int row = 0; row < rowCount(); ++row) {
-                auto *transaction = reinterpret_cast<TransactionModel*>(index(row, 0).internalPointer());
-
+            for (auto *transaction : snapshot_transactions()) {
                 if (transaction->status() == TransactionModel::Status::Normal) {
                     result += transaction->amount();
                 }
+            }
+            return result;
+        }
+
+        QList<TransactionModel*> snapshot_transactions() const {
+            QList<TransactionModel*> result;
+            for (int row = 0; row < rowCount(); ++row) {
+                result.append(reinterpret_cast<TransactionModel*>(index(row, 0).internalPointer()));
             }
             return result;
         }
@@ -77,6 +83,8 @@ namespace Accounting::Models
                 .m_creation_timestamp = m_creation_timestamp,
             };
         }
+
+        void exportTo(std::filesystem::path path);
 
         virtual bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override {
             auto sourceIndex = sourceModel()->index(sourceRow, 0, sourceParent);
