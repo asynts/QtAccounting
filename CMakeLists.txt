@@ -36,6 +36,7 @@ set(PROJECT_SOURCES
 
     LICENSE
     README.md
+    TODO.md
 )
 
 qt_wrap_ui(PROJECT_SOURCES
