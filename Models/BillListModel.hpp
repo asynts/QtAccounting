@@ -78,7 +78,18 @@ namespace Accounting::Models
                 return QVariant();
             }
 
-            return enum_type_to_string<Columns>(section);
+            switch (section) {
+            case ColumnDate:
+                return "Date";
+            case ColumnTotal:
+                return "Total";
+            case ColumnStatus:
+                return "Status";
+            case ColumnId:
+                return "Id";
+            default:
+                Q_UNREACHABLE();
+            }
         }
 
         virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
