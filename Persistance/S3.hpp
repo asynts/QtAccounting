@@ -41,16 +41,26 @@ namespace Accounting::Persistance
         return s3_client.value();
     }
 
-    inline std::filesystem::path generate_local_path(std::filesystem::path relativePath, std::string_view filename, std::string_view extension) {
+    inline std::filesystem::path generate_local_path(
+            std::filesystem::path relativePath,
+            std::string_view filename,
+            std::string_view extension,
+            bool appendVersion)
+    {
         std::filesystem::path path{ QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation).toStdString() };
         path /= relativePath;
-        path /= fmt::format("{:016x}_{}_version{}{}", QDateTime::currentMSecsSinceEpoch(), filename, binary_version, extension);
+
+        if (appendVersion) {
+            path /= fmt::format("{:016x}_{}_version{}{}", QDateTime::currentMSecsSinceEpoch(), filename, binary_version, extension);
+        } else {
+            path /= fmt::format("{:016x}_{}{}", QDateTime::currentMSecsSinceEpoch(), filename, extension);
+        }
 
         return path;
     }
 
     inline std::optional<std::filesystem::path> fetch_file_from_s3(std::filesystem::path remotePath) {
-        auto localPath = generate_local_path("Database", "Database", ".bin");
+        auto localPath = generate_local_path("Database", "Database", ".bin", true);
 
         QSettings settings;
 
@@ -105,7 +115,7 @@ namespace Accounting::Persistance
     }
 
     inline void save(const Database& database) {
-        auto path = generate_local_path("Database", "Database", ".bin");
+        auto path = generate_local_path("Database", "Database", ".bin", true);
         write_to_disk(database, path);
         upload_file_to_s3(path, fmt::format("/Database/{}", path.filename().string()));
         upload_file_to_s3(path, "/Database/Database.bin");
@@ -117,7 +127,7 @@ namespace Accounting::Persistance
         auto fromPath_opt = fetch_file_from_s3("/Database/Database.bin");
         Q_ASSERT(fromPath_opt.has_value());
 
-        auto toPath = generate_local_path("Database", "Database", ".bin");
+        auto toPath = generate_local_path("Database", "Database", ".bin", true);
 
         migrationFunction(fromPath_opt.value(), toPath);
 
