@@ -23,13 +23,13 @@ namespace Accounting::Models
 
         Persistance::Database serialize() const {
             QList<Persistance::Transaction> transactions;
-            for (auto *transaction : m_transactionList_model->transactions()) {
-                transactions.append(transaction->serialize());
+            for (auto *transaction_model : m_transactionList_model->transactions()) {
+                transactions.append(transaction_model->serialize());
             }
 
             QList<Persistance::Bill> bills;
-            for (auto *bill : m_billList_model->bills()) {
-                bills.append(bill->serialize());
+            for (auto *bill_model : m_billList_model->bill_models()) {
+                bills.append(bill_model->serialize());
             }
 
             return Persistance::Database{

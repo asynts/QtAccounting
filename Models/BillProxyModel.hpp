@@ -54,19 +54,15 @@ namespace Accounting::Models
 
         qreal totalAmount() const {
             qreal result = 0.0;
-            for (auto *transaction : transactions()) {
-                if (transaction->status() == TransactionModel::Status::Normal) {
-                    qDebug() << "[BillProxyModel::totalAmount] adding amount:" << transaction->amount();
-                    result += transaction->amount();
-                } else {
-                    qDebug() << "[BillProxyModel::totalAmount] skipping amount:" << transaction->amount();
+            for (auto *transaction_model : transaction_models()) {
+                if (transaction_model->status() == TransactionModel::Status::Normal) {
+                    result += transaction_model->amount();
                 }
             }
-            qDebug() << "[BillProxyModel::totalAmount] result:" << result;
             return result;
         }
 
-        QList<TransactionModel*> transactions() const {
+        QList<TransactionModel*> transaction_models() const {
             QList<TransactionModel*> result;
             for (int row = 0; row < rowCount(); ++row) {
                 auto proxyModelIndex = index(row, 0);
@@ -121,11 +117,11 @@ namespace Accounting::Models
     private:
         using QSortFilterProxyModel::setSourceModel;
 
-        DatabaseModel *m_database_model;
-        qint64 m_creation_timestamp;
+        DatabaseModel *m_parent_database_model;
 
         Q_OBJECT_BINDABLE_PROPERTY(BillProxyModel, QString, m_id, &BillProxyModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(BillProxyModel, QDate, m_date, &BillProxyModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(BillProxyModel, Status, m_status, &BillProxyModel::signalChanged);
+        Q_OBJECT_BINDABLE_PROPERTY(BillProxyModel, qint64, m_creation_timestamp, &BillProxyModel::signalChanged);
     };
 }

@@ -17,25 +17,25 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        explicit TransactionEditorDialog(Models::BillProxyModel *parent_bill, Models::TransactionModel *transaction, QWidget *parent = nullptr)
+        explicit TransactionEditorDialog(Models::BillProxyModel *parent_bill_model, Models::TransactionModel *transaction_model, QWidget *parent = nullptr)
             : QDialog(parent)
-            , m_old_transaction(transaction)
-            , m_parent_bill(parent_bill)
+            , m_old_transaction_model(transaction_model)
+            , m_parent_bill_model(parent_bill_model)
         {
             m_ui.setupUi(this);
 
-            if (transaction == nullptr) {
+            if (transaction_model == nullptr) {
                 setWindowTitle("New Transaction");
             } else {
-                setWindowTitle(QString("Edit Transaction '%1'").arg(transaction->id()));
+                setWindowTitle(QString("Edit Transaction '%1'").arg(transaction_model->id()));
             }
 
             {
                 fill_QComboBox_with_enum<Models::TransactionModel::Status>(m_ui.m_status_QComboBox);
-                if (transaction == nullptr) {
+                if (transaction_model == nullptr) {
                     m_ui.m_status_QComboBox->setCurrentIndex(0);
                 } else {
-                    m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(transaction->status()));
+                    m_ui.m_status_QComboBox->setCurrentIndex(static_cast<int>(transaction_model->status()));
                 }
             }
 
@@ -44,10 +44,10 @@ namespace Accounting::Widgets
                 m_ui.m_category_QComboBox->addItem("Transport");
                 m_ui.m_category_QComboBox->addItem("Pocket Money");
 
-                if (transaction == nullptr) {
+                if (transaction_model == nullptr) {
                     m_ui.m_category_QComboBox->setCurrentIndex(0);
                 } else {
-                    m_ui.m_category_QComboBox->setCurrentText(transaction->category());
+                    m_ui.m_category_QComboBox->setCurrentText(transaction_model->category());
                 }
 
                 connect(m_ui.m_category_QComboBox, &QComboBox::currentTextChanged,
@@ -58,10 +58,10 @@ namespace Accounting::Widgets
                 auto *validator = new QDoubleValidator(this);
                 m_ui.m_amount_QLineEdit->setValidator(validator);
 
-                if (transaction == nullptr) {
+                if (transaction_model == nullptr) {
                     m_ui.m_amount_QLineEdit->setText("0.00");
                 } else {
-                    m_ui.m_amount_QLineEdit->setText(QString::number(transaction->amount(), 'f', 2));
+                    m_ui.m_amount_QLineEdit->setText(QString::number(transaction_model->amount(), 'f', 2));
                 }
 
                 connect(m_ui.m_amount_QLineEdit, &QLineEdit::textChanged,
@@ -69,10 +69,10 @@ namespace Accounting::Widgets
             }
 
             {
-                if (transaction == nullptr) {
+                if (transaction_model == nullptr) {
                     m_ui.m_date_QDateEdit->setDate(QDate::currentDate());
                 } else {
-                    m_ui.m_date_QDateEdit->setDate(transaction->date());
+                    m_ui.m_date_QDateEdit->setDate(transaction_model->date());
                 }
 
                 connect(m_ui.m_date_QDateEdit, &QDateEdit::dateChanged,
@@ -80,7 +80,7 @@ namespace Accounting::Widgets
             }
 
             {
-                m_ui.m_delete_QPushButton->setEnabled(transaction != nullptr);
+                m_ui.m_delete_QPushButton->setEnabled(transaction_model != nullptr);
 
                 connect(m_ui.m_delete_QPushButton, &QPushButton::clicked,
                         this, &TransactionEditorDialog::slotDelete);
@@ -90,7 +90,7 @@ namespace Accounting::Widgets
                 m_ui.m_pocketMoney_QComboBox->addItem("No");
                 m_ui.m_pocketMoney_QComboBox->addItem("Yes");
 
-                if (transaction != nullptr && transaction->isPocketMoney()) {
+                if (transaction_model != nullptr && transaction_model->isPocketMoney()) {
                     m_ui.m_pocketMoney_QComboBox->setCurrentIndex(1);
                 } else {
                     m_ui.m_pocketMoney_QComboBox->setCurrentIndex(0);
@@ -102,16 +102,16 @@ namespace Accounting::Widgets
 
     private slots:
         void slotDelete() {
-            Q_ASSERT(m_old_transaction != nullptr);
+            Q_ASSERT(m_old_transaction_model != nullptr);
 
             int reply = QMessageBox::question(
                         this,
                         "Delete?",
-                        QString::fromStdString(fmt::format("Are you sure that you want to delete transaction '{}'?", m_old_transaction->id().toStdString())),
+                        QString::fromStdString(fmt::format("Are you sure that you want to delete transaction '{}'?", m_old_transaction_model->id().toStdString())),
                         QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
 
             if (reply == QMessageBox::StandardButton::Yes) {
-                m_old_transaction->deleteMyself();
+                m_old_transaction_model->deleteMyself();
                 done(QDialog::DialogCode::Accepted);
             }
         }
@@ -147,13 +147,13 @@ namespace Accounting::Widgets
             auto status = static_cast<Models::TransactionModel::Status>(m_ui.m_status_QComboBox->currentIndex());
             auto is_pocket_money = m_ui.m_pocketMoney_QComboBox->currentIndex() == 1;
 
-            if (m_old_transaction == nullptr) {
-                m_parent_bill->createTransaction(date, amount, category, status, is_pocket_money);
+            if (m_old_transaction_model == nullptr) {
+                m_parent_bill_model->createTransaction(date, amount, category, status, is_pocket_money);
             } else {
-                m_old_transaction->setAmount(amount);
-                m_old_transaction->setDate(date);
-                m_old_transaction->setCategory(category);
-                m_old_transaction->setStatus(status);
+                m_old_transaction_model->setAmount(amount);
+                m_old_transaction_model->setDate(date);
+                m_old_transaction_model->setCategory(category);
+                m_old_transaction_model->setStatus(status);
             }
 
             done(QDialog::Accepted);
@@ -162,7 +162,7 @@ namespace Accounting::Widgets
     private:
         Ui::TransactionEditorDialog m_ui;
 
-        Models::BillProxyModel *m_parent_bill;
-        Models::TransactionModel *m_old_transaction;
+        Models::BillProxyModel *m_parent_bill_model;
+        Models::TransactionModel *m_old_transaction_model;
     };
 }

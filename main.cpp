@@ -17,8 +17,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("asynts.com");
     QCoreApplication::setApplicationName("Accounting");
 
-    // FIXME: Where does AWS get the authentication token from?
-
     // Setup AWS.
     Aws::SDKOptions options;
     options.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Trace;

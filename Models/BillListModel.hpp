@@ -3,7 +3,6 @@
 #include <QAbstractItemModel>
 
 #include "Models/BillProxyModel.hpp"
-#include "Util.hpp"
 
 namespace Accounting::Models
 {
@@ -27,35 +26,35 @@ namespace Accounting::Models
     public:
         explicit BillListModel(DatabaseModel *parent_database_model);
 
-        void appendBill(BillProxyModel *bill) {
-            bill->setParent(this);
+        void appendBill(BillProxyModel *bill_model) {
+            bill_model->setParent(this);
 
-            int index = m_owned_bills.size();
+            int index = m_owned_bill_models.size();
 
             beginInsertRows(QModelIndex(), index, index);
-            m_owned_bills.append(bill);
+            m_owned_bill_models.append(bill_model);
             endInsertRows();
         }
 
-        void deleteBill(BillProxyModel *bill) {
-            int index = m_owned_bills.indexOf(bill);
+        void deleteBill(BillProxyModel *bill_model) {
+            int index = m_owned_bill_models.indexOf(bill_model);
             Q_ASSERT(index >= 0);
 
             beginRemoveRows(QModelIndex(), index, index);
-            m_owned_bills.remove(index);
+            m_owned_bill_models.remove(index);
             endRemoveRows();
 
-            bill->deleteLater();
+            bill_model->deleteLater();
         }
 
         void deleteAll() {
             beginResetModel();
-            m_owned_bills.clear();
+            m_owned_bill_models.clear();
             endResetModel();
         }
 
-        const QList<BillProxyModel*> bills() const {
-            return m_owned_bills;
+        const QList<BillProxyModel*>& bill_models() const {
+            return m_owned_bill_models;
         }
 
         BillProxyModel* createBill();
@@ -65,7 +64,7 @@ namespace Accounting::Models
                 Q_UNREACHABLE();
             }
 
-            return createIndex(row, column, reinterpret_cast<void*>(m_owned_bills[row]));
+            return createIndex(row, column, reinterpret_cast<void*>(m_owned_bill_models[row]));
         }
 
         virtual QModelIndex parent(const QModelIndex& index) const override {
@@ -73,7 +72,7 @@ namespace Accounting::Models
         }
 
         virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override {
-            return m_owned_bills.size();
+            return m_owned_bill_models.size();
         }
 
         virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override {
@@ -112,24 +111,24 @@ namespace Accounting::Models
                 return QVariant();
             }
 
-            auto *bill_entity = m_owned_bills[index.row()];
+            auto *bill_model = m_owned_bill_models[index.row()];
 
             if (index.column() == Columns::ColumnId) {
-                return bill_entity->id();
+                return bill_model->id();
             } else if (index.column() == Columns::ColumnStatus) {
-                return QVariant::fromValue(bill_entity->status());
+                return QVariant::fromValue(bill_model->status());
             } else if (index.column() == Columns::ColumnDate) {
-                return bill_entity->date().toString("yyyy-MM-dd");
+                return bill_model->date().toString("yyyy-MM-dd");
             } else if (index.column() == Columns::ColumnTotal) {
-                return QString::number(bill_entity->totalAmount(), 'f', 2);
+                return QString::number(bill_model->totalAmount(), 'f', 2);
             }
 
             return QVariant();
         }
 
     private:
-        QList<BillProxyModel*> m_owned_bills;
-
         DatabaseModel *m_parent_database_model;
+
+        QList<BillProxyModel*> m_owned_bill_models;
     };
 }

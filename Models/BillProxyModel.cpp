@@ -14,9 +14,9 @@ namespace Accounting::Models
     BillProxyModel::BillProxyModel(DatabaseModel *database_model, QObject *parent)
         : QSortFilterProxyModel(parent)
         , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch())
-        , m_database_model(database_model)
+        , m_parent_database_model(database_model)
     {
-        setSourceModel(database_model->transactionListModel());
+        setSourceModel(m_parent_database_model->transactionListModel());
     }
 
     TransactionModel* BillProxyModel::createTransaction(
@@ -26,21 +26,21 @@ namespace Accounting::Models
             TransactionModel::Status status,
             bool is_pocket_money)
     {
-        auto *transaction = new TransactionModel(m_database_model, this);
-        transaction->setId(m_database_model->consume_next_id());
-        transaction->setParentBillId(id());
-        transaction->setDate(date);
-        transaction->setAmount(amount);
-        transaction->setCategory(category);
-        transaction->setStatus(status);
-        transaction->setIsPocketMoney(is_pocket_money);
+        auto *transaction_model = new TransactionModel(m_parent_database_model, this);
+        transaction_model->setId(m_parent_database_model->consume_next_id());
+        transaction_model->setParentBillId(id());
+        transaction_model->setDate(date);
+        transaction_model->setAmount(amount);
+        transaction_model->setCategory(category);
+        transaction_model->setStatus(status);
+        transaction_model->setIsPocketMoney(is_pocket_money);
 
-        m_database_model->transactionListModel()->appendTransaction(transaction);
+        m_parent_database_model->transactionListModel()->appendTransaction(transaction_model);
 
-        return transaction;
+        return transaction_model;
     }
     void BillProxyModel::deleteMyself() {
-        m_database_model->billListModel()->deleteBill(this);
+        m_parent_database_model->billListModel()->deleteBill(this);
     }
 
     void BillProxyModel::exportTo(std::filesystem::path path) {
@@ -120,7 +120,7 @@ namespace Accounting::Models
         });
 
         // Transactions.
-        for (TransactionModel *transaction_model : transactions()) {
+        for (TransactionModel *transaction_model : transaction_models()) {
             QTextCharFormat charFormat;
 
             if (transaction_model->status() == TransactionModel::Status::Normal) {

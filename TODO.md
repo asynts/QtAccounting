@@ -18,6 +18,10 @@
 
 -   Copy S3 policy into README file.
 
+-   Forward `internalPointer` in proxy model's `createIndex`.
+
+-   Open bill editor dialog after creating new bill.
+
 ## Next 0.X.0
 
 -   Connect to S3 asynchronously.
@@ -45,3 +49,5 @@
 -   Switch to Visual Studio Code.
 
 -   Package it for `pacman`.
+
+    -   Separate settings for development and production.

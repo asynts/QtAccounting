@@ -28,25 +28,25 @@ namespace Accounting::Models
     public:
         explicit TransactionListModel(DatabaseModel *parent_database_model);
 
-        void appendTransaction(TransactionModel *transaction) {
-            transaction->setParent(this);
+        void appendTransaction(TransactionModel *transaction_model) {
+            transaction_model->setParent(this);
 
             int index = m_owned_transactions.size();
 
             beginInsertRows(QModelIndex(), index, index);
-            m_owned_transactions.append(transaction);
+            m_owned_transactions.append(transaction_model);
             endInsertRows();
         }
 
-        void deleteTransaction(TransactionModel *transaction) {
-            int index = m_owned_transactions.indexOf(transaction);
+        void deleteTransaction(TransactionModel *transaction_model) {
+            int index = m_owned_transactions.indexOf(transaction_model);
             Q_ASSERT(index >= 0);
 
             beginRemoveRows(QModelIndex(), index, index);
             m_owned_transactions.remove(index);
             endRemoveRows();
 
-            transaction->deleteLater();
+            transaction_model->deleteLater();
         }
 
         void deleteAll() {
@@ -131,8 +131,8 @@ namespace Accounting::Models
         }
 
     private:
-        QList<TransactionModel*> m_owned_transactions;
-
         DatabaseModel *m_parent_database_model;
+
+        QList<TransactionModel*> m_owned_transactions;
     };
 }

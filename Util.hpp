@@ -53,7 +53,7 @@ namespace Accounting
 
     // Ids must be generated in sequence to avoid collisions.
     inline QString hash_and_stringify_id(quint64 sequential_id) {
-        // We has the value to ensure that it looks random.
+        // We hash the value to ensure that it looks random.
         auto hashed_id = hash_triple32(sequential_id);
 
         // Only take 20 bits, we don't need more than that.
@@ -63,7 +63,7 @@ namespace Accounting
         return to_base_58(hashed_id);
     }
 
-    // This is useful for background.
+    // This is useful for debugging.
     inline void debug_set_widget_background_red(QWidget *widget) {
         QPalette palette;
         palette.setColor(QPalette::Window, Qt::red);
