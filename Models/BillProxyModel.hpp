@@ -64,8 +64,7 @@ namespace Accounting::Models
         QList<TransactionModel*> snapshot_transactions() const {
             QList<TransactionModel*> result;
             for (int row = 0; row < rowCount(); ++row) {
-                qDebug() << "[BillProxyModel::snapshot_transaction] index:" << index(row, 0);
-                result.append(reinterpret_cast<TransactionModel*>(index(row, 0).internalPointer()));
+                result.append(reinterpret_cast<TransactionModel*>(sourceModel()->index(row, 0).internalPointer()));
             }
             return result;
         }

@@ -64,3 +64,7 @@
 -   Maybe I forget to notify the view that something changed and it still uses the old `rowCount`?
 
 -   Maybe I am looking at the model index of a proxy model that doesn't have the data set?
+
+### Result
+
+-   I am calling the wrong `index` function.
