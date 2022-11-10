@@ -32,11 +32,35 @@
 
     https://bugreports.qt.io/browse/QTBUG-101177
 
+-   After this line, `transaction` is an invalid pointer:
+
+    ```c++
+    // BillProxyModel.hpp:55
+    for (auto *transaction : snapshot_transactions()) {
+    ```
+
+-   I tried moving the `snapshot_transactions` into another line to ensure that the iterators are still valid (they should be.)
+    However, the same issue still occurs.
+
+-   I tried printing out the model index that causes the crash:
+
+    ```none
+    [TransactionModel::TransactionModel] this: Accounting::Models::TransactionModel(0x55555610da10)
+    [BillProxyModel::snapshot_transaction] index: QModelIndex(0,0,0x555555deea30,Accounting::Models::BillProxyModel(0x555555b98d50))
+    ```
+    
+    Clearly, the `internalPointer` isn't what it should be.
+
 ### Ideas
 
 -   I should research, how to correctly iterate through it.
 
+-   I should verify that the ownership matches my expectations.
+
+-   I should print out the `QModelIndex` that causes the crash.
+
 ### Theories
 
--   Maybe the `reinterpret_cast` of the data from the `QModelIndex` is non-sense.
-    That could happen if the index is `QModelIndex()`.
+-   Maybe I forget to notify the view that something changed and it still uses the old `rowCount`?
+
+-   Maybe I am looking at the model index of a proxy model that doesn't have the data set?

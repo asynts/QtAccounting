@@ -52,7 +52,8 @@ namespace Accounting::Models
 
         qreal totalAmount() const {
             qreal result = 0.0;
-            for (auto *transaction : snapshot_transactions()) {
+            auto transactionsSnapshot = snapshot_transactions();
+            for (auto *transaction : transactionsSnapshot) {
                 if (transaction->status() == TransactionModel::Status::Normal) {
                     result += transaction->amount();
                 }
@@ -63,6 +64,7 @@ namespace Accounting::Models
         QList<TransactionModel*> snapshot_transactions() const {
             QList<TransactionModel*> result;
             for (int row = 0; row < rowCount(); ++row) {
+                qDebug() << "[BillProxyModel::snapshot_transaction] index:" << index(row, 0);
                 result.append(reinterpret_cast<TransactionModel*>(index(row, 0).internalPointer()));
             }
             return result;

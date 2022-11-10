@@ -29,7 +29,7 @@ namespace Accounting::Models
         explicit TransactionListModel(DatabaseModel *parent_database_model);
 
         void appendTransaction(TransactionModel *transaction) {
-            setParent(this);
+            transaction->setParent(this);
 
             int index = m_owned_transactions.size();
 
@@ -50,7 +50,7 @@ namespace Accounting::Models
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
-                return QModelIndex();
+                Q_UNREACHABLE();
             }
 
             return createIndex(row, column, reinterpret_cast<void*>(m_owned_transactions[row]));

@@ -51,7 +51,7 @@ namespace Accounting::Models
 
         virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override {
             if (row < 0 || row >= rowCount()) {
-                return QModelIndex();
+                Q_UNREACHABLE();
             }
 
             return createIndex(row, column, reinterpret_cast<void*>(m_owned_bills[row]));

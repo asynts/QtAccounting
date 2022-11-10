@@ -117,7 +117,8 @@ namespace Accounting::Models
         });
 
         // Transactions.
-        for (TransactionModel *transaction_model : snapshot_transactions()) {
+        auto transactionsSnapshot = snapshot_transactions();
+        for (TransactionModel *transaction_model : transactionsSnapshot) {
             QTextCharFormat charFormat;
 
             if (transaction_model->status() == TransactionModel::Status::Normal) {

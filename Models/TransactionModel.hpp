@@ -31,7 +31,10 @@ namespace Accounting::Models
     public:
         explicit TransactionModel(QObject *parent = nullptr)
             : QObject(parent)
-            , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch()) { }
+            , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch())
+        {
+            qDebug() << "[TransactionModel::TransactionModel] this:" << this;
+        }
 
         QString id() const { return m_id.value(); }
         void setId(QString value) { m_id =  value; }
