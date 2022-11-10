@@ -26,7 +26,7 @@ namespace Accounting::Models
             TransactionModel::Status status,
             bool is_pocket_money)
     {
-        auto *transaction = new TransactionModel(this);
+        auto *transaction = new TransactionModel(m_database_model, this);
         transaction->setId(m_database_model->consume_next_id());
         transaction->setParentBillId(id());
         transaction->setDate(date);
@@ -38,6 +38,9 @@ namespace Accounting::Models
         m_database_model->transactionListModel()->appendTransaction(transaction);
 
         return transaction;
+    }
+    void BillProxyModel::deleteMyself() {
+        m_database_model->billListModel()->deleteBill(this);
     }
 
     void BillProxyModel::exportTo(std::filesystem::path path) {

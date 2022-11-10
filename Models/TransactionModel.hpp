@@ -8,6 +8,8 @@
 
 namespace Accounting::Models
 {
+    class DatabaseModel;
+
     class TransactionModel final : public QObject {
     public:
         enum class Status {
@@ -29,9 +31,12 @@ namespace Accounting::Models
         Q_PROPERTY(qint64 creationTimestamp READ creationTimestamp WRITE setCreationTimestamp BINDABLE bindableCreationTimestamp NOTIFY signalChanged);
 
     public:
-        explicit TransactionModel(QObject *parent = nullptr)
+        explicit TransactionModel(DatabaseModel *database_model, QObject *parent = nullptr)
             : QObject(parent)
-            , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch()) { }
+            , m_creation_timestamp(QDateTime::currentMSecsSinceEpoch())
+            , m_database_model(database_model) { }
+
+        void deleteMyself();
 
         QString id() const { return m_id.value(); }
         void setId(QString value) { m_id =  value; }
@@ -93,6 +98,8 @@ namespace Accounting::Models
         void signalChanged();
 
     private:
+        DatabaseModel *m_database_model;
+
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QString, m_id, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QString, m_parent_bill_id, &TransactionModel::signalChanged);
         Q_OBJECT_BINDABLE_PROPERTY(TransactionModel, QDate, m_date, &TransactionModel::signalChanged);

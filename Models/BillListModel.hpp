@@ -37,6 +37,17 @@ namespace Accounting::Models
             endInsertRows();
         }
 
+        void deleteBill(BillProxyModel *bill) {
+            int index = m_owned_bills.indexOf(bill);
+            Q_ASSERT(index >= 0);
+
+            beginRemoveRows(QModelIndex(), index, index);
+            m_owned_bills.remove(index);
+            endRemoveRows();
+
+            bill->deleteLater();
+        }
+
         void deleteAll() {
             beginResetModel();
             m_owned_bills.clear();

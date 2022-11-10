@@ -30,6 +30,7 @@ set(PROJECT_SOURCES
     Models/BillProxyModel.hpp
     Models/BillProxyModel.cpp
     Models/TransactionModel.hpp
+    Models/TransactionModel.cpp
     Persistance/Database.hpp
     Persistance/S3.hpp
     MainWindow.hpp

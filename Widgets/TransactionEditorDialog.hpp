@@ -111,7 +111,7 @@ namespace Accounting::Widgets
                         QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
 
             if (reply == QMessageBox::StandardButton::Yes) {
-                // FIXME: m_parent_bill->deleteTransaction(m_old_transaction);
+                m_old_transaction->deleteMyself();
                 done(QDialog::DialogCode::Accepted);
             }
         }

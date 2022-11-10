@@ -68,3 +68,5 @@
 ### Result
 
 -   I am calling the wrong `index` function.
+
+-   Another similar issue appeared in `BillEditorDialog` when we tried to get the pointer in the `TransactionItemDelegate`.

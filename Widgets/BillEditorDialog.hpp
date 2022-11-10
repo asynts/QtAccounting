@@ -40,7 +40,7 @@ namespace Accounting::Widgets
             }
 
             auto *bill = qobject_cast<Models::BillProxyModel*>(model);
-            auto *transaction = reinterpret_cast<Models::TransactionModel*>(index.internalPointer());
+            auto *transaction = reinterpret_cast<Models::TransactionModel*>(bill->mapToSource(index).internalPointer());
 
             TransactionEditorDialog dialog(bill, transaction);
             dialog.exec();
@@ -112,7 +112,7 @@ namespace Accounting::Widgets
                         QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
 
             if (reply == QMessageBox::StandardButton::Yes) {
-                // FIXME: m_bill->deleteMyself();
+                m_bill->deleteMyself();
                 done(QDialog::DialogCode::Accepted);
             }
         }

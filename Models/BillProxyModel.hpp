@@ -38,6 +38,8 @@ namespace Accounting::Models
                 TransactionModel::Status status,
                 bool is_pocket_money);
 
+        void deleteMyself();
+
         QString id() const { return m_id.value(); }
         void setId(QString value) { m_id = value; }
         QBindable<QString> bindableId() { return QBindable<QString>(&m_id); }

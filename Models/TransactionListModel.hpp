@@ -38,6 +38,17 @@ namespace Accounting::Models
             endInsertRows();
         }
 
+        void deleteTransaction(TransactionModel *transaction) {
+            int index = m_owned_transactions.indexOf(transaction);
+            Q_ASSERT(index >= 0);
+
+            beginRemoveRows(QModelIndex(), index, index);
+            m_owned_transactions.remove(index);
+            endRemoveRows();
+
+            transaction->deleteLater();
+        }
+
         void deleteAll() {
             beginResetModel();
             m_owned_transactions.clear();
