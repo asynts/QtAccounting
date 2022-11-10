@@ -36,8 +36,8 @@
 //
 //  2. Increment 'ACCOUTNING_NEW_BINARY_VERSON' and 'ACCOUTNING_OLD_BINARY_VERSON'.
 
-#define ACCOUTNING_OLD_BINARY_VERSION 6ull
-#define ACCOUTNING_NEW_BINARY_VERSION 6ull
+#define ACCOUTNING_OLD_BINARY_VERSION 7ull
+#define ACCOUTNING_NEW_BINARY_VERSION 7ull
 
 #define ACCOUNTING_MAGIC_NUMBER 7250402524647310127ull
 
@@ -118,7 +118,8 @@ namespace Accounting::Persistance
             << value.m_category
             << value.m_creation_timestamp
             << value.m_status
-            << value.m_is_pocket_money;
+            << value.m_is_pocket_money
+            << value.m_parent_bill_id;
 
         return out;
     }
@@ -129,7 +130,8 @@ namespace Accounting::Persistance
            >> value.m_category
            >> value.m_creation_timestamp
            >> value.m_status
-           >> value.m_is_pocket_money;
+           >> value.m_is_pocket_money
+           >> value.m_parent_bill_id;
 
         return in;
     }

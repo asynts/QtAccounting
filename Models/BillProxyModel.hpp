@@ -70,7 +70,10 @@ namespace Accounting::Models
         }
 
         void deserialize(const Persistance::Bill& value) {
+            beginResetModel();
             m_id = value.m_id;
+            endResetModel();
+
             m_date = value.m_date;
             m_status = enum_type_from_string<Status>(value.m_status);
             m_creation_timestamp = value.m_creation_timestamp;
