@@ -31,11 +31,16 @@ namespace Accounting::Models
         void appendTransaction(TransactionModel *transaction_model) {
             transaction_model->setParent(this);
 
-            int index = m_owned_transactions.size();
+            int row = m_owned_transactions.size();
 
-            beginInsertRows(QModelIndex(), index, index);
+            beginInsertRows(QModelIndex(), row, row);
             m_owned_transactions.append(transaction_model);
             endInsertRows();
+
+            connect(transaction_model, &TransactionModel::signalChanged,
+                    this, [this, row] {
+                        emit dataChanged(index(row, 0), index(row, columnCount()));
+                    });
         }
 
         void deleteTransaction(TransactionModel *transaction_model) {

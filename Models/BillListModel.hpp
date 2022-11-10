@@ -29,11 +29,16 @@ namespace Accounting::Models
         void appendBill(BillProxyModel *bill_model) {
             bill_model->setParent(this);
 
-            int index = m_owned_bill_models.size();
+            int row = m_owned_bill_models.size();
 
-            beginInsertRows(QModelIndex(), index, index);
+            beginInsertRows(QModelIndex(), row, row);
             m_owned_bill_models.append(bill_model);
             endInsertRows();
+
+            connect(bill_model, &BillProxyModel::signalChanged,
+                    this, [this, row] {
+                        emit dataChanged(index(row, 0), index(row, columnCount()));
+                    });
         }
 
         void deleteBill(BillProxyModel *bill_model) {
