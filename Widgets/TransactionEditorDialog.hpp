@@ -95,6 +95,9 @@ namespace Accounting::Widgets
                 } else {
                     m_ui.m_pocketMoney_QComboBox->setCurrentIndex(0);
                 }
+
+                connect(m_ui.m_pocketMoney_QComboBox, &QComboBox::currentIndexChanged,
+                        this, &TransactionEditorDialog::slotValidate);
             }
 
             slotValidate();
