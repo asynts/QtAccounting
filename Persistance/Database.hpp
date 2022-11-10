@@ -111,6 +111,17 @@ namespace Accounting::Persistance
         };
     }
 
+    inline QDataStream& operator<<(QDataStream& out, const NewTransaction& value) {
+        out << value.m_id
+            << value.m_date
+            << value.m_amount
+            << value.m_category
+            << value.m_creation_timestamp
+            << value.m_status
+            << value.m_is_pocket_money;
+
+        return out;
+    }
     inline QDataStream& operator>>(QDataStream& in, Transaction& value) {
         in >> value.m_id
            >> value.m_date
@@ -131,27 +142,6 @@ namespace Accounting::Persistance
 
         return in;
     }
-
-    inline QDataStream& operator>>(QDataStream& in, Database& value) {
-        in >> value.m_bills
-           >> value.m_next_id
-           >> value.m_transactions;
-
-        return in;
-    }
-
-    inline QDataStream& operator<<(QDataStream& out, const NewTransaction& value) {
-        out << value.m_id
-            << value.m_date
-            << value.m_amount
-            << value.m_category
-            << value.m_creation_timestamp
-            << value.m_status
-            << value.m_is_pocket_money;
-
-        return out;
-    }
-
     inline QDataStream& operator<<(QDataStream& out, const NewBill& value) {
         out << value.m_id
             << value.m_date
@@ -161,6 +151,13 @@ namespace Accounting::Persistance
         return out;
     }
 
+    inline QDataStream& operator>>(QDataStream& in, Database& value) {
+        in >> value.m_bills
+           >> value.m_next_id
+           >> value.m_transactions;
+
+        return in;
+    }
     inline QDataStream& operator<<(QDataStream& out, const NewDatabase& value) {
         out << value.m_bills
             << value.m_next_id
