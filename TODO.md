@@ -34,6 +34,14 @@
 
 ## 0.Y.0
 
+-   Detect if `totalAmount` changed.
+
+    -   Maybe this is possible be connecting to all the relevant signals?
+
+    -   This seems promising too:
+    
+        https://stackoverflow.com/q/14858629/8746648
+
 -   Implement tab-stops properly.
 
 -   Scroll to bottom in `BillEditorDialog`, or reverse list.

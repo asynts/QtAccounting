@@ -49,6 +49,11 @@ namespace Accounting::Models
             m_owned_bill_models.remove(index);
             endRemoveRows();
 
+            // Delete all transactions that belong to this bill.
+            for (auto *transaction_model : bill_model->transaction_models()) {
+                transaction_model->deleteMyself();
+            }
+
             bill_model->deleteLater();
         }
 
