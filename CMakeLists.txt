@@ -40,6 +40,7 @@ set(PROJECT_SOURCES
     Notes/0002_understanding-model-view.md
     Notes/0003_generate-spreadsheet-odf.md
     Notes/0004_crash-binding-sigsegv.md
+    Notes/0005_total-incorrect.md
 
     Scripts/backup.sh
 

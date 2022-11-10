@@ -52,19 +52,25 @@ namespace Accounting::Models
 
         qreal totalAmount() const {
             qreal result = 0.0;
-            auto transactionsSnapshot = snapshot_transactions();
-            for (auto *transaction : transactionsSnapshot) {
+            for (auto *transaction : transactions()) {
                 if (transaction->status() == TransactionModel::Status::Normal) {
+                    qDebug() << "[BillProxyModel::totalAmount] adding amount:" << transaction->amount();
                     result += transaction->amount();
+                } else {
+                    qDebug() << "[BillProxyModel::totalAmount] skipping amount:" << transaction->amount();
                 }
             }
+            qDebug() << "[BillProxyModel::totalAmount] result:" << result;
             return result;
         }
 
-        QList<TransactionModel*> snapshot_transactions() const {
+        QList<TransactionModel*> transactions() const {
             QList<TransactionModel*> result;
             for (int row = 0; row < rowCount(); ++row) {
-                result.append(reinterpret_cast<TransactionModel*>(sourceModel()->index(row, 0).internalPointer()));
+                auto proxyModelIndex = index(row, 0);
+                auto sourceModelIndex = mapToSource(proxyModelIndex);
+
+                result.append(reinterpret_cast<TransactionModel*>(sourceModelIndex.internalPointer()));
             }
             return result;
         }
