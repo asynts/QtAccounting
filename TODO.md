@@ -1,18 +1,8 @@
-## 0.3.0
+## 0.4.0
 
 ### Tweaks
 
--   Get Bucket name from settings.
-
--   Add `${BINARY_VERSION}` in uploaded filename.
-
--   `backup.sh` script.
-
 ### Features
-
--   Allow deletion of transactions and bills.
-
--   Keep track of pocket money.
 
 ## Tweaks
 
