@@ -79,6 +79,6 @@ namespace Accounting::Models
         BillListModel *m_billList_model;
         PocketMoneyProxyModel *m_pocketMoney_model;
 
-        quint64 m_next_id = 1;
+        quint32 m_next_id = 1;
     };
 }

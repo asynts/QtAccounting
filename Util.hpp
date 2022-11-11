@@ -52,12 +52,11 @@ namespace Accounting
     }
 
     // Ids must be generated in sequence to avoid collisions.
-    inline QString hash_and_stringify_id(quint64 sequential_id) {
+    inline QString hash_and_stringify_id(quint32 sequential_id) {
         // We hash the value to ensure that it looks random.
         auto hashed_id = hash_triple32(sequential_id);
 
-        // Only take 20 bits, we don't need more than that.
-        hashed_id &= (1 << 20) - 1;
+        // We must not truncate the value like I did before, otherwise, collisions could occur.
 
         // Use Base58 to turn into a relatively short string.
         return to_base_58(hashed_id);

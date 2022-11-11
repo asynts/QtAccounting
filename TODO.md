@@ -50,6 +50,10 @@
 
 -   Automatic migration.
 
+-   Develop a new hash algorithm that can bijectively map 20-bit integers.
+    That could be used to make the ids shorter.
+    Obviously, I would have to use some sort of prefix to differentiate them.
+
 ## 0.Z.0
 
 -   Use QML.

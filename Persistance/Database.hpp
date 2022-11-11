@@ -36,8 +36,8 @@
 //
 //  2. Increment 'ACCOUTNING_NEW_BINARY_VERSON' and 'ACCOUTNING_OLD_BINARY_VERSON'.
 
-#define ACCOUTNING_OLD_BINARY_VERSION 7ull
-#define ACCOUTNING_NEW_BINARY_VERSION 7ull
+#define ACCOUTNING_OLD_BINARY_VERSION 8ull
+#define ACCOUTNING_NEW_BINARY_VERSION 8ull
 
 #define ACCOUNTING_MAGIC_NUMBER 7250402524647310127ull
 
@@ -65,7 +65,7 @@ namespace Accounting::Persistance
 
     struct Database {
         QList<Bill> m_bills;
-        quint64 m_next_id;
+        quint32 m_next_id;
         QList<Transaction> m_transactions;
     };
 
