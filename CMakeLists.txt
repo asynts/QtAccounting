@@ -42,6 +42,7 @@ set(PROJECT_SOURCES
     Notes/0003_generate-spreadsheet-odf.md
     Notes/0004_crash-binding-sigsegv.md
     Notes/0005_total-incorrect.md
+    Notes/0006_crash-in-random-location.md
 
     Scripts/backup.sh
 
