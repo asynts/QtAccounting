@@ -74,8 +74,4 @@ set_target_properties(Accounting PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-install(TARGETS Accounting
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
 qt_finalize_executable(Accounting)

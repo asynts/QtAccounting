@@ -10,6 +10,8 @@
 
 namespace Accounting
 {
+    constexpr const char *ACCOUNTING_ALLOCATION_TAG = "Accounting";
+
     // Credit: https://github.com/skeeto/hash-prospector#three-round-functions
     inline quint32 hash_triple32(quint32 x)
     {

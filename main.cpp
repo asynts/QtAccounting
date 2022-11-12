@@ -4,7 +4,9 @@
 #include <QSettings>
 
 #include <aws/core/Aws.h>
+#include <aws/core/utils/logging/ConsoleLogSystem.h>
 
+#include "Util.hpp"
 #include "MainWindow.hpp"
 
 void setup_AWS() {
@@ -24,7 +26,10 @@ int main(int argc, char *argv[])
 
     // Setup AWS.
     Aws::SDKOptions options;
-    options.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Trace;
+    options.loggingOptions.logLevel = Aws::Utils::Logging::LogLevel::Warn;
+    options.loggingOptions.logger_create_fn = []() {
+        return Aws::MakeShared<Aws::Utils::Logging::ConsoleLogSystem>(Accounting::ACCOUNTING_ALLOCATION_TAG, Aws::Utils::Logging::LogLevel::Warn);
+    };
     Aws::InitAPI(options);
 
     QApplication application(argc, argv);

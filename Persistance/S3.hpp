@@ -14,13 +14,12 @@
 #include <aws/core/auth/AWSCredentials.h>
 
 #include "Persistance/Database.hpp"
+#include "Util.hpp"
 
 // FIXME: Find a better name for this file.
 
 namespace Accounting::Persistance
 {
-    constexpr const char *AWS_ALLOCATION_TAG = "AccountingTag";
-
     inline Aws::S3::S3Client get_s3_client() {
         static std::optional<Aws::S3::S3Client> s3_client;
 
@@ -68,7 +67,7 @@ namespace Accounting::Persistance
         request.SetBucket(settings.value("AWS/BucketName").value<QString>().toStdString());
         request.SetKey(remotePath);
         request.SetResponseStreamFactory([localPath] {
-            return Aws::New<Aws::FStream>(AWS_ALLOCATION_TAG, localPath, std::ios_base::out | std::ios_base::binary);
+            return Aws::New<Aws::FStream>(ACCOUNTING_ALLOCATION_TAG, localPath, std::ios_base::out | std::ios_base::binary);
         });
 
         // FIXME: Async.
@@ -89,7 +88,7 @@ namespace Accounting::Persistance
     }
 
     inline void upload_file_to_s3(std::filesystem::path localPath, std::filesystem::path remotePath) {
-        auto inputStream = Aws::MakeShared<Aws::FStream>(AWS_ALLOCATION_TAG, localPath, std::ios_base::in | std::ios_base::binary);
+        auto inputStream = Aws::MakeShared<Aws::FStream>(ACCOUNTING_ALLOCATION_TAG, localPath, std::ios_base::in | std::ios_base::binary);
 
         QSettings settings;
 
