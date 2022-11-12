@@ -1,12 +1,6 @@
-## 0.4.0
+## 0.5.0
 
 ### Tweaks
-
--   Fix the tab order in dialogs.
-
--   Open bill editor dialog after creating new bill.
-
--   Separate settings for development and production.
 
 ### Features
 
@@ -51,5 +45,3 @@
 -   Use QML.
 
 -   Switch to Visual Studio Code.
-
--   Package it for `pacman`.

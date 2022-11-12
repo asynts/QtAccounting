@@ -4,6 +4,7 @@ pkgrel="1"
 arch=("x86_64")
 url="https://github.com/asynts/QtAccounting"
 
+# FIXME: Update.
 source=("https://github.com/asynts/QtAccounting/archive/refs/tags/version/0.4.0.tar.gz"
         "Accounting.desktop")
 sha256sums=("11324904407d66b9ac813fb54bb8584d8331d617105684c23ad6cd9b9923f209"
