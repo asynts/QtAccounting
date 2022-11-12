@@ -74,4 +74,7 @@ set_target_properties(Accounting PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
+install(TARGETS Accounting
+    RUNTIME)
+
 qt_finalize_executable(Accounting)
