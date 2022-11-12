@@ -15,7 +15,12 @@ int main(int argc, char *argv[])
     // Needed to use 'QSettings'.
     QCoreApplication::setOrganizationName("Asynts");
     QCoreApplication::setOrganizationDomain("asynts.com");
+
+#ifdef QT_DEBUG
+    QCoreApplication::setApplicationName("Accounting-Debug");
+#else
     QCoreApplication::setApplicationName("Accounting");
+#endif
 
     // Setup AWS.
     Aws::SDKOptions options;

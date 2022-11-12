@@ -4,6 +4,8 @@
 
 ### Features
 
+-   Separate settings for development and production.
+
 ## Tweaks
 
 -   Copy S3 policy into README file.
@@ -51,5 +53,3 @@
 -   Switch to Visual Studio Code.
 
 -   Package it for `pacman`.
-
-    -   Separate settings for development and production.
