@@ -55,6 +55,7 @@ set(ACCOUNTING_SOURCES
     LICENSE
     README.md
     TODO.md
+    PKGBUILD
 )
 
 qt_add_executable(Accounting
