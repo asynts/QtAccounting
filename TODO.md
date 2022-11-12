@@ -4,17 +4,15 @@
 
 -   Fix the tab order in dialogs.
 
-### Features
+-   Open bill editor dialog after creating new bill.
 
 -   Separate settings for development and production.
 
+### Features
+
 ## Tweaks
 
--   Copy S3 policy into README file.
-
 -   Forward `internalPointer` in proxy model's `createIndex`.
-
--   Open bill editor dialog after creating new bill.
 
 ## Next 0.X.0
 

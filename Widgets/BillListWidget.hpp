@@ -66,8 +66,10 @@ namespace Accounting::Widgets
         void slotNewBill() {
             Q_ASSERT(m_database_model != nullptr);
 
-            // FIXME: Open dialog?
-            m_database_model->billListModel()->createBill();
+            auto *bill_model = m_database_model->billListModel()->createBill();
+
+            BillEditorDialog dialog(bill_model);
+            dialog.exec();
         }
 
     private:
