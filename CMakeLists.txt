@@ -43,6 +43,9 @@ set(ACCOUNTING_SOURCES
     Ui/MainWindow.ui
     Ui/BillEditorDialog.ui
 
+    Bundle/PKGBUILD
+    Bundle/Accounting.desktop
+
     Notes/0001_form-layout-expands.md
     Notes/0002_understanding-model-view.md
     Notes/0003_generate-spreadsheet-odf.md
@@ -55,8 +58,7 @@ set(ACCOUNTING_SOURCES
     LICENSE
     README.md
     TODO.md
-    PKGBUILD
-)
+    )
 
 qt_add_executable(Accounting
     MANUAL_FINALIZATION

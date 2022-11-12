@@ -1,0 +1,10 @@
+[Desktop Entry]
+
+Type=Application
+Version=1.0
+
+Name=Accounting
+Categories=Office;Database
+
+Exec=/usr/bin/Accounting
+Terminal=false

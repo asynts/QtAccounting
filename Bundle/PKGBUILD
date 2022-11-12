@@ -4,8 +4,10 @@ pkgrel="1"
 arch=("x86_64")
 url="https://github.com/asynts/QtAccounting"
 
-source=("https://github.com/asynts/QtAccounting/archive/refs/tags/version/0.4.0.tar.gz")
-sha256sums=("11324904407d66b9ac813fb54bb8584d8331d617105684c23ad6cd9b9923f209")
+source=("https://github.com/asynts/QtAccounting/archive/refs/tags/version/0.4.0.tar.gz"
+        "Accounting.desktop")
+sha256sums=("11324904407d66b9ac813fb54bb8584d8331d617105684c23ad6cd9b9923f209"
+            "SKIP")
 
 build() {
     cmake \
@@ -22,4 +24,7 @@ package() {
     DESTDIR="${pkgdir}" \
     cmake \
         --install build
+
+    mkdir -p "${pkgdir}/usr/share/applications"
+    cp "${srcdir}/Accounting.desktop" "${pkgdir}/usr/share/applications/"
 }
