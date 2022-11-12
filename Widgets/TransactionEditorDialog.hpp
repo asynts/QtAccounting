@@ -100,6 +100,11 @@ namespace Accounting::Widgets
                         this, &TransactionEditorDialog::slotValidate);
             }
 
+            {
+                // Do not allow tab focus on the cancel button.
+                m_ui.m_buttons_QDialogButtonBox->button(QDialogButtonBox::StandardButton::Cancel)->setFocusPolicy(Qt::FocusPolicy::ClickFocus);
+            }
+
             slotValidate();
         }
 

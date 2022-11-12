@@ -52,6 +52,9 @@
      </item>
      <item row="2" column="1">
       <widget class="QDateEdit" name="m_date_QDateEdit">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <property name="displayFormat">
         <string>yyyy-MM-dd</string>
        </property>
@@ -65,7 +68,11 @@
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QComboBox" name="m_status_QComboBox"/>
+      <widget class="QComboBox" name="m_status_QComboBox">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+      </widget>
      </item>
      <item row="3" column="0">
       <widget class="QLabel" name="label_2">
@@ -75,12 +82,19 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QComboBox" name="m_pocketMoney_QComboBox"/>
+      <widget class="QComboBox" name="m_pocketMoney_QComboBox">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
    <item>
     <widget class="QPushButton" name="m_delete_QPushButton">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="text">
       <string>Delete Transaction</string>
      </property>
@@ -88,6 +102,9 @@
    </item>
    <item>
     <widget class="QDialogButtonBox" name="m_buttons_QDialogButtonBox">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -98,6 +115,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>m_category_QComboBox</tabstop>
+  <tabstop>m_amount_QLineEdit</tabstop>
+  <tabstop>m_date_QDateEdit</tabstop>
+  <tabstop>m_pocketMoney_QComboBox</tabstop>
+  <tabstop>m_status_QComboBox</tabstop>
+  <tabstop>m_delete_QPushButton</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
