@@ -10,6 +10,9 @@
     <height>300</height>
    </rect>
   </property>
+  <property name="focusPolicy">
+   <enum>Qt::StrongFocus</enum>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -26,6 +29,10 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>m_new_QPushButton</tabstop>
+  <tabstop>m_bills_QTableView</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

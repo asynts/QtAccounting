@@ -2,6 +2,8 @@
 
 ### Tweaks
 
+-   Fix the tab order in dialogs.
+
 ### Features
 
 -   Separate settings for development and production.
@@ -34,8 +36,6 @@
     
         https://stackoverflow.com/q/14858629/8746648
 
--   Implement tab-stops properly.
-
 -   Scroll to bottom in `BillEditorDialog`, or reverse list.
 
 -   Allow calculations in amount text field.
@@ -47,6 +47,8 @@
     Obviously, I would have to use some sort of prefix to differentiate them.
 
 ## 0.Z.0
+
+-   Polish the tab stops, I think there are other shortcuts that I am not taking advantage of.
 
 -   Use QML.
 

@@ -28,7 +28,11 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="m_status_QComboBox"/>
+       <widget class="QComboBox" name="m_status_QComboBox">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_2">
@@ -39,6 +43,9 @@
       </item>
       <item row="1" column="1">
        <widget class="QDateEdit" name="m_date_QDateEdit">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="displayFormat">
          <string>yyyy-MM-dd</string>
         </property>
@@ -49,13 +56,20 @@
    </item>
    <item>
     <widget class="QPushButton" name="m_delete_QPushButton">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="text">
       <string>Delete Bill</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QTableView" name="m_transactions_QTableView"/>
+    <widget class="QTableView" name="m_transactions_QTableView">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QPushButton" name="m_new_QPushButton">
@@ -66,6 +80,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="m_export_QPushButton">
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
      <property name="text">
       <string>Export .ODF (LibreOffice)</string>
      </property>
@@ -73,6 +90,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>m_new_QPushButton</tabstop>
+  <tabstop>m_export_QPushButton</tabstop>
+  <tabstop>m_delete_QPushButton</tabstop>
+  <tabstop>m_transactions_QTableView</tabstop>
+  <tabstop>m_status_QComboBox</tabstop>
+  <tabstop>m_date_QDateEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

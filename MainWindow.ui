@@ -17,6 +17,9 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTabWidget" name="tabWidget">
+      <property name="focusPolicy">
+       <enum>Qt::NoFocus</enum>
+      </property>
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -26,7 +29,11 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="Accounting::Widgets::BillListWidget" name="m_bills_BillListWidget" native="true"/>
+         <widget class="Accounting::Widgets::BillListWidget" name="m_bills_BillListWidget" native="true">
+          <property name="focusPolicy">
+           <enum>Qt::StrongFocus</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -53,6 +60,11 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>m_bills_BillListWidget</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>m_pocketMoney_QTableView</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
