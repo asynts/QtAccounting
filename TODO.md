@@ -6,6 +6,13 @@
 
 ## Tweaks
 
+-   Use `-O2` for `Release` builds.
+
+-   Right align "amount" column in export.
+    There are a few other things that could be aligned too.
+
+-   Update the dependencies in `PKGBUILD`.
+
 -   Forward `internalPointer` in proxy model's `createIndex`.
 
 ## Next 0.X.0
