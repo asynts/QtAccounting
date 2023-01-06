@@ -15,6 +15,8 @@
 
 -   Forward `internalPointer` in proxy model's `createIndex`.
 
+-   Consider using Conan for dependencies.
+
 ## Next 0.X.0
 
 -   Connect to S3 asynchronously.

@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <filesystem>
+#include <optional>
 
 #include <fmt/format.h>
 
@@ -21,12 +22,6 @@
 namespace Accounting::Persistance
 {
     inline Aws::S3::S3Client get_s3_client() {
-        static std::optional<Aws::S3::S3Client> s3_client;
-
-        if (s3_client.has_value()) {
-            return s3_client.value();
-        }
-
         QSettings settings;
 
         Aws::Auth::AWSCredentials credentials;
@@ -36,8 +31,9 @@ namespace Accounting::Persistance
         Aws::Client::ClientConfiguration clientConfiguration;
         clientConfiguration.region = settings.value("AWS/Region").value<QString>().toStdString();
 
-        s3_client.emplace(credentials, clientConfiguration);
-        return s3_client.value();
+        auto endpointProvider = Aws::MakeShared<Aws::S3::Endpoint::S3EndpointProvider>(ACCOUNTING_ALLOCATION_TAG);
+
+        return Aws::S3::S3Client{ credentials, endpointProvider, clientConfiguration };
     }
 
     inline std::filesystem::path generate_local_path(

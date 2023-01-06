@@ -52,6 +52,7 @@ set(ACCOUNTING_SOURCES
     Notes/0004_crash-binding-sigsegv.md
     Notes/0005_total-incorrect.md
     Notes/0006_crash-in-random-location.md
+    Notes/0007_aws-crash-on-exit.md
 
     Scripts/backup.sh
 
