@@ -9,6 +9,7 @@
 
 #include "Models/DatabaseModel.hpp"
 #include "Widgets/BillEditorDialog.hpp"
+#include "Widgets/FutureProgressDialog.hpp"
 
 #include "ui_BillListWidget.h"
 
@@ -52,6 +53,14 @@ namespace Accounting::Widgets
 
             connect(m_ui.m_new_QPushButton, &QPushButton::clicked,
                     this, &BillListWidget::slotNewBill);
+
+            Widgets::FutureProgressDialog dialog{
+                "Doing something",
+                [](auto fulfill, auto reject) {
+                    reject();
+                }
+            };
+            dialog.exec();
         }
 
         void setModel(Models::DatabaseModel *database_model) {

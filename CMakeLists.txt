@@ -21,6 +21,7 @@ set(ACCOUNTING_SOURCES
     Widgets/BillListWidget.hpp
     Widgets/BillEditorDialog.hpp
     Widgets/TransactionEditorDialog.hpp
+    Widgets/FutureProgressDialog.hpp
     Models/BillListModel.hpp
     Models/BillListModel.cpp
     Models/DatabaseModel.hpp
@@ -42,6 +43,7 @@ set(ACCOUNTING_SOURCES
     Ui/BillListWidget.ui
     Ui/MainWindow.ui
     Ui/BillEditorDialog.ui
+    Ui/FutureProgressDialog.ui
 
     Bundle/PKGBUILD
     Bundle/Accounting.desktop
