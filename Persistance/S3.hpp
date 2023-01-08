@@ -72,15 +72,9 @@ namespace Accounting::Persistance
 
             if (outcome.IsSuccess()) {
                 return localPath;
-            }
-
-            bool b_is_resource_not_found = outcome.GetError().GetErrorType() == Aws::S3::S3Errors::RESOURCE_NOT_FOUND;
-            bool b_is_no_such_key = outcome.GetError().GetErrorType() == Aws::S3::S3Errors::NO_SUCH_KEY;
-            if (b_is_resource_not_found || b_is_no_such_key) {
+            } else {
                 return std::nullopt;
             }
-
-            Q_UNREACHABLE();
         });
     }
 

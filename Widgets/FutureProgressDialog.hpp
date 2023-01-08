@@ -54,6 +54,8 @@ namespace Accounting::Widgets
                     // Automatically close the dialog.
                     done(QDialog::DialogCode::Accepted);
                 } else {
+                    // FIXME: This does not appear to be working.
+                    //        I suspect that this is because this is being run in the wrong thread.
                     m_ui.m_description_QLabel->setText("Operation failed.");
                     m_ui.m_buttons_QDialogButtonBox->setStandardButtons(QDialogButtonBox::StandardButton::Retry);
                 }

@@ -66,7 +66,7 @@ namespace Accounting
             Widgets::FutureProgressDialog dialog{
                 "Doing something",
                 [this] {
-                    return std::async(std::launch::async, [=] {
+                    return std::async(std::launch::async, [this] {
                         auto database_opt = Persistance::load_async().get();
 
                         if (database_opt.has_value()) {
