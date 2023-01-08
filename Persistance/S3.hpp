@@ -3,6 +3,7 @@
 #include <fstream>
 #include <filesystem>
 #include <optional>
+#include <coroutine>
 
 #include <fmt/format.h>
 
@@ -54,7 +55,7 @@ namespace Accounting::Persistance
         return path;
     }
 
-    inline std::optional<std::filesystem::path> fetch_file_from_s3(std::filesystem::path remotePath) {
+    inline std::future<std::optional<std::filesystem::path>> fetch_file_from_s3_async(std::filesystem::path remotePath) {
         auto localPath = generate_local_path("Database", "Database", ".bin", true);
 
         QSettings settings;
@@ -66,21 +67,21 @@ namespace Accounting::Persistance
             return Aws::New<Aws::FStream>(ACCOUNTING_ALLOCATION_TAG, localPath, std::ios_base::out | std::ios_base::binary);
         });
 
-        // FIXME: Async.
-        // FIXME: Error handling.
-        auto outcome = get_s3_client().GetObject(request);
+        return std::async(std::launch::async, [request, localPath] () -> std::optional<std::filesystem::path> {
+            auto outcome = get_s3_client().GetObject(request);
 
-        if (outcome.IsSuccess()) {
-            return localPath;
-        }
+            if (outcome.IsSuccess()) {
+                return localPath;
+            }
 
-        bool b_is_resource_not_found = outcome.GetError().GetErrorType() == Aws::S3::S3Errors::RESOURCE_NOT_FOUND;
-        bool b_is_no_such_key = outcome.GetError().GetErrorType() == Aws::S3::S3Errors::NO_SUCH_KEY;
-        if (b_is_resource_not_found || b_is_no_such_key) {
-            return std::nullopt;
-        }
+            bool b_is_resource_not_found = outcome.GetError().GetErrorType() == Aws::S3::S3Errors::RESOURCE_NOT_FOUND;
+            bool b_is_no_such_key = outcome.GetError().GetErrorType() == Aws::S3::S3Errors::NO_SUCH_KEY;
+            if (b_is_resource_not_found || b_is_no_such_key) {
+                return std::nullopt;
+            }
 
-        Q_UNREACHABLE();
+            Q_UNREACHABLE();
+        });
     }
 
     inline void upload_file_to_s3(std::filesystem::path localPath, std::filesystem::path remotePath) {
@@ -99,14 +100,16 @@ namespace Accounting::Persistance
         Q_ASSERT(outcome.IsSuccess());
     }
 
-    inline std::optional<Database> load() {
-        auto path_opt = fetch_file_from_s3("/Database/Database.bin");
+    inline std::future<std::optional<Database>> load_async() {
+        return std::async(std::launch::async, [] () -> std::optional<Database> {
+            auto path_opt = fetch_file_from_s3_async("/Database/Database.bin").get();
 
-        if (!path_opt.has_value()) {
-            return std::nullopt;
-        }
+            if (!path_opt.has_value()) {
+                return std::nullopt;
+            }
 
-        return read_from_disk(path_opt.value());
+            return read_from_disk(path_opt.value());
+        });
     }
 
     inline void save(const Database& database) {
@@ -118,15 +121,17 @@ namespace Accounting::Persistance
 
     using MigrationFunction = void(*)(std::filesystem::path fromPath, std::filesystem::path toPath);
 
-    inline void migrate(MigrationFunction migrationFunction) {
-        auto fromPath_opt = fetch_file_from_s3("/Database/Database.bin");
-        Q_ASSERT(fromPath_opt.has_value());
+    inline std::future<void> migrate_async(MigrationFunction migrationFunction) {
+        return std::async(std::launch::async, [=] {
+            auto fromPath_opt = fetch_file_from_s3_async("/Database/Database.bin").get();
+            Q_ASSERT(fromPath_opt.has_value());
 
-        auto toPath = generate_local_path("Database", "Database", ".bin", true);
+            auto toPath = generate_local_path("Database", "Database", ".bin", true);
 
-        migrationFunction(fromPath_opt.value(), toPath);
+            migrationFunction(fromPath_opt.value(), toPath);
 
-        upload_file_to_s3(toPath, fmt::format("/Database/{}", toPath.filename().string()));
-        upload_file_to_s3(toPath, "/Database/Database.bin");
+            upload_file_to_s3(toPath, fmt::format("/Database/{}", toPath.filename().string()));
+            upload_file_to_s3(toPath, "/Database/Database.bin");
+        });
     }
 }

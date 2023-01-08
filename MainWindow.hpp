@@ -27,23 +27,9 @@ namespace Accounting
             m_database_model = new Models::DatabaseModel(this);
             m_ui.m_bills_BillListWidget->setModel(m_database_model);
 
-            // Try to load database from disk.
-            {
-                auto database_opt = Persistance::load();
-
-                if (database_opt.has_value()) {
-                    m_database_model->deserialize(database_opt.value());
-                } else {
-                    QMessageBox message_box;
-                    message_box.setText("No existing database found, loading empty database.");
-                    message_box.setStandardButtons(QMessageBox::StandardButton::Ok);
-                    message_box.exec();
-                }
-            }
+            load_database_from_disk();
 
             {
-                m_ui.m_pocketMoney_QTableView->setModel(m_database_model->pocketMoneyModel());
-
                 m_ui.m_pocketMoney_QTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
                 m_ui.m_pocketMoney_QTableView->horizontalHeader()->setSectionResizeMode(
                             Models::TransactionListModel::Columns::ColumnCategory,
@@ -75,6 +61,31 @@ namespace Accounting
         }
 
     private:
+        void load_database_from_disk()
+        {
+            Widgets::FutureProgressDialog dialog{
+                "Doing something",
+                [this](auto fulfill, auto reject) {
+                    auto future = std::async(std::launch::async, [=] {
+                        auto database_opt = Persistance::load_async().get();
+
+                        if (database_opt.has_value()) {
+                            m_database_model->deserialize(database_opt.value());
+                            m_ui.m_pocketMoney_QTableView->setModel(m_database_model->pocketMoneyModel());
+                            fulfill();
+                        } else {
+                            reject();
+                        }
+                    });
+
+                    // We are wrapping this in a custom promise object.
+                    // FIXME: Update the 'FutureProgressDialog' thing to use an 'std::future' instead.
+                    (void)future;
+                }
+            };
+            dialog.exec();
+        }
+
         Models::DatabaseModel *m_database_model;
 
         Ui::MainWindow m_ui;
