@@ -65,22 +65,18 @@ namespace Accounting
         {
             Widgets::FutureProgressDialog dialog{
                 "Doing something",
-                [this](auto fulfill, auto reject) {
-                    auto future = std::async(std::launch::async, [=] {
+                [this] {
+                    return std::async(std::launch::async, [=] {
                         auto database_opt = Persistance::load_async().get();
 
                         if (database_opt.has_value()) {
                             m_database_model->deserialize(database_opt.value());
                             m_ui.m_pocketMoney_QTableView->setModel(m_database_model->pocketMoneyModel());
-                            fulfill();
+                            return Widgets::FutureProgressDialog::Result::Success;
                         } else {
-                            reject();
+                            return Widgets::FutureProgressDialog::Result::Failure;
                         }
                     });
-
-                    // We are wrapping this in a custom promise object.
-                    // FIXME: Update the 'FutureProgressDialog' thing to use an 'std::future' instead.
-                    (void)future;
                 }
             };
             dialog.exec();
