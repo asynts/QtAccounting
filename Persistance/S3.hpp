@@ -14,6 +14,7 @@
 #include <aws/s3/model/PutObjectRequest.h>
 #include <aws/s3/model/GetObjectRequest.h>
 #include <aws/core/auth/AWSCredentials.h>
+#include <aws/core/client/DefaultRetryStrategy.h>
 
 #include "Persistance/Database.hpp"
 #include "Util.hpp"
@@ -31,6 +32,10 @@ namespace Accounting::Persistance
 
         Aws::Client::ClientConfiguration clientConfiguration;
         clientConfiguration.region = settings.value("AWS/Region").value<QString>().toStdString();
+        clientConfiguration.connectTimeoutMs = 1000;
+        clientConfiguration.httpRequestTimeoutMs = 1000;
+        clientConfiguration.requestTimeoutMs = 1000;
+        clientConfiguration.retryStrategy = Aws::MakeShared<Aws::Client::DefaultRetryStrategy>(0);
 
         auto endpointProvider = Aws::MakeShared<Aws::S3::Endpoint::S3EndpointProvider>(ACCOUNTING_ALLOCATION_TAG);
 
