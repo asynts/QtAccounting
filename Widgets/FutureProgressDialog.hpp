@@ -53,7 +53,7 @@ namespace Accounting::Widgets
         }
 
     private:
-        std::function<void(std::function<void()> success, std::function<void()>)> m_callback;
+        std::function<void(std::function<void()> fulfill, std::function<void()> reject)> m_callback;
         Ui::FutureProgressDialog m_ui;
     };
 }
