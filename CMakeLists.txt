@@ -37,6 +37,7 @@ set(ACCOUNTING_SOURCES
     Persistance/S3.hpp
     MainWindow.hpp
     Util.hpp
+    Events.hpp
     main.cpp
 
     Ui/TransactionEditorDialog.ui

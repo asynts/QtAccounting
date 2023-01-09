@@ -30,7 +30,7 @@ namespace Accounting
 
             if (!load_database_from_disk())
             {
-                Q_ASSERT(false);
+                Q_UNREACHABLE();
             }
 
             {
@@ -81,9 +81,9 @@ namespace Accounting
                 [this, database] {
                     return std::async(std::launch::async, [this, database] {
                         if (Persistance::save_async(database).get()) {
-                            return Widgets::FutureProgressDialog::Result::Success;
+                            return ResultEnum::Success;
                         } else {
-                            return Widgets::FutureProgressDialog::Result::Failure;
+                            return ResultEnum::Failure;
                         }
                     });
                 }
@@ -104,9 +104,9 @@ namespace Accounting
                             m_database_model->deserialize(database_opt.value());
                             m_ui.m_pocketMoney_QTableView->setModel(m_database_model->pocketMoneyModel());
                             m_database_loaded = true;
-                            return Widgets::FutureProgressDialog::Result::Success;
+                            return ResultEnum::Success;
                         } else {
-                            return Widgets::FutureProgressDialog::Result::Failure;
+                            return ResultEnum::Failure;
                         }
                     });
                 }

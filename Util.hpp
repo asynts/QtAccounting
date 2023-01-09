@@ -102,28 +102,8 @@ namespace Accounting
         return enum_type_to_string<EnumType>(static_cast<EnumType>(value));
     }
 
-    class Promise {
-    public:
-        explicit Promise(std::function<void()> fulfill, std::function<void()> reject)
-            : m_fulfill(fulfill)
-            , m_reject(reject) { }
-
-        void fulfill()
-        {
-            Q_ASSERT(m_fulfill != nullptr);
-            m_fulfill();
-            m_fulfill = nullptr;
-        }
-
-        void reject()
-        {
-            Q_ASSERT(m_reject != nullptr);
-            m_reject();
-            m_reject = nullptr;
-        }
-
-    private:
-        std::function<void()> m_fulfill;
-        std::function<void()> m_reject;
+    enum class ResultEnum {
+        Success,
+        Failure,
     };
 }

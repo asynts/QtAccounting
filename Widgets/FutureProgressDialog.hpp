@@ -5,6 +5,8 @@
 #include <QDialog>
 #include <QPushButton>
 
+#include "Events.hpp"
+
 #include "ui_FutureProgressDialog.h"
 
 namespace Accounting::Widgets
@@ -13,25 +15,23 @@ namespace Accounting::Widgets
         Q_OBJECT
 
     public:
-        enum class Result {
-            Success,
-            Failure,
-        };
+        enum class StateEnum {
+            // The future has not yet been resolved.
+            // The user can cancel, but we wait for the operation to complete.
+            Waiting,
 
-        class FutureReadyEvent : public QEvent {
-        public:
-            explicit FutureReadyEvent(Result result)
-                : QEvent(FutureReadyEvent::Type)
-                , m_result(result) { }
+            // The future was resolved as a failure, but the user retried the operation.
+            // The user can cancel, but we wait for the operation to complete.
+            WaitingAgain,
 
-            static constexpr QEvent::Type Type = static_cast<QEvent::Type>(QEvent::User + 1);
-
-            Result m_result;
+            // The future was resolved as a failure.
+            // The user can retry or cancel.
+            Failed,
         };
 
         explicit FutureProgressDialog(
                 QString windowTitle,
-                std::function<std::future<Result>()>&& callback)
+                std::function<std::future<ResultEnum>()>&& callback)
         {
             m_callback = std::move(callback);
 
@@ -39,11 +39,8 @@ namespace Accounting::Widgets
 
             setWindowTitle(windowTitle);
 
-            connect(m_ui.m_buttons_QDialogButtonBox->button(QDialogButtonBox::StandardButton::Retry), &QPushButton::clicked,
-                    this, &FutureProgressDialog::slotRetry);
-
-            m_ui.m_description_QLabel->setText("Waiting for operation to complete.");
-            m_ui.m_buttons_QDialogButtonBox->setStandardButtons(QDialogButtonBox::StandardButton::NoButton);
+            m_state = StateEnum::Waiting;
+            updateInterface();
 
             try_operation();
         }
@@ -59,24 +56,54 @@ namespace Accounting::Widgets
         }
 
     private slots:
+        void slotCancel()
+        {
+            // The destructor of the 'm_callback_future' will wait for it to complete.
+            close();
+        }
+
         void slotRetry()
         {
-            m_ui.m_description_QLabel->setText("Retrying operation; waiting for operation to complete.");
-            m_ui.m_buttons_QDialogButtonBox->setStandardButtons(QDialogButtonBox::StandardButton::NoButton);
+            Q_ASSERT(m_state == StateEnum::Failed);
+            m_state = StateEnum::WaitingAgain;
+            updateInterface();
 
             try_operation();
         }
 
     private:
-        void eventFutureReady(Result result)
+        void updateInterface()
         {
-            if (result == Result::Success) {
+            using StandardButton = QDialogButtonBox::StandardButton;
+
+            if (m_state == StateEnum::Waiting) {
+                m_ui.m_description_QLabel->setText("Waiting for operation to complete.");
+                m_ui.m_buttons_QDialogButtonBox->setStandardButtons(StandardButton::Cancel);
+            } else if (m_state == StateEnum::Failed) {
+                m_ui.m_description_QLabel->setText("Operation failed.");
+                m_ui.m_buttons_QDialogButtonBox->setStandardButtons(StandardButton::Cancel | StandardButton::Retry);
+
+                connect(m_ui.m_buttons_QDialogButtonBox->button(QDialogButtonBox::StandardButton::Retry), &QPushButton::clicked,
+                        this, &FutureProgressDialog::slotRetry);
+            } else if (m_state == StateEnum::WaitingAgain) {
+                m_ui.m_description_QLabel->setText("Retrying operation; waiting for operation to complete.");
+                m_ui.m_buttons_QDialogButtonBox->setStandardButtons(StandardButton::Cancel);
+            } else {
+                Q_UNREACHABLE();
+            }
+
+            connect(m_ui.m_buttons_QDialogButtonBox->button(QDialogButtonBox::StandardButton::Cancel), &QPushButton::clicked,
+                    this, &FutureProgressDialog::slotCancel);
+        }
+
+        void eventFutureReady(ResultEnum result)
+        {
+            if (result == ResultEnum::Success) {
                 // Automatically close the dialog.
                 done(QDialog::DialogCode::Accepted);
             } else {
-                // Allow the user to retry.
-                m_ui.m_description_QLabel->setText("Operation failed.");
-                m_ui.m_buttons_QDialogButtonBox->setStandardButtons(QDialogButtonBox::StandardButton::Retry);
+                m_state = StateEnum::Failed;
+                updateInterface();
             }
         }
 
@@ -89,8 +116,11 @@ namespace Accounting::Widgets
             });
         }
 
-        std::function<std::future<Result>()> m_callback;
+        std::function<std::future<ResultEnum>()> m_callback;
         std::future<void> m_callback_future;
+
         Ui::FutureProgressDialog m_ui;
+
+        StateEnum m_state;
     };
 }
