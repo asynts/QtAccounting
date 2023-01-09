@@ -19,8 +19,6 @@
 #include "Persistance/Database.hpp"
 #include "Util.hpp"
 
-// FIXME: Find a better name for this file.
-
 namespace Accounting::Persistance
 {
     inline Aws::S3::S3Client get_s3_client() {
@@ -30,6 +28,7 @@ namespace Accounting::Persistance
         credentials.SetAWSAccessKeyId(settings.value("AWS/AccessKeyId").value<QString>().toStdString());
         credentials.SetAWSSecretKey(settings.value("AWS/SecretKey").value<QString>().toStdString());
 
+        // FIXME: It appears, that AWS ignores this configuration.
         Aws::Client::ClientConfiguration clientConfiguration;
         clientConfiguration.region = settings.value("AWS/Region").value<QString>().toStdString();
         clientConfiguration.connectTimeoutMs = 1000;
