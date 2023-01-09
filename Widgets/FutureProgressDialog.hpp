@@ -18,6 +18,17 @@ namespace Accounting::Widgets
             Failure,
         };
 
+        class FutureReadyEvent : public QEvent {
+        public:
+            explicit FutureReadyEvent(Result result)
+                : QEvent(FutureReadyEvent::Type)
+                , m_result(result) { }
+
+            static constexpr QEvent::Type Type = static_cast<QEvent::Type>(QEvent::User + 1);
+
+            Result m_result;
+        };
+
         explicit FutureProgressDialog(
                 QString windowTitle,
                 std::function<std::future<Result>()>&& callback)
@@ -37,6 +48,16 @@ namespace Accounting::Widgets
             try_operation();
         }
 
+        virtual bool event(QEvent *event) override
+        {
+            if (event->type() == FutureReadyEvent::Type) {
+                eventFutureReady(static_cast<FutureReadyEvent*>(event)->m_result);
+                return true;
+            } else {
+                return QDialog::event(event);
+            }
+        }
+
     private slots:
         void slotRetry()
         {
@@ -47,28 +68,24 @@ namespace Accounting::Widgets
         }
 
     private:
+        void eventFutureReady(Result result)
+        {
+            if (result == Result::Success) {
+                // Automatically close the dialog.
+                done(QDialog::DialogCode::Accepted);
+            } else {
+                // Allow the user to retry.
+                m_ui.m_description_QLabel->setText("Operation failed.");
+                m_ui.m_buttons_QDialogButtonBox->setStandardButtons(QDialogButtonBox::StandardButton::Retry);
+            }
+        }
+
         void try_operation() {
             m_callback_future = std::async(std::launch::async, [this] {
+                // We must not update the UI from a worker thread.
+                // Emit an event for the main thread.
                 auto result = m_callback().get();
-
-                // FIXME: Somehow, this is not working.
-                //        I suspect that this needs to run on the UI thread.
-                //
-                //        Somehow, the caller gets the wrong dialog code returned.
-                //
-                //        I could keep a reference to the object and then savely run this in another thread.
-                //        When I am done, I can simply emit an event.
-
-                if (result == Result::Success) {
-                    // Automatically close the dialog.
-
-                    done(QDialog::DialogCode::Accepted);
-                } else {
-                    // FIXME: This does not appear to be working.
-                    //        I suspect that this is because this is being run in the wrong thread.
-                    m_ui.m_description_QLabel->setText("Operation failed.");
-                    m_ui.m_buttons_QDialogButtonBox->setStandardButtons(QDialogButtonBox::StandardButton::Retry);
-                }
+                QCoreApplication::postEvent(this, new FutureReadyEvent{ result });
             });
         }
 
