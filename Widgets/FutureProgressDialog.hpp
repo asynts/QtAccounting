@@ -50,8 +50,18 @@ namespace Accounting::Widgets
         void try_operation() {
             m_callback_future = std::async(std::launch::async, [this] {
                 auto result = m_callback().get();
+
+                // FIXME: Somehow, this is not working.
+                //        I suspect that this needs to run on the UI thread.
+                //
+                //        Somehow, the caller gets the wrong dialog code returned.
+                //
+                //        I could keep a reference to the object and then savely run this in another thread.
+                //        When I am done, I can simply emit an event.
+
                 if (result == Result::Success) {
                     // Automatically close the dialog.
+
                     done(QDialog::DialogCode::Accepted);
                 } else {
                     // FIXME: This does not appear to be working.

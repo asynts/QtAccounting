@@ -83,7 +83,7 @@ namespace Accounting::Persistance
         });
     }
 
-    inline void upload_file_to_s3(std::filesystem::path localPath, std::filesystem::path remotePath) {
+    inline std::future<bool> upload_file_to_s3_async(std::filesystem::path localPath, std::filesystem::path remotePath) {
         auto inputStream = Aws::MakeShared<Aws::FStream>(ACCOUNTING_ALLOCATION_TAG, localPath, std::ios_base::in | std::ios_base::binary);
 
         QSettings settings;
@@ -93,10 +93,10 @@ namespace Accounting::Persistance
         request.SetKey(remotePath);
         request.SetBody(inputStream);
 
-        // FIXME: Async.
-        // FIXME: Error handling.
-        auto outcome = get_s3_client().PutObject(request);
-        Q_ASSERT(outcome.IsSuccess());
+        return std::async(std::launch::async, [request] {
+            auto outcome = get_s3_client().PutObject(request);
+            return outcome.IsSuccess();
+        });
     }
 
     inline std::future<std::optional<Database>> load_async() {
@@ -111,26 +111,45 @@ namespace Accounting::Persistance
         });
     }
 
-    inline void save(const Database& database) {
+    inline std::future<bool> save_async(const Database& database) {
         auto path = generate_local_path("Database", "Database", ".bin", true);
         write_to_disk(database, path);
-        upload_file_to_s3(path, fmt::format("/Database/{}", path.filename().string()));
-        upload_file_to_s3(path, "/Database/Database.bin");
+
+        return std::async(std::launch::async, [path] {
+            if (!upload_file_to_s3_async(path, fmt::format("/Database/{}", path.filename().string())).get()) {
+                return false;
+            }
+
+            if (!upload_file_to_s3_async(path, "/Database/Database.bin").get()) {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     using MigrationFunction = void(*)(std::filesystem::path fromPath, std::filesystem::path toPath);
 
-    inline std::future<void> migrate_async(MigrationFunction migrationFunction) {
+    inline std::future<bool> migrate_async(MigrationFunction migrationFunction) {
         return std::async(std::launch::async, [=] {
             auto fromPath_opt = fetch_file_from_s3_async("/Database/Database.bin").get();
-            Q_ASSERT(fromPath_opt.has_value());
+            if (!fromPath_opt.has_value()) {
+                return false;
+            }
 
             auto toPath = generate_local_path("Database", "Database", ".bin", true);
 
             migrationFunction(fromPath_opt.value(), toPath);
 
-            upload_file_to_s3(toPath, fmt::format("/Database/{}", toPath.filename().string()));
-            upload_file_to_s3(toPath, "/Database/Database.bin");
+            if (!upload_file_to_s3_async(toPath, fmt::format("/Database/{}", toPath.filename().string())).get()) {
+                return false;
+            }
+
+            if (!upload_file_to_s3_async(toPath, "/Database/Database.bin").get()) {
+                return false;
+            }
+
+            return true;
         });
     }
 }

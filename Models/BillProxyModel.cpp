@@ -195,6 +195,8 @@ namespace Accounting::Models
         writer.write(&document);
 
         // Upload the file to S3.
-        Persistance::upload_file_to_s3(path, fmt::format("/Bills/{}", path.filename().string()));
+        // FIXME: Error handling.
+        auto upload_succeeded = Persistance::upload_file_to_s3_async(path, fmt::format("/Bills/{}", path.filename().string())).get();
+        Q_ASSERT(upload_succeeded);
     }
 }
