@@ -55,6 +55,7 @@ set(ACCOUNTING_SOURCES
     Notes/0005_total-incorrect.md
     Notes/0006_crash-in-random-location.md
     Notes/0007_aws-crash-on-exit.md
+    Notes/0008_dialog-returns-wrong-code.md
 
     Scripts/backup.sh
 

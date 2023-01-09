@@ -112,7 +112,8 @@ namespace Accounting
                 }
             };
 
-            return dialog.exec() == QDialog::DialogCode::Accepted;
+            auto retval = dialog.exec();
+            return retval == QDialog::DialogCode::Accepted;
         }
 
         Models::DatabaseModel *m_database_model;
