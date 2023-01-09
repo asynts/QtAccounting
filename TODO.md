@@ -2,11 +2,37 @@
 
 ### Tweaks
 
+-   Use `-O2` for `Release` builds.
+
 ### Features
+
+-   Connect to S3 asynchronously.
+
+    -   Opens dialog that closes when operation completed.
+    
+    -   Provides "Retry" and "Cancel" actions.
+
+## Bugs
+
+-   Closing the `FutureProgressDialog` when loading database (e.g. after failure) crashes application.
+
+    -   This is because of an `Q_UNREACHABLE` I put ther.
+        It can't easily be removed because `close()` doesn't seem to work in that location.
+
+-   AWS does not obey the timeout provided in the client configuration.
+
+-   Sometimes we crash during startup.
+    The crash occurs somewhere in the models.
+    
+    -   There are messages in the console that suggest that we are sharing objects across threads.
 
 ## Tweaks
 
--   Use `-O2` for `Release` builds.
+-   Using `std::async` everywhere might create more threads than needed.
+
+    -   This could be resolved by using `<coroutines>`.
+    
+    -   Alternatively, I could read about the semantics of `std::async`.
 
 -   Right align "amount" column in export.
     There are a few other things that could be aligned too.
@@ -19,11 +45,9 @@
 
 ## Next 0.X.0
 
--   Connect to S3 asynchronously.
+-   Make `BillProxyModel::exportTo` async and failable.
 
-    -   Open a dialog that closes when completed.
-    
-    -   Deal with errors as well: try again, or quit.
+-   Switch to Visual Studio Code.
 
 -   Error handling everywhere.
 
