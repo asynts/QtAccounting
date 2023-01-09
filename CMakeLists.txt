@@ -13,6 +13,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# FIXME: This is only for debugging.
+set(CMAKE_PREFIX_PATH "/home/me/.local/lib/custom-qt")
+
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(AWSSDK REQUIRED COMPONENTS s3)
 find_package(fmt REQUIRED)
@@ -58,6 +61,7 @@ set(ACCOUNTING_SOURCES
     Notes/0007_aws-crash-on-exit.md
     Notes/0008_dialog-returns-wrong-code.md
     Notes/0009_timeout-and-retry-ignored.md
+    Notes/0010_build-qt-from-source.md
 
     Scripts/backup.sh
 
