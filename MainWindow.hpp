@@ -30,6 +30,8 @@ namespace Accounting
 
             if (!load_database_from_disk())
             {
+                // FIXME: We already provided user feedback in the dialog.
+                //        Simply calling 'close' here should be enough, but that does not appear to be working.
                 Q_UNREACHABLE();
             }
 

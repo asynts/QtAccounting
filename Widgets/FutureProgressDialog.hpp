@@ -4,6 +4,7 @@
 
 #include <QDialog>
 #include <QPushButton>
+#include <QPointer>
 
 #include "Events.hpp"
 
@@ -108,16 +109,36 @@ namespace Accounting::Widgets
         }
 
         void try_operation() {
-            m_callback_future = std::async(std::launch::async, [this] {
-                // We must not update the UI from a worker thread.
-                // Emit an event for the main thread.
-                auto result = m_callback().get();
-                QCoreApplication::postEvent(this, new FutureReadyEvent{ result });
-            });
+            // We should only ever show the retry button if the thread completed.
+            // However, to make it easier to detect this type of error we join the thread here.
+            // This should be a no-op, if we block here, something is wrong.
+            if (m_callback_thread.joinable()) {
+                m_callback_thread.join();
+            }
+
+            m_callback_thread = std::thread{
+                [this_ = QPointer(this)] {
+                    // We (reasonably) assume that this thread is started before the object is destroyed.
+                    // In theory, there is nothing that justifies that assumption, but it shouldn't come up in practice.
+
+                    auto result = this_->m_callback().get();
+
+                    // If the user cancelled the operation, the dialog no longer exists.
+                    // Since we are using 'QPointer' it will be null in that case.
+                    if (this_ == nullptr) {
+                        return;
+                    }
+
+                    // We must not update the UI from a worker thread.
+                    // Emit an event for the main thread.
+                    QCoreApplication::postEvent(this_, new FutureReadyEvent{ result });
+                }
+            };
+            m_callback_thread.detach();
         }
 
         std::function<std::future<ResultEnum>()> m_callback;
-        std::future<void> m_callback_future;
+        std::thread m_callback_thread;
 
         Ui::FutureProgressDialog m_ui;
 
