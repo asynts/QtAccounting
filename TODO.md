@@ -21,11 +21,6 @@
 
 -   AWS does not obey the timeout provided in the client configuration.
 
--   Sometimes we crash during startup.
-    The crash occurs somewhere in the models.
-    
-    -   There are messages in the console that suggest that we are sharing objects across threads.
-
 ## Tweaks
 
 -   Using `std::async` everywhere might create more threads than needed.

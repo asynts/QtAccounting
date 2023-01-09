@@ -34,14 +34,6 @@ namespace Accounting
                 //        Simply calling 'close' here should be enough, but that does not appear to be working.
                 Q_UNREACHABLE();
             }
-
-            {
-                m_ui.m_pocketMoney_QTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
-                m_ui.m_pocketMoney_QTableView->horizontalHeader()->setSectionResizeMode(
-                            Models::TransactionListModel::Columns::ColumnCategory,
-                            QHeaderView::ResizeMode::Stretch);
-
-            }
         }
 
         virtual void closeEvent(QCloseEvent *event) override {
@@ -71,6 +63,29 @@ namespace Accounting
             } else {
                 Q_UNREACHABLE();
             }
+        }
+
+        virtual bool event(QEvent *event) override
+        {
+            if (event->type() == DatabaseLoadedEvent::Type) {
+                eventDatabaseLoaded(static_cast<DatabaseLoadedEvent*>(event)->m_database);
+                return true;
+            } else {
+                return QMainWindow::event(event);
+            }
+        }
+
+        void eventDatabaseLoaded(const Persistance::Database& database)
+        {
+            m_database_model->deserialize(database);
+            m_ui.m_pocketMoney_QTableView->setModel(m_database_model->pocketMoneyModel());
+
+            m_ui.m_pocketMoney_QTableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
+            m_ui.m_pocketMoney_QTableView->horizontalHeader()->setSectionResizeMode(
+                        Models::TransactionListModel::Columns::ColumnCategory,
+                        QHeaderView::ResizeMode::Stretch);
+
+            m_database_loaded = true;
         }
 
     private:
@@ -103,9 +118,9 @@ namespace Accounting
                         auto database_opt = Persistance::load_async().get();
 
                         if (database_opt.has_value()) {
-                            m_database_model->deserialize(database_opt.value());
-                            m_ui.m_pocketMoney_QTableView->setModel(m_database_model->pocketMoneyModel());
-                            m_database_loaded = true;
+                            // We must not update the UI from a worker thread.
+                            // Emit an event for the main thread.
+                            QCoreApplication::postEvent(this, new DatabaseLoadedEvent{ std::move(database_opt).value() });
                             return ResultEnum::Success;
                         } else {
                             return ResultEnum::Failure;
@@ -114,8 +129,7 @@ namespace Accounting
                 }
             };
 
-            auto retval = dialog.exec();
-            return retval == QDialog::DialogCode::Accepted;
+            return dialog.exec() == QDialog::DialogCode::Accepted;
         }
 
         Models::DatabaseModel *m_database_model;

@@ -74,7 +74,4 @@ I got a message that suggested that I was sharing something across threads.
 
 -   My understanding is, that we are deserializing in a worker thread and then creating fancy `QObject` objects which are feed into the models.
 
-
-### Ideas
-
--   I could use custom build profiles?
+-   I was able to resolve the issue by introducing another custom event that is emitted when the database has been loaded.
