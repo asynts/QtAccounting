@@ -14,14 +14,11 @@
 
 ## Bugs
 
--   Closing the `FutureProgressDialog` when loading database (e.g. after failure) crashes application.
-
-    -   This is because of an `Q_UNREACHABLE` I put ther.
-        It can't easily be removed because `close()` doesn't seem to work in that location.
-
 -   AWS does not obey the timeout provided in the client configuration.
 
 ## Tweaks
+
+-   Put the S3 client into some sort of service that is provided with dependency injection.
 
 -   Using `std::async` everywhere might create more threads than needed.
 

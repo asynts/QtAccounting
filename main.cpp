@@ -9,10 +9,26 @@
 #include "Util.hpp"
 #include "MainWindow.hpp"
 
-void setup_AWS() {
+namespace Accounting
+{
+    int gui_main(int argc, char **argv)
+    {
+        QApplication application(argc, argv);
+
+        auto main_window_opt = Accounting::MainWindow::try_create_main_window();
+
+        if (!main_window_opt.has_value()) {
+            // The 'try_create_main_window' function already provided feedback to the user.
+            return 0;
+        }
+
+        main_window_opt.value()->show();
+
+        return application.exec();
+    }
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
     // Needed to use 'QSettings'.
     QCoreApplication::setOrganizationName("Asynts");
@@ -32,13 +48,9 @@ int main(int argc, char *argv[])
     };
     Aws::InitAPI(options);
 
-    QApplication application(argc, argv);
+    int retval = Accounting::gui_main(argc, argv);
 
-    Accounting::MainWindow main_window;
-    main_window.show();
-
-    int retval = application.exec();
-
+    // Cleanup AWS.
     Aws::ShutdownAPI(options);
 
     return retval;

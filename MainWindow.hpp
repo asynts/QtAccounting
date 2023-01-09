@@ -19,23 +19,6 @@ namespace Accounting
         Q_OBJECT
 
     public:
-        explicit MainWindow(QWidget *parent = nullptr)
-            : QMainWindow(parent)
-        {
-            m_ui.setupUi(this);
-
-            m_database_loaded = false;
-            m_database_model = new Models::DatabaseModel(this);
-            m_ui.m_bills_BillListWidget->setModel(m_database_model);
-
-            if (!load_database_from_disk())
-            {
-                // FIXME: We already provided user feedback in the dialog.
-                //        Simply calling 'close' here should be enough, but that does not appear to be working.
-                Q_UNREACHABLE();
-            }
-        }
-
         virtual void closeEvent(QCloseEvent *event) override {
             // If there is no database loaded, we don't need to try to save it.
             if (!m_database_loaded) {
@@ -88,7 +71,35 @@ namespace Accounting
             m_database_loaded = true;
         }
 
+        // This will download the database and provide a dialog to inform the user.
+        // If the operation failed and the user decided to cancel it, returns 'std::nullopt'.
+        static std::optional<MainWindow*> try_create_main_window()
+        {
+            MainWindow *main_window = new MainWindow;
+
+            // This will create a modal dialog which can run without QApplication.
+            if (!main_window->load_database_from_disk())
+            {
+                return std::nullopt;
+            }
+
+            return main_window;
+        }
+
     private:
+        explicit MainWindow(QWidget *parent = nullptr)
+            : QMainWindow(parent)
+        {
+            m_ui.setupUi(this);
+
+            m_database_model = new Models::DatabaseModel(this);
+            m_ui.m_bills_BillListWidget->setModel(m_database_model);
+
+            // The 'try_create_main_window' function should have put an 'DatabaseLoadedEvent' event into the queue.
+            // It will be processed as soon as the event loop is started.
+            m_database_loaded = false;
+        }
+
         bool save_database_to_disk()
         {
             auto database = m_database_model->serialize();
