@@ -1,18 +1,10 @@
-## 0.5.0
+## 0.6.0
 
 ### Bugs
 
--   Make it possible to change the date of a bill.
+### Tweaks
 
 ### Features
-
--   Connect to S3 asynchronously.
-
-    -   Opens dialog that closes when operation completed.
-    
-    -   Provides "Retry" and "Cancel" actions.
-
-    -   Export ODF file asynchronously.
 
 ## Bugs
 
