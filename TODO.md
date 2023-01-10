@@ -16,6 +16,8 @@
 
 ## Tweaks
 
+-   Be more consistent with camelCase and snake\_case.
+
 -   Resize column names after editing (for example after insertion.)
 
 -   Scroll to bottom when adding transaction.
