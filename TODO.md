@@ -12,6 +12,8 @@
     
     -   Provides "Retry" and "Cancel" actions.
 
+    -   Export ODF file asynchronously.
+
 ## Bugs
 
 -   AWS does not obey the timeout provided in the client configuration.
@@ -37,11 +39,7 @@
 
 ## Next 0.X.0
 
--   Make `BillProxyModel::exportTo` async and failable.
-
 -   Switch to Visual Studio Code.
-
--   Error handling everywhere.
 
 ## 0.Y.0
 

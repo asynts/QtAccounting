@@ -1,5 +1,7 @@
 #pragma once
 
+#include <future>
+
 #include <QObject>
 #include <QBindable>
 #include <QSortFilterProxyModel>
@@ -92,7 +94,7 @@ namespace Accounting::Models
             };
         }
 
-        void exportTo(std::filesystem::path path);
+        std::future<ResultEnum> exportTo_async(std::filesystem::path path);
 
         virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
             // The default is to share the headers of the source model.

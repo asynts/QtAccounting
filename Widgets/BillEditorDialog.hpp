@@ -9,12 +9,15 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QDesktopServices>
+#include <QPointer>
 
 #include <fmt/format.h>
 
+#include "Events.hpp"
 #include "Models/BillProxyModel.hpp"
 #include "Models/TransactionListModel.hpp"
 #include "Widgets/TransactionEditorDialog.hpp"
+#include "Widgets/FutureProgressDialog.hpp"
 #include "Persistance/S3.hpp"
 
 #include "ui_BillEditorDialog.h"
@@ -134,7 +137,18 @@ namespace Accounting::Widgets
         void slotExport()
         {
             auto path = Persistance::generate_local_path("Bills", fmt::format("Bill_{}", m_bill_model->id().toStdString()), ".odt", false);
-            m_bill_model->exportTo(path);
+
+            FutureProgressDialog dialog{
+                "Exporting Bill as ODF",
+                [this, path] {
+                    return m_bill_model->exportTo_async(path);
+                }
+            };
+
+            // The dialog already provided feedback to the user if the export failed.
+            // Simply ignore the return value here.
+            dialog.exec();
+
             QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path)));
         }
 

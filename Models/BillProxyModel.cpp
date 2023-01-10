@@ -43,7 +43,7 @@ namespace Accounting::Models
         m_parent_database_model->billListModel()->deleteBill(this);
     }
 
-    void BillProxyModel::exportTo(std::filesystem::path path) {
+    std::future<ResultEnum> BillProxyModel::exportTo_async(std::filesystem::path path) {
         QSettings settings;
         QTextDocument document;
         QTextCursor cursor(&document);
@@ -188,15 +188,31 @@ namespace Accounting::Models
         }
 
         // Ensure that the directory exists.
-        std::filesystem::create_directories(path.parent_path());
+        {
+            std::error_code error_code;
+            std::filesystem::create_directories(path.parent_path(), error_code);
+
+            // If an error occured, return a resolved promise.
+            if (error_code) {
+                std::promise<ResultEnum> promise;
+                promise.set_value(ResultEnum::Failure);
+                return promise.get_future();
+            }
+        }
 
         // Write the file to disk.
         QTextDocumentWriter writer(QString::fromStdString(path), "odf");
         writer.write(&document);
 
         // Upload the file to S3.
-        // FIXME: Error handling.
-        auto upload_succeeded = Persistance::upload_file_to_s3_async(path, fmt::format("/Bills/{}", path.filename().string())).get();
-        Q_ASSERT(upload_succeeded);
+        return std::async(std::launch::async, [path] {
+            auto upload_succeeded = Persistance::upload_file_to_s3_async(path, fmt::format("/Bills/{}", path.filename().string())).get();
+
+            if (upload_succeeded) {
+                return ResultEnum::Success;
+            } else {
+                return ResultEnum::Failure;
+            }
+        });
     }
 }
