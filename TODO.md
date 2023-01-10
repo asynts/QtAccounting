@@ -24,6 +24,10 @@
 
 ## Tweaks
 
+-   Resize column names after editing (for example after insertion.)
+
+-   Scroll to bottom when adding transaction.
+
 -   Use `-O2` for `Release` builds.
 
 -   Put the S3 client into some sort of service that is provided with dependency injection.
