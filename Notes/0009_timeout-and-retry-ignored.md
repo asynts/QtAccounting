@@ -125,6 +125,89 @@ If no network connection is avaliable, it takes forever until the application re
     
 -   Since `S3Client` inherits from `AWSXMLClient` and thus inherits from `AWSClient`, the configuration is initialized correctly.
 
+-   I build the AWS SDK from source using the following command:
+
+    ```none
+    cmake .. -GNinja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/home/me/.local/lib/custom-aws-sdk-cpp    
+    ```
+    
+    Unfortunately, this seemed to run tests as well.
+    Next time, I should try to disable this.
+
+-   I changed the command the next time when I rebuilt it:
+
+    ```none
+    cmake .. \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_PREFIX_PATH=/home/me/.local/lib/custom-aws-sdk-cpp \
+        -DENABLE_TESTING=OFF
+        
+    ninja
+    ```
+    
+    -   I had to delete a `-Werror` in `set_gcc_warnings` inside of `compiler_settings.cmake`.
+
+    -   If I build it again, I should specify exactly which sub-modules need to be build.
+
+-   Somehow, I am not able to install the SDK after building it:
+
+    ```none
+    $ ninja install
+    [0/1] Install the project...
+    -- Install configuration: "Debug"
+    CMake Error at cmake_install.cmake:46 (file):
+      file cannot create directory: /usr/local/lib/cmake/AWSSDK.  Maybe need
+      administrative privileges.
+    
+    
+    FAILED: CMakeFiles/install.util 
+    cd /home/me/src/github.com/aws/aws-sdk-cpp/build && /usr/bin/cmake -P cmake_install.cmake
+    ninja: build stopped: subcommand failed.
+    ```
+
+-   I updated the command again:
+
+    ```none
+    cmake .. \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_PREFIX_PATH=/home/me/.local/lib/custom-aws-sdk-cpp \
+        -DENABLE_TESTING=OFF \
+        -DBUILD_ONLY="s3"
+    ```
+    
+-   I found this command in `build_custom_client_linux.yml`:
+
+    ```none
+    cmake $SDK_ROOT/custom-service/aws-cpp-sdk-custom-service \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_PREFIX_PATH="$SDK_ROOT/install" \
+        -DAWSSDK_ROOT_DIR="$SDK_ROOT/install" \
+        -DBUILD_SHARED_LIBS=ON
+    ```    
+
+    Maybe this `AWSSDK_ROOT_DIR` is the issue?
+
+-   This is my new command:
+
+    ```none
+    cmake .. \
+        -GNinja \
+        -DCMAKE_BUILD_TYPE=Debug \
+        -DCMAKE_PREFIX_PATH="/home/me/.local/lib/custom-aws-sdk-cpp" \
+        -DENABLE_TESTING=OFF \
+        -DBUILD_ONLY="s3" \
+        -DAWSSDK_ROOT_DIR="/home/me/.local/lib/custom-aws-sdk-cpp"
+        
+    ninja
+    ```
+    
+    However, I get a warning that the new variable is not use.
+
+-   I can't figure this out.
+    For now, I'll put this on hold since this is only a minor issue.
+
 ### Ideas
 
 -   Try to put a debug print in `AWSClient::AttemptExhaustively`.
