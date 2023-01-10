@@ -70,12 +70,65 @@ If no network connection is avaliable, it takes forever until the application re
 
     This doesn't access `m_clientConfiguration` at all.
 
+-   It seems that `DefaultEndpointProvider` makes use of the configuration:
+
+    ```c++
+    void InitBuiltInParameters(const ClientConfigurationT& config) override
+    {
+        m_builtInParameters.SetFromClientConfiguration(config);
+    }
+    ```
+
+-   `S3Client::GetObject` ultimately calls `AWSClient::MakeRequestWithUnparsedResponse`:
+
+    ```c++
+    StreamOutcome AWSClient::MakeRequestWithUnparsedResponse(const Aws::Http::URI& uri,
+        const Aws::AmazonWebServiceRequest& request,
+        Http::HttpMethod method,
+        const char* signerName,
+        const char* signerRegionOverride,
+        const char* signerServiceNameOverride) const
+    {
+        HttpResponseOutcome httpResponseOutcome = AttemptExhaustively(uri, request, method, signerName, signerRegionOverride, signerServiceNameOverride);
+        if (httpResponseOutcome.IsSuccess())
+        {
+            return StreamOutcome(AmazonWebServiceResult<Stream::ResponseStream>(
+                httpResponseOutcome.GetResult()->SwapResponseStreamOwnership(),
+                httpResponseOutcome.GetResult()->GetHeaders(), httpResponseOutcome.GetResult()->GetResponseCode()));
+        }
+    
+        return StreamOutcome(std::move(httpResponseOutcome));
+    }    
+    ```
+
+-   `AWSClient::MakeRequestWithUnparsedResponse` then calls `AWSClient::AttemptExhaustively` which retries based on it's `m_retryStrategy`:
+
+    ```c++
+    for (long retries = 0;; retries++)
+    {
+        if(!m_retryStrategy->HasSendToken())
+
+        // ...
+    }
+    ```
+    
+-   This `m_retryStrategy` is extracted from the `clientConfiguration` passed to the `AWSClient` constructor:
+
+    ```c++
+    AWSClient::AWSClient(const Aws::Client::ClientConfiguration& configuration,
+        const std::shared_ptr<Aws::Client::AWSAuthSigner>& signer,
+        const std::shared_ptr<AWSErrorMarshaller>& errorMarshaller) :
+        // ...
+        m_retryStrategy(configuration.retryStrategy),    
+        // ...
+    ```
+    
+-   Since `S3Client` inherits from `AWSXMLClient` and thus inherits from `AWSClient`, the configuration is initialized correctly.
+
 ### Ideas
 
--   Verify that I am actually passing my client configuration to S3.
+-   Try to put a debug print in `AWSClient::AttemptExhaustively`.
+
+    -   This requires building the AWS SDK from source.
 
 ### Theories
-
--   I suspect, that AWS will not use my configuration at all and call the default constructor implicitly.
-
--   I suspect that AWS has a very large default timeout, possibly with a retry strategy.
