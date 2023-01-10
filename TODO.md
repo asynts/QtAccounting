@@ -1,8 +1,8 @@
 ## 0.5.0
 
-### Tweaks
+### Bugs
 
--   Use `-O2` for `Release` builds.
+-   Make it possible to change the date of a bill.
 
 ### Features
 
@@ -18,7 +18,13 @@
 
 -   AWS does not obey the timeout provided in the client configuration.
 
+-   Somehow, Qt doesn't obey the tab order in `BillEditorDialog`.
+    It always places focus on the date element, even if the tab order suggests that it should focus the "New Transations"
+    button first.
+
 ## Tweaks
+
+-   Use `-O2` for `Release` builds.
 
 -   Put the S3 client into some sort of service that is provided with dependency injection.
 
