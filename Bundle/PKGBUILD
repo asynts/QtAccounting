@@ -1,31 +1,30 @@
 pkgname="asynts-accounting"
-pkgver="0.4.0"
+pkgver="0.5.1"
 pkgrel="1"
 arch=("x86_64")
 url="https://github.com/asynts/QtAccounting"
 
-# FIXME: Update.
-source=("https://github.com/asynts/QtAccounting/archive/refs/tags/version/0.4.0.tar.gz"
+source=("https://github.com/asynts/QtAccounting/archive/refs/tags/version/0.5.1.tar.gz"
         "Accounting.desktop")
-sha256sums=("11324904407d66b9ac813fb54bb8584d8331d617105684c23ad6cd9b9923f209"
+sha256sums=(""
             "SKIP")
 
 build() {
     cmake \
-        -B build \
+        -B "build-QtAccounting-version-${pkgver}-${pkgrel}" \
         -S "QtAccounting-version-${pkgver}" \
-        -JNinja \
+        -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr
 
     cmake \
-        --build build
+        --build "build-QtAccounting-version-${pkgver}-${pkgrel}"
 }
 
 package() {
     DESTDIR="${pkgdir}" \
     cmake \
-        --install build
+        --install "build-QtAccounting-version-${pkgver}-${pkgrel}"
 
     mkdir -p "${pkgdir}/usr/share/applications"
     cp "${srcdir}/Accounting.desktop" "${pkgdir}/usr/share/applications/"

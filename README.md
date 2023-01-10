@@ -56,3 +56,17 @@ The database file is fetched from S3 and re-uploaded when exiting the applicatio
     ```
 
     For production another configuraiton file needs to be created at `$HOME/.config/Asynts/Accounting.conf`.
+
+### Creating a Release
+
+-   Update `Bundle/PKGBUILD`.
+
+    -   Set version and build number.
+
+    -   Update link to `.tar.gz`.
+    
+    -   Update checksum.
+
+    -   Build with `makepkg` and install with `makepkg --install`.
+
+-   Increment version in `CMakeLists.txt`.

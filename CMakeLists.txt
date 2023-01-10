@@ -13,10 +13,21 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# FIXME: This is only for debugging.
-set(CMAKE_PREFIX_PATH "/home/me/.local/lib/custom-qt")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # This is useful to be able do modify the source code.
+    # This is a custom build created as follows:
+    #
+    #     ./configure \
+    #         --prefix=/home/me/.local/lib/custom-qt \
+    #         --debug
+    #     cmake --build . \
+    #         --parallel
+    #     cmake --install .
+    message(WARNING "Setting CMAKE_PREFIX_PATH to '/home/me/.local/lib/custom-qt' to use custom Qt build.")
+    set(CMAKE_PREFIX_PATH "/home/me/.local/lib/custom-qt")
+endif()
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Widgets)
 find_package(AWSSDK REQUIRED COMPONENTS s3)
 find_package(fmt REQUIRED)
 
