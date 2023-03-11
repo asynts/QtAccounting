@@ -1,12 +1,12 @@
 pkgname="asynts-accounting"
-pkgver="0.5.1"
+pkgver="0.5.2"
 pkgrel="1"
 arch=("x86_64")
 url="https://github.com/asynts/QtAccounting"
 
-source=("https://github.com/asynts/QtAccounting/archive/refs/tags/version/0.5.1.tar.gz"
+source=("https://github.com/asynts/QtAccounting/archive/refs/tags/version/0.5.2.tar.gz"
         "Accounting.desktop")
-sha256sums=("a655375652fa801931bf67f03a2b040eb546c458573ef8d48f985f9b29dc7a81"
+sha256sums=("ad15db8c8493895e7e6a740ddaac1827c25fef39a160047a0c27c0e2a7ecac42"
             "SKIP")
 
 build() {
