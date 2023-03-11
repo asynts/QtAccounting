@@ -16,6 +16,10 @@
 
 ## Tweaks
 
+-   Add dialog after creating new transaction containing the id.
+
+    -   An alternatively would be to highlight the row in the table view.
+
 -   Be more consistent with camelCase and snake\_case.
 
 -   Resize column names after editing (for example after insertion.)
@@ -44,6 +48,8 @@
 ## Next 0.X.0
 
 -   Switch to Visual Studio Code.
+
+-   Add checksum to bills.
 
 ## 0.Y.0
 
